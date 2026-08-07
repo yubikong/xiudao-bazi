@@ -98,6 +98,15 @@
   .help-box h3 { color: #b98c51; font-size: 1.3rem; padding: 8px 0 4px; }
   .help-box .tip { color: #b98c51; }
   .hidden { display: none; }
+  /* 圆形罗盘控件 */
+  .ctrl-line { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 1.1rem; color: #5a4632; }
+  .ctrl-line label { display: flex; align-items: center; gap: 4px; }
+  .ctrl-line select, .ctrl-line input { font-size: 1rem; padding: 2px 4px; border: 1px solid #b98c51; border-radius: 4px; }
+  .level-wrap { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .level-label { font-size: 1rem; color: #999; }
+  #level-bubble.level-ok circle:nth-child(5) { fill: #228b22; }
+  /* 玄空九星断语 */
+  .xk-luck { font-size: 0.8rem; color: #888; line-height: 1.2; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -128,10 +137,36 @@
     <div class="info-item"><div class="label">二十四山</div><div class="val" id="shan24">--</div></div>
     <div class="info-item"><div class="label">地分（十二支）</div><div class="val zhi" id="zhi12">--</div></div>
     <div class="info-item"><div class="label">方位</div><div class="val" id="dir8">--</div></div>
+    <div class="info-item"><div class="label">盘针读数</div><div class="val" id="pan-read" style="color:#6b98c0;">-</div></div>
+    <div class="info-item"><div class="label">真北校正</div><div class="val" id="true-read" style="color:#b98c51;">-</div></div>
   </div>
 
   <!-- 圆形罗盘 -->
   <div class="pan-body" id="compass-box"></div>
+  <!-- 圆形罗盘控件：盘针/盘式/磁偏角/水平仪 -->
+  <div class="pan-body" id="circular-ctrl" style="padding:6px 12px;">
+    <div class="ctrl-line">
+      <label>盘针 <select id="pan-needle">
+        <option value="0">地盘正针</option>
+        <option value="7.5">人盘中针</option>
+        <option value="15">天盘缝针</option>
+      </select></label>
+      <label>盘式 <select id="pan-style">
+        <option value="all">综合盘</option>
+        <option value="sanyuan">三元盘</option>
+        <option value="sanhe">三合盘</option>
+      </select></label>
+      <label>磁偏角 <input id="declination" type="number" step="0.1" style="width:3.5em;" placeholder="0">°</label>
+    </div>
+    <div class="level-wrap"><span class="level-label">水平仪</span>
+      <svg id="level-bubble" viewBox="0 0 40 40" width="40" height="40">
+        <circle cx="20" cy="20" r="18" fill="#fdf8ef" stroke="#a1a1a1" stroke-width="1"/>
+        <line x1="20" y1="4" x2="20" y2="36" stroke="#ccc" stroke-width="0.5"/>
+        <line x1="4" y1="20" x2="36" y2="20" stroke="#ccc" stroke-width="0.5"/>
+        <circle id="level-dot" cx="20" cy="20" r="4" fill="#d41313"/>
+      </svg>
+    </div>
+  </div>
 
   <!-- 八宅 -->
   <div class="pan-body hidden" id="bazhai-body">
