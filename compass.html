@@ -9,10 +9,10 @@
   html { font-size: 14px; }
   body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; background: #f5f2ea; }
   #app { width: 100%; max-width: 415px; margin: auto; background: #fff; min-height: 100vh; }
-  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; background: #fff; overflow-x: auto; white-space: nowrap; }
-  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.4rem; margin-right: 10px; }
-  .page-nav a.active { font-weight: bold; }
-  .page-nav a:last-child { margin-right: 0; }
+  .page-nav { display: flex; gap: 3px; padding: 8px 8px 2px; }
+  .page-nav a { flex: 1 1 0; min-width: 0; text-align: center; padding: 7px 2px; font-size: 1.15rem; color: #7a5c2e; text-decoration: none; background: #faf6ee; border: 1px solid #e0d4bc; border-radius: 6px; white-space: nowrap; }
+  .page-nav a.active { background: #b98c51; color: #fff; font-weight: bold; border-color: #b98c51; }
+  @media (max-width: 415px) { .page-nav a { font-size: 1.02rem; } }
 
   .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #eee; background: #fff; }
   .header-bar .title { font-size: 1.5rem; color: #b98c51; font-weight: 700; }
@@ -102,8 +102,7 @@
   .info-card { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 4px 2px; }
   .info-item { text-align: center; font-size: 1.0rem; white-space: nowrap; overflow: hidden; }
   .info-item .label { font-size: 0.78rem; color: #999; white-space: nowrap; }
-  .info-item .val { font-size: 1.02rem; line-height: 1.35; white-space: nowrap; }
-  .info-item .val.big { font-size: 1.05rem; }
+  .info-item .val, .info-item .val.big, .info-item .val.zhi { font-size: 1.05rem; font-weight: 700; color: #5a4632; line-height: 1.4; white-space: nowrap; min-height: 0; }
   /* 圆形罗盘控件 */
   .ctrl-line { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 1.1rem; color: #5a4632; }
   .ctrl-line label { display: flex; align-items: center; gap: 4px; }
@@ -117,14 +116,14 @@
 </head>
 <body>
 <div id="app">
-  <div class="page-nav">
+  <nav class="page-nav">
     <a href="index.html">八字排盘</a>
     <a href="jinkoujue.html">金口诀</a>
     <a href="rili.html">黄历</a>
     <a href="doushu.html">紫微</a>
     <a href="compass.html" class="active">罗盘</a>
-    <a href="baziHelp.html">说明</a>
-  </div>
+    <a href="baziHelp.html">使用说明</a>
+  </nav>
 
   <div class="header-bar">
     <div class="title">风水罗盘</div>
@@ -139,12 +138,12 @@
 
   <!-- 当前朝向 -->
   <div class="info-card">
-    <div class="info-item"><div class="label">朝向度数</div><div class="val big" id="degree">--</div></div>
+    <div class="info-item"><div class="label">朝向度数</div><div class="val" id="degree">--</div></div>
     <div class="info-item"><div class="label">二十四山</div><div class="val" id="shan24">--</div></div>
-    <div class="info-item"><div class="label">地分（十二支）</div><div class="val zhi" id="zhi12">--</div></div>
+    <div class="info-item"><div class="label">地分（十二支）</div><div class="val" id="zhi12">--</div></div>
     <div class="info-item"><div class="label">方位</div><div class="val" id="dir8">--</div></div>
-    <div class="info-item"><div class="label">盘针读数</div><div class="val" id="pan-read" style="color:#6b98c0;">-</div></div>
-    <div class="info-item"><div class="label">真北校正</div><div class="val" id="true-read" style="color:#b98c51;">-</div></div>
+    <div class="info-item"><div class="label">盘针读数</div><div class="val" id="pan-read">-</div></div>
+    <div class="info-item"><div class="label">真北校正</div><div class="val" id="true-read">-</div></div>
   </div>
 
   <!-- 圆形罗盘 -->
@@ -232,8 +231,8 @@
   </div>
 </div>
 
-<script src="js/lunar.js?v=20260808b"></script>
-<script src="js/fengshui.js?v=20260808b"></script>
-<script src="js/compass.js?v=20260808b"></script>
+<script src="js/lunar.js?v=20260808c"></script>
+<script src="js/fengshui.js?v=20260808c"></script>
+<script src="js/compass.js?v=20260808c"></script>
 </body>
 </html>
