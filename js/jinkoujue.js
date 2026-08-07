@@ -386,31 +386,43 @@
     pushZhi('五墓', '凶', SS.wuMu[b.monthZhi] || '', '月支' + b.monthZhi);
   }
 
-  // 三动五动（以日干为我）
-  function rel(me, other) {
-    if (me === other) return { k: '比', name: '兄弟', cls: 'bi' };
-    if (SHENG[me] === other) return { k: '我生', name: '子孙', cls: 'zi' };
-    if (SHENG[other] === me) return { k: '生我', name: '父母', cls: 'fu' };
-    if (KE[me] === other) return { k: '我克', name: '妻财', cls: 'cai' };
-    if (KE[other] === me) return { k: '克我', name: '官鬼', cls: 'guan' };
-    return { k: '-', name: '-', cls: '' };
-  }
+  // ============ 三动五动（课内四位生克，非日干） ============
+  // 五行：干=人元天干、神=贵神地支、将=将神地支、方=地分支
+  // 五动（克）：妻动=干克方、官动=神克干、贼动=神克将、财动=将克神、鬼动=方克干
+  // 三动（生/比）：父母动=方生干、子孙动=干生方、兄弟动=干方比
+  var WUDONG_GJ = {
+    妻动: '妻动于妻妾，官财防损折',
+    官动: '官动利求官，相逢禄位迁',
+    贼动: '贼动内贼生，勾连诈不明',
+    财动: '财动利求财，占官定不谐',
+    鬼动: '鬼动忧灾祸，官事并疾病'
+  };
+  var SANDONG_GJ = {
+    父母动: '方生干，主印绶文书职称，求有得',
+    子孙动: '干生方，主添人进口、外来财物',
+    兄弟动: '干方比和，主朋友兄弟间争执不和'
+  };
   function calcSanDong() {
-    var b = ke.bazi;
-    var dayWX = U.wuXingMap(b.dayGan);
-    // 四课五行（人元干/贵神支/将神支/地分支）
-    var items = [
-      { name: '人元', gz: ke.renyuan, wx: ke.renyuanWX },
-      { name: '贵神', gz: ke.gui.ganzhi, wx: ke.gui.wx },
-      { name: '将神', gz: ke.jiang.ganzhi, wx: ke.jiang.wx },
-      { name: '地分', gz: ke.difen, wx: ke.difenWX }
-    ];
+    var gWX = ke.renyuanWX;   // 干：人元天干五行
+    var sWX = ke.gui.wx;      // 神：贵神地支五行
+    var jWX = ke.jiang.wx;    // 将：将神地支五行
+    var fWX = ke.difenWX;     // 方：地分支五行
+
+    // 五动（课内相克）
     var wuDong = [];
-    for (var i = 0; i < items.length; i++) {
-      var r = rel(dayWX, items[i].wx);
-      wuDong.push({ pos: items[i].name, gz: items[i].gz, wx: items[i].wx, name: r.name, k: r.k });
-    }
-    return { wuDong: wuDong, dayWX: dayWX };
+    if (KE[gWX] === fWX) wuDong.push({ name: '妻动', cond: '干克方', left: '人元', leftGZ: ke.renyuan, leftWX: gWX, right: '地分', rightGZ: ke.difen, rightWX: fWX });
+    if (KE[sWX] === gWX) wuDong.push({ name: '官动', cond: '神克干', left: '贵神', leftGZ: ke.gui.ganzhi, leftWX: sWX, right: '人元', rightGZ: ke.renyuan, rightWX: gWX });
+    if (KE[sWX] === jWX) wuDong.push({ name: '贼动', cond: '神克将', left: '贵神', leftGZ: ke.gui.ganzhi, leftWX: sWX, right: '将神', rightGZ: ke.jiang.ganzhi, rightWX: jWX });
+    if (KE[jWX] === sWX) wuDong.push({ name: '财动', cond: '将克神', left: '将神', leftGZ: ke.jiang.ganzhi, leftWX: jWX, right: '贵神', rightGZ: ke.gui.ganzhi, rightWX: sWX });
+    if (KE[fWX] === gWX) wuDong.push({ name: '鬼动', cond: '方克干', left: '地分', leftGZ: ke.difen, leftWX: fWX, right: '人元', rightGZ: ke.renyuan, rightWX: gWX });
+
+    // 三动（课内相生/比和）
+    var sanDong = [];
+    if (SHENG[fWX] === gWX) sanDong.push({ name: '父母动', cond: '方生干', left: '地分', leftGZ: ke.difen, leftWX: fWX, right: '人元', rightGZ: ke.renyuan, rightWX: gWX });
+    if (SHENG[gWX] === fWX) sanDong.push({ name: '子孙动', cond: '干生方', left: '人元', leftGZ: ke.renyuan, leftWX: gWX, right: '地分', rightGZ: ke.difen, rightWX: fWX });
+    if (gWX === fWX) sanDong.push({ name: '兄弟动', cond: '干方比', left: '人元', leftGZ: ke.renyuan, leftWX: gWX, right: '地分', rightGZ: ke.difen, rightWX: fWX });
+
+    return { wuDong: wuDong, sanDong: sanDong };
   }
 
   // ============ 渲染 ============
@@ -520,21 +532,33 @@
     h += '<div class="ss-title" style="margin-top:8px;">不常见神煞（' + P_RARE.length + '）</div>';
     h += renderShenShaList(P_RARE, 0);    h += '</div>';
 
-    // 三动五动
+    // 三动五动（课内四位生克）
     h += '<div class="sd-section">';
-    h += '<div class="sd-row"><span class="name">五动</span>　以日干' + U.wuXingColor(b.dayGan, 'span') + '（' + sd.dayWX + '）为我：';
-    var dongSet = {};
-    for (var wd = 0; wd < sd.wuDong.length; wd++) {
-      var n = sd.wuDong[wd].name;
-      if (n !== '-') dongSet[n] = 1;
+    // 五动
+    h += '<div class="sd-row"><span class="name">五动</span>（课内相克）';
+    if (sd.wuDong.length) {
+      h += sd.wuDong.map(function (d) { return '<span class="name">' + d.name + '</span>'; }).join(' ');
+    } else {
+      h += '<span class="desc">课内无相克</span>';
     }
-    var dongNames = Object.keys(dongSet);
-    h += dongNames.map(function (d) { return d + '动'; }).join('、') + '</div>';
-    for (var wd2 = 0; wd2 < sd.wuDong.length; wd2++) {
-      var it2 = sd.wuDong[wd2];
-      if (it2.name !== '-') {
-        h += '<div class="sd-row">　' + it2.pos + '：' + U.wuXingColor(it2.gz, 'span') + '（' + it2.wx + '）' + it2.k + '日干→<span class="name">' + it2.name + '动</span></div>';
-      }
+    h += '</div>';
+    for (var wd = 0; wd < sd.wuDong.length; wd++) {
+      var it = sd.wuDong[wd];
+      h += '<div class="sd-row">　' + U.wuXingColor(it.leftGZ, 'span') + '（' + it.left + it.leftWX + '）' + it.cond + U.wuXingColor(it.rightGZ, 'span') + '（' + it.right + it.rightWX + '）→ <span class="name">' + it.name + '</span>';
+      h += '<div class="sd-row desc">　' + (WUDONG_GJ[it.name] || '') + '</div>';
+    }
+    // 三动
+    h += '<div class="sd-row" style="margin-top:4px;"><span class="name">三动</span>（人元·地分生比）';
+    if (sd.sanDong.length) {
+      h += sd.sanDong.map(function (d) { return '<span class="name">' + d.name + '</span>'; }).join(' ');
+    } else {
+      h += '<span class="desc">无生比</span>';
+    }
+    h += '</div>';
+    for (var sd2 = 0; sd2 < sd.sanDong.length; sd2++) {
+      var it2 = sd.sanDong[sd2];
+      h += '<div class="sd-row">　' + U.wuXingColor(it2.leftGZ, 'span') + '（' + it2.left + it2.leftWX + '）' + it2.cond + U.wuXingColor(it2.rightGZ, 'span') + '（' + it2.right + it2.rightWX + '）→ <span class="name">' + it2.name + '</span>';
+      h += '<div class="sd-row desc">　' + (SANDONG_GJ[it2.name] || '') + '</div>';
     }
     h += '</div>';
 
