@@ -78,18 +78,19 @@
     for (var a = 0; a < 360; a += 15) {
       var major = (a % 30 === 0);
       var r1 = major ? 178 : 184, r2 = 190;
-      s += '<line x1="' + (cx + r1 * Math.sin(a * Math.PI / 180)).toFixed(1) + '" y1="' + (cy - r1 * Math.cos(a * Math.PI / 180)).toFixed(1) + '" x2="' + (cx + r2 * Math.sin(a * Math.PI / 180)).toFixed(1) + '" y2="' + (cy - r2 * Math.cos(a * Math.PI / 180)).toFixed(1) + '" stroke="' + (major ? '#8a6d3b' : '#c4b48c') + '" stroke-width="' + (major ? 2 : 1) + '"/>';
+      var aa = a + 180; // 上南下北（传统罗盘持盘方向）
+      s += '<line x1="' + (cx + r1 * Math.sin(aa * Math.PI / 180)).toFixed(1) + '" y1="' + (cy - r1 * Math.cos(aa * Math.PI / 180)).toFixed(1) + '" x2="' + (cx + r2 * Math.sin(aa * Math.PI / 180)).toFixed(1) + '" y2="' + (cy - r2 * Math.cos(aa * Math.PI / 180)).toFixed(1) + '" stroke="' + (major ? '#8a6d3b' : '#c4b48c') + '" stroke-width="' + (major ? 2 : 1) + '"/>';
     }
     for (var i = 0; i < 24; i++) {
-      var ang = i * 15, rad = ang * Math.PI / 180;
+      var ang = (i * 15 + 180) % 360, rad = ang * Math.PI / 180;
       s += '<text x="' + (cx + 162 * Math.sin(rad)).toFixed(1) + '" y="' + (cy - 162 * Math.cos(rad) + 5).toFixed(1) + '" text-anchor="middle" font-size="17" fill="#5a4632" font-weight="600">' + SHAN24[i] + '</text>';
     }
     for (var j = 0; j < 12; j++) {
-      var ang2 = j * 30, rad2 = ang2 * Math.PI / 180;
+      var ang2 = (j * 30 + 180) % 360, rad2 = ang2 * Math.PI / 180;
       var z = ZHI12[j];
       s += '<text x="' + (cx + 126 * Math.sin(rad2)).toFixed(1) + '" y="' + (cy - 126 * Math.cos(rad2) + 6).toFixed(1) + '" text-anchor="middle" font-size="20" font-weight="700" fill="' + (WX_COLOR[z] || '#333') + '">' + z + '</text>';
     }
-    var four = [[0, '北', '#d41313'], [90, '东', '#228b22'], [180, '南', '#007bff'], [270, '西', '#ffa436']];
+    var four = [[0, '南', '#007bff'], [90, '西', '#ffa436'], [180, '北', '#d41313'], [270, '东', '#228b22']];
     for (var k = 0; k < 4; k++) {
       var a3 = four[k][0], r3 = 88, rad3 = a3 * Math.PI / 180;
       s += '<text x="' + (cx + r3 * Math.sin(rad3)).toFixed(1) + '" y="' + (cy - r3 * Math.cos(rad3) + 9).toFixed(1) + '" text-anchor="middle" font-size="30" font-weight="800" fill="' + four[k][2] + '">' + four[k][1] + '</text>';
@@ -110,12 +111,12 @@
   function updateCircular() {
     var h = smoothHeading || 0;
     var dial = document.getElementById('dial');
-    if (dial) dial.setAttribute('transform', 'rotate(' + (-h) + ' 200 200)');
+    if (dial) dial.setAttribute('transform', 'rotate(' + (-h - 180) + ' 200 200)');
   }
 
   // ============ 八宅方形罗盘 ============
-  // 3x3 布局（上北）：[西北 北 东北 / 西 中 东 / 西南 南 东南]
-  var BZ_GRID = [['西北', '北', '东北'], ['西', '中', '东'], ['西南', '南', '东南']];
+  // 3x3 布局（上南下北、左东右西，传统持盘方向）：[东南 南 西南 / 东 中 西 / 东北 北 西北]
+  var BZ_GRID = [['东南', '南', '西南'], ['东', '中', '西'], ['东北', '北', '西北']];
   var QUALITY_CLS = { 吉: 'q-good', 凶: 'q-bad', 大吉: 'q-best', 大凶: 'q-worst', 中: 'q-mid' };
 
   function renderBazhai() {
