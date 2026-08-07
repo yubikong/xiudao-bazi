@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>黄历</title>
+<link rel="stylesheet" href="css/bazi.d78872fa.css">
+<link rel="stylesheet" href="css/bazi.85d86054.css">
+<link rel="stylesheet" href="css/bazi.074c3eea.css">
+<link rel="stylesheet" href="css/rili.4cedce6e.css">
+<style>
+  .page-nav { display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; background: #fff; border-bottom: 1px solid #e1e1e1; }
+  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.5rem; margin-right: 10px; }
+  .page-nav .spacer { flex: 1; }
+  #app { width: 100%; max-width: 415px; margin: auto; }
+  .sel { position: relative; display: flex; align-items: center; }
+  #input { box-sizing: border-box; color: green; width: 100%; height: 1.7em; margin-top: 0; padding: 0 5px; font-size: 1.5rem; line-height: 1.7em; border: 1px solid #000; }
+  .btn_today { color: green; cursor: pointer; height: 80%; font-size: 1.2rem; position: absolute; top: 10%; right: 3rem; background: none; border: none; }
+  /* ===== 紧凑化覆盖 ===== */
+  .cal-item { padding: .35rem 0 !important; }
+  .cal-item-day { font-size: 1.8rem; }
+  .cal-item-info { font-size: .9rem; }
+  .dtr { padding: .15rem 0 !important; }
+  .dtrGap { padding: .1rem 0 !important; font-size: 1.4rem; }
+  .div_table { font-size: 1.15rem; }
+  .div_table .bazi { font-size: 1.9rem; }
+  .pan .col0 { line-height: 1.5rem; }
+  .pan .col-right { line-height: 1.5rem; }
+  .feixing-wrap { gap: .3rem .5rem; }
+  .feixing-grid { width: 7.5rem; }
+  .feixing-cell { font-size: 1.4rem; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="page-nav">
+    <div>
+      <a href="index.html">八字排盘</a>
+      <a href="index.html#jinkoujue">金口诀</a>
+      <a href="rili.html" style="font-weight:bold;">黄历</a>
+      <a href="doushu.html">紫微</a>
+      <a href="baziHelp.html">使用说明</a>
+    </div>
+    <div class="spacer"></div>
+  </div>
+  <div id="pan" class="pan">
+    <div class="sel">
+      <input id="input" placeholder="如199409290322">
+      <button class="btn_today">今日</button>
+    </div>
+    <div class="calendar" id="calendar"></div>
+    <div class="info" id="info"></div>
+  </div>
+</div>
+<script src="js/lunar.js"></script>
+<script src="js/rili_data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/rili.js"></script>
+</body>
+</html>

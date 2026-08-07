@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紫微斗数</title>
+<link rel="stylesheet" href="css/bazi.d78872fa.css">
+<link rel="stylesheet" href="css/bazi.85d86054.css">
+<style>
+  html, body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
+  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; max-width: 415px; margin: auto; }
+  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.5rem; margin-right: 10px; }
+  .page-nav a.active { font-weight: bold; }
+  .doushu-container { max-width: 415px; margin: 0 auto; padding: 0 8px; }
+  .doushu-container h1 { color: #b98c51; padding: 6px 0; font-size: 1.7rem; font-weight: 400; }
+  /* 输入控制条 */
+  .ctrl-bar { background: #fbfbfb; border: 1px solid #e1e1e1; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; }
+  .ctrl-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 1.25rem; margin: 2px 0; }
+  .ctrl-row label { cursor: pointer; }
+  #zw-input { flex: 1; min-width: 150px; padding: 3px 6px; border: 1px solid #888; font-size: 1.3rem; box-sizing: border-box; }
+  .ctrl-btn { cursor: pointer; padding: 3px 9px; border: 1px solid #888; background: #fff; border-radius: 4px; font-size: 1.15rem; }
+  .ctrl-btn.primary { background: #b98c51; color: #fff; border-color: #b98c51; }
+  .ctrl-btn:hover { background: #f5e9d8; }
+  .ctrl-btn.primary:hover { background: #a07b46; }
+  .ctrl-tip { font-size: 1.0rem; color: #999; padding: 2px 0 0; }
+  /* 信息块 */
+  .info-box { background: #fbfbfb; border: 1px solid #e1e1e1; border-radius: 4px; padding: 6px 8px; margin: 5px 0; font-size: 1.25rem; }
+  .info-box p { padding: 2px 0; line-height: 1.5; }
+  .info-box strong { color: #b98c51; }
+  /* 五行颜色 */
+  .c-gold { color: #ffa436; }
+  .c-wood { color: #228b22; }
+  .c-water { color: #007bff; }
+  .c-fire { color: #d41313; }
+  .c-earth { color: #a17323; }
+  /* 紫微盘面 */
+  .zw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 8px 0; }
+  .zw-cell { border: 1px solid #888; border-radius: 2px; padding: 3px; background: #fff; }
+  .zw-cell.empty { border-color: transparent; min-height: 0; }
+  .zw-cell.ming { background: #fff8e1; border-color: #b98c51; }
+  .zw-cell.shen { box-shadow: inset 0 0 0 2px #f0e6d0; }
+  .zw-cell-head { font-weight: bold; color: #b98c51; text-align: center; padding: 1px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
+  .zw-daxian { text-align: center; font-size: 0.75em; color: #999; padding: 1px 0; }
+  .zw-stars { padding: 2px 0; }
+  .zw-star { display: flex; justify-content: center; align-items: center; padding: 0; font-size: 0.9em; line-height: 1.35em; }
+  .hua-mark { font-size: 0.7em; margin-left: 2px; font-weight: bold; }
+  .hua-mark.禄 { color: #228b22; }
+  .hua-mark.权 { color: #b98c51; }
+  .hua-mark.科 { color: #007bff; }
+  .hua-mark.忌 { color: #d41313; }
+  .btn-group { display: flex; gap: 8px; margin: 10px 0; }
+  .btn { padding: 6px 14px; background: #b98c51; color: #fff; border: 0; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 1.3rem; }
+  .btn:hover { background: #a07b46; }
+  @media (max-width: 415px) { html { font-size: 2.5vw; } }
+</style>
+</head>
+<body>
+<div class="page-nav">
+  <a href="index.html">八字排盘</a>
+  <a href="jinkoujue.html">金口诀</a>
+  <a href="rili.html">黄历</a>
+  <a href="baziHelp.html">使用说明</a>
+  <a href="doushu.html" class="active">紫微</a>
+</div>
+<div class="doushu-container">
+  <h1>紫微斗数排盘</h1>
+
+  <!-- 输入控制条 -->
+  <div class="ctrl-bar">
+    <div class="ctrl-row">
+      <label>时间：</label>
+      <input id="zw-input" type="text" placeholder="199409290322" maxlength="14">
+    </div>
+    <div class="ctrl-row">
+      <label><input type="radio" name="zw-gender" id="zw-man" value="1" checked> 男</label>
+      <label><input type="radio" name="zw-gender" id="zw-woman" value="0"> 女</label>
+      <button class="ctrl-btn primary" id="zw-pp">排盘</button>
+      <button class="ctrl-btn" id="zw-now">此刻</button>
+    </div>
+    <p class="ctrl-tip">输入公历时间（年月日时分，12位），可选男/女。如：199409290322。</p>
+  </div>
+
+  <div id="zw-pan">
+    <div class="info-box" id="birth-info"><p>正在排盘...</p></div>
+  </div>
+  <div class="btn-group">
+    <a href="index.html" class="btn">八字排盘</a>
+    <a href="rili.html" class="btn">黄历</a>
+  </div>
+</div>
+<script src="js/lunar.js"></script>
+<script src="js/shensha_data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/ziwei.js"></script>
+<script>
+$(function () {
+  function getV() {
+    const params = new URLSearchParams(location.search);
+    let v = params.get('v');
+    if (!v) {
+      const now = Solar.fromDate(new Date());
+      v = now.toYmdHms().replace(/[- :]/gim, '').substr(0, 12);
+    }
+    return v;
+  }
+  function getGender() {
+    const params = new URLSearchParams(location.search);
+    const gParam = params.get('gender');
+    if (gParam) return gParam === '0' ? 0 : 1;
+    return $('#zw-man').prop('checked') ? 1 : 0;
+  }
+  function renderPan() {
+    const raw = $('#zw-input').val().trim();
+    if (!raw) {
+      $('#birth-info').html('<p style="color:#c00">请先输入公历时间（12位数字）。</p>');
+      return;
+    }
+    // 去掉非数字
+    const v = raw.replace(/[^\d]/g, '');
+    if (v.length < 8) {
+      $('#birth-info').html('<p style="color:#c00">时间格式错误，至少需要8位（年月日）。</p>');
+      return;
+    }
+    const y = parseInt(v.substr(0, 4), 10);
+    const m = parseInt(v.substr(4, 2), 10);
+    const d = parseInt(v.substr(6, 2), 10);
+    const h = v.length >= 10 ? parseInt(v.substr(8, 2), 10) : 12;
+    const mi = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
+    const gender = getGender();
+    try {
+      const solar = Solar.fromYmdHms(y, m, d, h, mi, 0);
+      const pan = ZiWei.paiPan(solar, gender);
+      $('#zw-pan').html(ZiWei.render(pan));
+      // 同步 URL
+      const url = new URL(location.href);
+      url.searchParams.set('v', v);
+      url.searchParams.set('gender', gender);
+      history.replaceState(null, '', url.toString());
+    } catch (e) {
+      $('#birth-info').html('<p style="color:#c00">排盘出错：' + e.message + '</p>');
+    }
+  }
+
+  // 初始化
+  $('#zw-input').val(getV());
+  if (getGender() === 0) $('#zw-woman').prop('checked', true);
+  renderPan();
+
+  // 排盘按钮
+  $('#zw-pp').on('click', renderPan);
+  // 此刻
+  $('#zw-now').on('click', function () {
+    const now = Solar.fromDate(new Date());
+    $('#zw-input').val(now.toYmdHms().replace(/[- :]/gim, '').substr(0, 12));
+    renderPan();
+  });
+  // 回车提交
+  $('#zw-input').on('keypress', function (e) {
+    if (13 === e.which) { e.preventDefault(); renderPan(); }
+  });
+  // 性别切换
+  $('input[name=zw-gender]').on('change', renderPan);
+});
+</script>
+</body>
+</html>

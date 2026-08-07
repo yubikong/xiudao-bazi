@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>金口诀排盘</title>
+<link rel="stylesheet" href="css/bazi.d78872fa.css">
+<link rel="stylesheet" href="css/bazi.85d86054.css">
+<link rel="stylesheet" href="css/bazi.074c3eea.css">
+<style>
+  html, body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 62.5%; margin: 0; background: #f5f5f5; }
+  body { font-size: 1.6rem; }
+  i { font-style: normal; }
+  #app { background: #fff; max-width: 415px; margin: 0 auto 60px; padding-bottom: 30vh; position: relative; }
+  .c-gold { color: #ffa436; }
+  .c-wood { color: #228b22; }
+  .c-water { color: #007bff; }
+  .c-fire { color: #d41313; }
+  .c-earth { color: #a17323; }
+
+  /* ===== 页面导航（与八字页一致） ===== */
+  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; }
+  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.5rem; margin-right: 10px; }
+  .page-nav a.active { font-weight: bold; }
+  .page-nav .spacer { flex: 1; }
+  /* ===== 顶部标题栏 ===== */
+  .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-bottom: 1px solid #eee; background: #fff; }
+  .header-bar .title { font-size: 1.5rem; color: #333; font-weight: 500; }
+  .header-bar .menu-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #999; background: none; color: #333; cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 0; }
+  /* ===== 出生信息行 ===== */
+  .birth-row { padding: 5px 10px; font-size: 1.4rem; color: #333; background: #fff; border-bottom: 1px solid #f0f0f0; }
+
+  /* ===== 八字排盘简版 ===== */
+  .bazi-section { background: #fff; padding: 6px 6px; border-bottom: 1px solid #eee; }
+  .bazi-pillars { display: flex; }
+  .bazi-pillar { flex: 1; text-align: center; padding: 2px 0; position: relative; }
+  .bazi-pillar-label { font-size: 0.9rem; color: #b98c51; padding-bottom: 1px; }
+  .bazi-pillar-gan, .bazi-pillar-zhi { font-size: 2.0rem; font-weight: 700; cursor: pointer; border-radius: 4px; padding: 0 2px; transition: background .15s; }
+  .bazi-pillar-gan:hover, .bazi-pillar-zhi:hover { background: #f5ead5; }
+  .bazi-pillar-attr { font-size: 0.9rem; line-height: 1.4em; color: #888; }
+  .bazi-pillar-attr .lbl { color: #555; }
+  .bazi-info { margin-top: 4px; font-size: 1.15rem; color: #555; line-height: 1.5em; }
+  .bazi-info .key { color: #b98c51; font-weight: 700; }
+
+  /* ===== 时间起课区 ===== */
+  .start-section { background: #fff; padding: 6px 10px; border-bottom: 1px solid #eee; }
+  .start-title { font-size: 1.35rem; color: #b98c51; font-weight: 700; margin-bottom: 2px; }
+  .start-row { font-size: 1.3rem; color: #333; line-height: 1.5em; }
+
+  /* ===== 金口诀盘（十二宫外框 + 中间四课4行） ===== */
+  .jkj-section { background: #fff; padding: 6px 6px; border-bottom: 1px solid #eee; }
+  .jkj-title { font-size: 1.35rem; color: #b98c51; font-weight: 700; padding: 0 4px 5px; }
+  .jkj-pan { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, auto); gap: 2px; }
+  .jkj-cell { border: 1px solid #888; border-radius: 2px; text-align: center; padding: 3px 1px; cursor: pointer; min-height: 54px; display: flex; flex-direction: column; justify-content: center; background: #fff; transition: background .15s; }
+  .jkj-cell:hover { background: #fdf8ef; }
+  .jkj-cell.active { background: #d8d8d8; border-color: #989898; box-shadow: inset 0 0 0 2px #b98c51; }
+  .jkj-cell .zr { font-size: 1.5rem; font-weight: 700; }
+  .jkj-cell .xi { font-size: 1.3rem; color: #555; }
+  .jkj-cell .attr { font-size: 0.9rem; color: #888; line-height: 1.3em; margin-top: 2px; }
+  /* 修复：attr 内嵌 span 五行颜色不被父级 color 继承覆盖 */
+  .jkj-cell .attr span.c-gold { color: #ffa436 !important; }
+  .jkj-cell .attr span.c-wood { color: #228b22 !important; }
+  .jkj-cell .attr span.c-water { color: #007bff !important; }
+  .jkj-cell .attr span.c-fire { color: #d41313 !important; }
+  .jkj-cell .attr span.c-earth { color: #a17323 !important; }
+  /* 四课盘 + 起课说明行的五行颜色保护 */
+  .jkj-ke span.c-gold { color: #ffa436 !important; }
+  .jkj-ke span.c-wood { color: #228b22 !important; }
+  .jkj-ke span.c-water { color: #007bff !important; }
+  .jkj-ke span.c-fire { color: #d41313 !important; }
+  .jkj-ke span.c-earth { color: #a17323 !important; }
+  .jkj-desc span.c-gold, .jkj-desc .c-gold { color: #ffa436 !important; }
+  .jkj-desc span.c-wood, .jkj-desc .c-wood { color: #228b22 !important; }
+  .jkj-desc span.c-water, .jkj-desc .c-water { color: #007bff !important; }
+  .jkj-desc span.c-fire, .jkj-desc .c-fire { color: #d41313 !important; }
+  .jkj-desc span.c-earth, .jkj-desc .c-earth { color: #a17323 !important; }
+  /* 神煞描述行 */
+  .ss-row .desc, .ss-row span { color: inherit; }
+  .ss-row .desc .c-gold, .ss-row span.c-gold { color: #ffa436 !important; }
+  .ss-row .desc .c-wood, .ss-row span.c-wood { color: #228b22 !important; }
+  .ss-row .desc .c-water, .ss-row span.c-water { color: #007bff !important; }
+  .ss-row .desc .c-fire, .ss-row span.c-fire { color: #d41313 !important; }
+  .ss-row .desc .c-earth, .ss-row span.c-earth { color: #a17323 !important; }
+  /* 中间四课（合并 2x2 区域，竖排 4 行） */
+  .jkj-ke-wrap { grid-column: 2 / 4; grid-row: 2 / 4; border: 1px solid #b98c51; border-radius: 3px; background: #fdf8ef; display: flex; flex-direction: column; padding: 2px 4px; }
+  .jkj-ke { flex: 1; display: flex; align-items: center; border-bottom: 1px dotted #e0d5c0; padding: 1px 2px; font-size: 1.15rem; }
+  .jkj-ke:last-child { border-bottom: none; }
+  .jkj-ke .name { width: 3.2em; color: #b98c51; font-weight: 700; }
+  .jkj-ke .gz { font-weight: 700; }
+  .jkj-ke .gn { color: #6b4eb6; margin-left: 4px; }
+  .jkj-ke .wxyy { margin-left: 6px; color: #999; font-size: 0.95rem; }
+  .jkj-ke .ws { margin-left: auto; padding: 0 4px; border-radius: 3px; font-size: 0.95rem; }
+  .jkj-ke .ws.wang { color: #d41313; }
+  .jkj-ke .ws.xiang { color: #228b22; }
+  .jkj-ke .ws.xiu { color: #007bff; }
+  .jkj-ke .ws.qiu { color: #a17323; }
+  .jkj-ke .ws.si { color: #888; }
+
+  /* 起课说明 */
+  .jkj-desc { padding: 5px 10px; font-size: 1.15rem; color: #555; line-height: 1.55em; background: #fff; border-bottom: 1px solid #eee; }
+  .jkj-desc .k { color: #b98c51; font-weight: 700; }
+
+  /* ===== 神煞区 ===== */
+  .ss-section { background: #fff; padding: 5px 10px; border-bottom: 1px solid #eee; }
+  .ss-title { font-size: 1.35rem; color: #b98c51; font-weight: 700; padding: 2px 0; }
+  .ss-row { padding: 3px 0; font-size: 1.2rem; line-height: 1.5em; border-bottom: 1px dotted #f0f0f0; }
+  .ss-row:last-child { border-bottom: none; }
+  .ss-row .name { color: #6b98c0; font-weight: 700; margin-right: 6px; }
+  .ss-row .tag { color: #888; font-size: 1.05rem; margin-right: 4px; }
+  .ss-row .desc { color: #444; }
+  .ss-row .desc .c-gold { color: #ffa436; }
+  .ss-row .desc .c-wood { color: #228b22; }
+  .ss-row .desc .c-water { color: #007bff; }
+  .ss-row .desc .c-fire { color: #d41313; }
+  .ss-row .desc .c-earth { color: #a17323; }
+
+  /* ===== 三动五动区 ===== */
+  .sd-section { background: #fff; padding: 6px 10px; border-bottom: 1px solid #eee; }
+  .sd-row { padding: 3px 0; font-size: 1.25rem; line-height: 1.5em; }
+  .sd-row .name { color: #6b98c0; font-weight: 700; }
+  .sd-row .desc { color: #555; }
+
+  /* ===== 浮动"重新排盘"按钮 ===== */
+  .reroll-btn { position: fixed; right: 16px; bottom: 70px; width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 2px solid #6b4eb6; color: #6b4eb6; cursor: pointer; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 50; }
+
+  @media (max-width: 415px) { html { font-size: 2.5vw; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 页面导航（与八字页一致） -->
+  <nav class="page-nav">
+    <a href="index.html">八字排盘</a>
+    <a href="jinkoujue.html" class="active">金口诀</a>
+    <a href="rili.html">黄历</a>
+    <a href="doushu.html">紫微</a>
+    <a href="baziHelp.html">使用说明</a>
+    <div class="spacer"></div>
+  </nav>
+  <!-- 标题栏 -->
+  <div class="header-bar">
+    <div class="title">金口诀排盘</div>
+    <button class="menu-btn" id="menu-btn">⋮</button>
+  </div>
+  <!-- 出生信息 -->
+  <div class="birth-row" id="birth-title">--</div>
+  <!-- 输入控制条（默认隐藏，可点 ⋮ 展开） -->
+  <div id="control-panel" style="display:none; padding: 10px 14px; background: #fff; border-bottom: 1px solid #eee;">
+    <div class="input-wrap">
+      <input id="input" style="box-sizing:border-box; width:100%; height:1.8em; padding:0 5px; font-size:1.4rem;" placeholder="199409290322">
+    </div>
+    <div style="padding: 6px 0; font-size: 1.2rem;">
+      <label style="margin-right: 10px;"><input id="gender_man" type="radio" name="gender" value="1" checked>男</label>
+      <label style="margin-right: 10px;"><input id="gender_woman" type="radio" name="gender" value="0">女</label>
+      <label style="margin-right: 10px;"><input type="checkbox" id="sect">晚子时</label>
+      <label style="margin-right: 10px;"><input type="checkbox" id="suse">素色</label>
+      <button id="now-btn" style="font-size:1.2rem; padding: 2px 8px;">此刻</button>
+    </div>
+  </div>
+
+  <div id="content"></div>
+
+  <!-- 重新排盘浮动按钮 -->
+  <button class="reroll-btn" id="reroll-btn">重新排盘</button>
+</div>
+
+<script src="js/lunar.js"></script>
+<script src="js/rili_data.js"></script>
+<script src="js/shensha_data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jinkoujue.js"></script>
+</body>
+</html>

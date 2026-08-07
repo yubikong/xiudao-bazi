@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>八字排盘</title>
+<link rel="stylesheet" href="css/bazi.d78872fa.css">
+<link rel="stylesheet" href="css/bazi.85d86054.css">
+<link rel="stylesheet" href="css/bazi.074c3eea.css">
+<style>
+  html, body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 62.5%; }
+  body { font-size: 1.6rem; background: #fff; }
+  i { font-style: normal; }
+  #app { background-color: #fff; border: 1px solid #1e1e1e; max-width: 415px; margin: 0 auto 30vh; padding: .05rem; position: relative; }
+  .firstLine { position: relative; padding: 0 10px; }
+  .firstLine h1 { color: #b98c51; padding: .2rem 0; font-size: 1.7rem; font-weight: 400; display: inline-block; margin: 0; }
+  .firstLine .nowBazi { color: green; background: none; border: 1px solid green; border-radius: 4px; cursor: pointer; margin-left: 8px; padding: 1px 7px; font-size: 1.2rem; }
+  .firstLine a.anchor { color: #b98c51; text-decoration: none; margin-left: 7px; font-size: 1.35rem; }
+  .top { padding: 0 10px; }
+  .input-wrap { position: relative; }
+  #input { box-sizing: border-box; border: 1px solid #000; width: 100%; height: 1.8em; margin-top: .2rem; padding: 0 5px; font-size: 1.6rem; line-height: 1.8em; min-height: 1.8em; }
+  #input i { font-style: normal; }
+  .condition { padding: .15rem 0; font-size: 1.2rem; }
+  .condition label { cursor: pointer; margin-right: .4rem; }
+  .tip { color: #773f0c; white-space: normal; padding: .4rem .6rem; font-size: 1rem; line-height: 1.4em; }
+  .tip a { color: #773f0c; }
+  .pan { border-top: .01rem solid #a1a1a1; padding: 0 5px; }
+  .div_table { font-size: 1.2rem; }
+  .div_table .bazi { font-size: 2rem; }
+  .dtr { padding: .3rem 0; display: flex; }
+  .dtrGap { border-top: .01rem solid #a1a1a1; border-bottom: .01rem solid #a1a1a1; padding: .2rem 0; font-size: 1.6rem; }
+  .pan .col { text-align: center; flex-shrink: 0; }
+  .col0 { flex-shrink: 0; flex-basis: 12%; min-width: 56px; text-align: left; }
+  .col1, .col2, .col3, .col4 { flex-basis: 12%; }
+  .col5 { flex-shrink: 1; flex-basis: 4%; }
+  .col6, .col7, .col8, .col9 { flex-basis: 12%; }
+  .colItem { flex-grow: 1; }
+  .left { text-align: left; }
+  .center-center { justify-content: center; align-items: center; display: flex; }
+  .pan .bazi { font-size: 2.6rem; font-weight: 600; }
+  .pan .small { font-size: 1.2rem; font-weight: 400; }
+  .pan .tiny { font-size: 1rem; }
+  .pan .bold { font-weight: 700; }
+  .cangGan .unit { padding: .1rem 0; }
+  .c-gold { color: #ffa436; }
+  .c-wood { color: #228b22; }
+  .c-water { color: #007bff; }
+  .c-fire { color: #d41313; }
+  .c-earth { color: #a17323; }
+  .c-suse { color: #000; }
+  .bgray { background-color: #f5f5f5; }
+  .yunCol { text-align: center; flex-grow: 1; max-width: 50px; padding: .5%; }
+  .yunCol .unit { padding: .2rem 0; }
+  .yunCol .ganzhi { color: #444; font-size: 1.6rem; font-weight: 700; }
+  .yunCol .ganshen { margin-left: 1px; }
+  .yunCol.current { background-color: #d8d8d8; border-radius: 7%; }
+  .year5 { border-right: .1rem solid #cdcdcd; }
+  .shensha-item { white-space: nowrap; padding: .2rem 0; overflow: hidden; }
+  .keyboard { -webkit-user-select: none; user-select: none; width: 400px; max-width: 415px; display: none; margin: auto; }
+  .keyboard .dtr { justify-content: space-around; }
+  .keyboard .dtr .zhu { flex-direction: column; justify-content: center; display: flex; }
+  .keyboard .circle { cursor: pointer; border: .2rem solid green; border-radius: 50%; margin: .4rem; padding: .8rem; font-size: 1.6rem; }
+  .keyboard .circle.edit { color: #fff; background-color: #dc3545; border-color: #dc3545; }
+  .keyboard .key { text-align: center; cursor: pointer; background-color: #d6e6f6; border-radius: .4rem; flex-basis: 14%; margin: .2rem 0; padding: 1rem 0; font-size: 1.8rem; font-weight: 700; }
+
+  /* ===== 八字反推对话框 ===== */
+  .ft-dialog { position: fixed; inset: 0; z-index: 9999; }
+  .ft-mask { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+  .ft-box { position: relative; width: 90%; max-width: 400px; margin: 20vh auto 0; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; }
+  .ft-title { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #b98c51; color: #fff; font-size: 1.6rem; font-weight: 700; }
+  .ft-close { cursor: pointer; font-size: 2.4rem; line-height: 1; padding: 0 4px; }
+  .ft-close:hover { color: #ffeb3b; }
+  .ft-body { padding: 12px 16px; }
+  .ft-tip { color: #666; font-size: 1.2rem; margin-bottom: 8px; }
+  .ft-textarea { width: 100%; min-height: 80px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1.4rem; box-sizing: border-box; resize: vertical; font-family: inherit; }
+  .ft-textarea:focus { outline: none; border-color: #b98c51; }
+  .ft-presets { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .ft-preset { cursor: pointer; padding: 4px 10px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; font-size: 1.2rem; }
+  .ft-preset:hover { background: #b98c51; color: #fff; border-color: #b98c51; }
+  .ft-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #eee; }
+  .ft-foot button { cursor: pointer; padding: 6px 16px; border: 0; border-radius: 4px; font-size: 1.4rem; }
+  .ft-cancel { background: #f5f5f5; color: #333; }
+  .ft-cancel:hover { background: #ddd; }
+  .ft-ok { background: #b98c51; color: #fff; }
+  .ft-ok:hover { background: #a07b46; }
+  .error { border-color: red !important; }
+  .jsCopy { cursor: pointer; background-color: #e1e1e1; border-radius: 8%; }
+  .jsInfo { cursor: pointer; }
+  .text_a { color: inherit; text-decoration: none; }
+  @media (max-width: 415px) { html { font-size: 2.5vw; } .keyboard { width: 80vw; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="firstLine">
+    <h1><a href="index.html" class="superLink" style="color:inherit;text-decoration:none;">八字排盘</a> - <span class="fanTui" style="cursor:pointer;">八字反推</span></h1>
+    <button class="nowBazi">此刻</button>
+    <a href="#" class="anchor riliAnchor">黄历</a>
+    <a href="jinkoujue.html" class="anchor jkjAnchor">金口诀</a>
+    <a href="#" class="anchor doushuAnchor">紫微</a>
+    <a href="#" class="anchor analyseAnchor">分析</a>
+    <a href="baziHelp.html" class="anchor">说明</a>
+  </div>
+  <div class="top">
+    <div class="input-wrap">
+      <div id="input" contenteditable="true"></div>
+    </div>
+    <div class="condition">
+      <label><input id="gender_man" type="radio" name="gender" value="1" checked>男</label>
+      <label><input id="gender_woman" type="radio" name="gender" value="0">女</label>
+      <label><input type="checkbox" id="lunar">阴历</label>
+      <label><input type="checkbox" id="sect">晚子时</label>
+      <label><input type="checkbox" id="suse">素色</label>
+    </div>
+  </div>
+  <div id="pan" class="pan"></div>
+  <div id="analyse"></div>
+</div>
+<div id="keyboard" class="keyboard" style="display:none;">
+  <div class="dtr">
+    <div class="title">造</div>
+    <div class="title">年</div>
+    <div class="title">月</div>
+    <div class="title">日</div>
+    <div class="title">时</div>
+  </div>
+  <div class="dtr">
+    <div class="zhu"><div class="circle" id="circle0">女</div></div>
+    <div class="zhu"><div class="circle" id="circle1">干</div><div class="circle" id="circle2">支</div></div>
+    <div class="zhu"><div class="circle" id="circle3">干</div><div class="circle" id="circle4">支</div></div>
+    <div class="zhu"><div class="circle" id="circle5">干</div><div class="circle" id="circle6">支</div></div>
+    <div class="zhu"><div class="circle" id="circle7">干</div><div class="circle" id="circle8">支</div></div>
+  </div>
+  <div class="dtr">
+    <div class="key" type="gender">男</div>
+    <div class="key" type="gan">甲</div><div class="key" type="gan">丙</div><div class="key" type="gan">戊</div><div class="key" type="gan">庚</div><div class="key" type="gan">壬</div>
+  </div>
+  <div class="dtr">
+    <div class="key" type="gender">女</div>
+    <div class="key" type="gan">乙</div><div class="key" type="gan">丁</div><div class="key" type="gan">己</div><div class="key" type="gan">辛</div><div class="key" type="gan">癸</div>
+  </div>
+  <div class="dtr">
+    <div class="key" type="zhi">子</div>
+    <div class="key" type="zhi">寅</div><div class="key" type="zhi">辰</div><div class="key" type="zhi">午</div><div class="key" type="zhi">申</div><div class="key" type="zhi">戌</div>
+  </div>
+  <div class="dtr">
+    <div class="key" type="zhi">丑</div>
+    <div class="key" type="zhi">卯</div><div class="key" type="zhi">巳</div><div class="key" type="zhi">未</div><div class="key" type="zhi">酉</div><div class="key" type="zhi">亥</div>
+  </div>
+</div>
+<script src="js/lunar.js"></script>
+<script src="js/rili_data.js"></script>
+<script src="js/shensha_data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/bazi.js"></script>
+</body>
+</html>
