@@ -9,50 +9,87 @@
   html { font-size: 14px; }
   body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; background: #f5f2ea; }
   #app { width: 100%; max-width: 415px; margin: auto; background: #fff; min-height: 100vh; }
-  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; background: #fff; }
-  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.5rem; margin-right: 10px; }
+  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; background: #fff; overflow-x: auto; white-space: nowrap; }
+  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.4rem; margin-right: 10px; }
   .page-nav a.active { font-weight: bold; }
-  .page-nav .spacer { flex: 1; }
   .page-nav a:last-child { margin-right: 0; }
 
-  .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #eee; background: #fff; }
-  .header-bar .title { font-size: 1.6rem; color: #b98c51; font-weight: 700; }
-  .header-bar .hint { font-size: 1.1rem; color: #999; }
+  .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #eee; background: #fff; }
+  .header-bar .title { font-size: 1.5rem; color: #b98c51; font-weight: 700; }
+  .header-bar .hint { font-size: 1.0rem; color: #999; }
+
+  /* ===== 类型切换 ===== */
+  .type-tabs { display: flex; background: #fff; border-bottom: 1px solid #eee; }
+  .type-tabs .tab { flex: 1; padding: 8px 2px; border: none; background: none; font-size: 1.35rem; color: #888; cursor: pointer; border-bottom: 2px solid transparent; }
+  .type-tabs .tab.active { color: #b98c51; font-weight: 700; border-bottom-color: #b98c51; }
 
   /* ===== 朝向信息卡 ===== */
-  .info-card { background: #fff; padding: 8px 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-around; }
+  .info-card { background: #fff; padding: 6px 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-around; }
   .info-item { text-align: center; }
-  .info-item .label { font-size: 1.05rem; color: #999; }
-  .info-item .val { font-size: 1.7rem; font-weight: 700; color: #333; min-height: 2rem; line-height: 2rem; }
-  .info-item .val.big { font-size: 2.6rem; color: #b98c51; }
-  .info-item .val.zhi { font-size: 2.2rem; }
+  .info-item .label { font-size: 0.95rem; color: #999; }
+  .info-item .val { font-size: 1.6rem; font-weight: 700; color: #333; min-height: 1.9rem; line-height: 1.9rem; }
+  .info-item .val.big { font-size: 2.4rem; color: #b98c51; }
+  .info-item .val.zhi { font-size: 2.0rem; }
 
-  /* ===== 罗盘容器 ===== */
-  .compass-wrap { position: relative; padding: 12px; background: #fff; }
-  #compass-box { width: 100%; max-width: 380px; margin: 0 auto; aspect-ratio: 1; }
+  /* ===== 圆形罗盘 ===== */
+  .pan-body { padding: 10px; background: #fff; }
+  .compass-wrap { position: relative; }
+  #compass-box { width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 1; }
   #compass-box svg { display: block; width: 100%; height: 100%; }
+
+  /* ===== 控制区 ===== */
+  .ctrl-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 1.2rem; color: #555; padding: 4px 0; }
+  .ctrl-row input[type=number] { width: 74px; padding: 3px 5px; border: 1px solid #999; border-radius: 4px; font-size: 1.2rem; }
+  .ctrl-row select { padding: 3px 4px; border: 1px solid #999; border-radius: 4px; font-size: 1.2rem; }
+  .ctrl-row label { display: flex; align-items: center; gap: 3px; cursor: pointer; }
+  .ctrl-row .btn-sm { padding: 3px 10px; border: 1px solid #b98c51; background: #fff; color: #b98c51; border-radius: 4px; font-size: 1.15rem; cursor: pointer; }
+  .ctrl-row .btn-sm:active { background: #f5ead5; }
+  .ctrl-tip { font-size: 1.0rem; color: #999; padding: 2px 0; }
+
+  /* ===== 八宅盘 ===== */
+  .bz-pan-title, .xk-pan-title { font-size: 1.35rem; font-weight: 700; color: #b98c51; text-align: center; padding: 6px 0 4px; }
+  .bz-ming-title { font-size: 1.25rem; font-weight: 700; color: #6b98c0; text-align: center; padding: 8px 0 4px; }
+  .xk-sub { font-size: 1.05rem; color: #888; text-align: center; padding: 0 0 6px; }
+  .bz-grid, .xk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; max-width: 360px; margin: 0 auto; }
+  .bz-cell { border: 1px solid #a1a1a1; border-radius: 3px; text-align: center; padding: 6px 2px; background: #fff; min-height: 74px; display: flex; flex-direction: column; justify-content: center; }
+  .bz-cell.bz-facing { background: #fdf8ef; border-color: #b98c51; }
+  .bz-cell.bz-center { background: #f7f0e2; }
+  .bz-dir, .xk-dir { font-size: 0.95rem; color: #999; }
+  .bz-star { font-size: 1.4rem; font-weight: 700; line-height: 1.3; }
+  .bz-name { font-size: 0.9rem; color: #777; }
+  .bz-q { font-size: 0.85rem; margin-top: 1px; }
+  .bz-tip { font-size: 1.1rem; color: #999; text-align: center; padding: 10px; }
+  .q-good { color: #228b22; }
+  .q-bad { color: #d41313; }
+  .q-best { color: #b8860b; }
+  .q-worst { color: #8b0000; }
+  .q-mid { color: #999; }
+
+  /* ===== 玄空盘 ===== */
+  .xk-cell { border: 1px solid #a1a1a1; border-radius: 3px; text-align: center; padding: 5px 2px; background: #fff; min-height: 74px; display: flex; flex-direction: column; justify-content: center; }
+  .xk-cell.xk-center { background: #f7f0e2; }
+  .xk-yun { font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
+  .xk-sname { font-size: 0.75rem; font-weight: 400; margin-left: 2px; }
+  .xk-sx { font-size: 0.95rem; color: #555; display: flex; justify-content: center; gap: 6px; }
+  .xk-name { font-size: 0.85rem; color: #777; }
 
   /* ===== 按钮区 ===== */
   .btn-row { display: flex; gap: 8px; padding: 4px 12px 10px; flex-wrap: wrap; }
-  .btn { flex: 1; min-width: 100px; padding: 10px 6px; border-radius: 6px; border: 1px solid #b98c51; background: #fff; color: #b98c51; font-size: 1.3rem; font-weight: 700; cursor: pointer; }
+  .btn { flex: 1; min-width: 100px; padding: 9px 6px; border-radius: 6px; border: 1px solid #b98c51; background: #fff; color: #b98c51; font-size: 1.25rem; font-weight: 700; cursor: pointer; }
   .btn.primary { background: #b98c51; color: #fff; }
   .btn:active { opacity: 0.8; }
 
-  /* ===== 状态 ===== */
   .status-bar { padding: 4px 12px 10px; }
-  #status { font-size: 1.2rem; color: #666; line-height: 1.5em; padding: 6px 8px; background: #fbfbfb; border: 1px solid #eee; border-radius: 6px; }
+  #status { font-size: 1.15rem; color: #666; line-height: 1.5em; padding: 6px 8px; background: #fbfbfb; border: 1px solid #eee; border-radius: 6px; }
   #status.ok { color: #228b22; border-color: #cde8cd; background: #f0faf0; }
   #status.err { color: #d41313; border-color: #f3cdcd; background: #fdf0f0; }
   #status.warn { color: #b98c51; border-color: #ecd9b8; background: #fdf8ef; }
   #status.sim { color: #007bff; border-color: #c5ddf5; background: #f0f7fd; }
-  #api-status { font-size: 1.05rem; color: #999; padding: 6px 8px; }
+  #api-status { font-size: 1.0rem; color: #999; padding: 6px 8px; }
 
-  /* ===== 使用说明 ===== */
-  .help-box { padding: 6px 12px 20px; font-size: 1.2rem; color: #555; line-height: 1.8em; }
-  .help-box h3 { color: #b98c51; font-size: 1.35rem; padding: 8px 0 4px; }
+  .help-box { padding: 6px 12px 20px; font-size: 1.15rem; color: #555; line-height: 1.8em; }
+  .help-box h3 { color: #b98c51; font-size: 1.3rem; padding: 8px 0 4px; }
   .help-box .tip { color: #b98c51; }
-  .help-box a { color: #b98c51; }
-
   .hidden { display: none; }
 </style>
 </head>
@@ -68,39 +105,61 @@
   </div>
 
   <div class="header-bar">
-    <div class="title">手机罗盘</div>
+    <div class="title">风水罗盘</div>
     <div class="hint" id="api-status"></div>
+  </div>
+
+  <div class="type-tabs">
+    <button class="tab active" data-type="circular">圆形罗盘</button>
+    <button class="tab" data-type="bazhai">八宅罗盘</button>
+    <button class="tab" data-type="xuankong">玄空罗盘</button>
   </div>
 
   <!-- 当前朝向 -->
   <div class="info-card">
-    <div class="info-item">
-      <div class="label">朝向度数</div>
-      <div class="val big" id="degree">--</div>
-    </div>
-    <div class="info-item">
-      <div class="label">二十四山</div>
-      <div class="val" id="shan24">--</div>
-    </div>
-    <div class="info-item">
-      <div class="label">地分（十二支）</div>
-      <div class="val zhi" id="zhi12">--</div>
-    </div>
-    <div class="info-item">
-      <div class="label">方位</div>
-      <div class="val" id="dir8">--</div>
-    </div>
+    <div class="info-item"><div class="label">朝向度数</div><div class="val big" id="degree">--</div></div>
+    <div class="info-item"><div class="label">二十四山</div><div class="val" id="shan24">--</div></div>
+    <div class="info-item"><div class="label">地分（十二支）</div><div class="val zhi" id="zhi12">--</div></div>
+    <div class="info-item"><div class="label">方位</div><div class="val" id="dir8">--</div></div>
   </div>
 
-  <!-- 罗盘 -->
-  <div class="compass-wrap">
-    <div id="compass-box"></div>
+  <!-- 圆形罗盘 -->
+  <div class="pan-body" id="compass-box"></div>
+
+  <!-- 八宅 -->
+  <div class="pan-body hidden" id="bazhai-body">
+    <div class="ctrl-row">
+      <label>出生年 <input type="number" id="birth-year" placeholder="1990" min="1900" max="2099"></label>
+      <label><input type="radio" name="bg" value="1" checked>男</label>
+      <label><input type="radio" name="bg" value="0">女</label>
+    </div>
+    <div class="ctrl-tip">输入出生年份+性别，下方同时显示「宅卦吉凶」与「个人命卦吉凶」</div>
+    <div id="bazhai-pan"></div>
+    <div id="bazhai-ming"></div>
+  </div>
+
+  <!-- 玄空 -->
+  <div class="pan-body hidden" id="xuankong-body">
+    <div class="ctrl-row">
+      <label>建成年份 <input type="number" id="xk-year" placeholder="2026" min="1864" max="2100"></label>
+      <label>坐山 <select id="xk-shan">
+        <option value="">跟随朝向</option>
+        <option value="0">子</option><option value="1">癸</option><option value="2">丑</option><option value="3">艮</option>
+        <option value="4">寅</option><option value="5">甲</option><option value="6">卯</option><option value="7">乙</option>
+        <option value="8">辰</option><option value="9">巽</option><option value="10">巳</option><option value="11">丙</option>
+        <option value="12">午</option><option value="13">丁</option><option value="14">未</option><option value="15">坤</option>
+        <option value="16">申</option><option value="17">庚</option><option value="18">酉</option><option value="19">辛</option>
+        <option value="20">戌</option><option value="21">乾</option><option value="22">亥</option><option value="23">壬</option>
+      </select></label>
+    </div>
+    <div class="ctrl-tip">坐山默认跟随手机朝向；每格显示「运星 / 山星·向星」</div>
+    <div id="xuankong-pan"></div>
   </div>
 
   <!-- 按钮 -->
   <div class="btn-row">
     <button class="btn primary" id="start-btn">启动罗盘</button>
-    <button class="btn" id="set-difen-btn" data-zhi="寅">设为金口诀地分（寅）</button>
+    <button class="btn" id="set-difen-btn">设为金口诀地分（寅）</button>
     <button class="btn" id="sim-btn" style="display:none;">模拟演示</button>
   </div>
 
@@ -113,15 +172,18 @@
   <div class="help-box">
     <h3>使用说明</h3>
     <p>① 点击「启动罗盘」并允许访问运动传感器（iOS 13+ 必须点击授权）。</p>
-    <p>② <b>手机平放</b>，屏幕朝上，顶部对准你要测的方向，盘面即显示当前朝向。</p>
-    <p>③ 中央红色指针始终指向<b>正北</b>；屏幕顶部对准的方向即当前朝向。</p>
-    <p>④ 当前朝向对应的<b>十二地支</b>会高亮显示——点击「设为金口诀地分」即可把该地支带到金口诀页作为地分起课（方位测向，地分取用）。</p>
-    <p>⑤ 盘面外圈为<b>二十四山</b>（每山 15°），中圈为十二地支（五行着色），内圈为四正方位。</p>
-    <p class="tip">⚠ 提示：需在 HTTPS 环境（GitHub Pages 已满足）；指南针受磁场干扰，请远离金属/磁铁，必要时沿"8"字形晃动校准。</p>
+    <p>② <b>手机平放</b>，屏幕顶部对准要测的方向，盘面即显示当前朝向。</p>
+    <p>③ 三种罗盘切换：<b>圆形罗盘</b>（二十四山+十二地支）、<b>八宅罗盘</b>（宅卦/命卦八方吉凶）、<b>玄空罗盘</b>（运盘+山向盘九宫飞星）。</p>
+    <p>④ 八宅：输入出生年+性别显示个人命卦八方吉凶（生气/天医/延年/伏位吉，绝命/五鬼/六煞/祸害凶）。</p>
+    <p>⑤ 玄空：输入建成年份+坐山（默认跟随朝向）显示三元九运九宫飞星盘。</p>
+    <p>⑥ 点击「设为金口诀地分（X）」把当前朝向地支带到金口诀页起课。</p>
+    <p class="tip">⚠ 需 HTTPS（GitHub Pages 已满足）；指南针受磁场干扰，远离金属磁铁，必要时沿"8"字形校准。</p>
     <p>💻 电脑无传感器：点击「模拟演示」可看到盘面自动旋转的效果。</p>
   </div>
 </div>
 
+<script src="js/lunar.js"></script>
+<script src="js/fengshui.js"></script>
 <script src="js/compass.js"></script>
 </body>
 </html>
