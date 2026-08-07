@@ -114,7 +114,7 @@
     else if (['乙', '己'].indexOf(dayGan) >= 0) guiRen = isDay ? '子' : '申';
     else if (['丙', '丁'].indexOf(dayGan) >= 0) guiRen = isDay ? '亥' : '酉';
     else if (['壬', '癸'].indexOf(dayGan) >= 0) guiRen = isDay ? '巳' : '卯';
-    else guiRen = isDay ? '午' : '寅'; // 辛
+    else guiRen = isDay ? '寅' : '午'; // 辛：昼贵寅、夜贵午（金口诀"六辛逢马虎"，辛日旦贵在寅）
     var isShun = (isDay && ['壬', '癸', '辛'].indexOf(dayGan) < 0) || (!isDay && ['壬', '癸', '辛'].indexOf(dayGan) >= 0);
     var idx = ZHI.indexOf(guiRen);
     var shenPan = new Array(12);
