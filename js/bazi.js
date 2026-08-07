@@ -281,7 +281,10 @@
     w.sel.def.month = curMonthIdx;
     const curLiuYue = liuYueArr[curMonthIdx];
     w.zhu[8] = { type: 'liuMonth', title: '流月', gan: curLiuYue.getGanZhi().substr(0, 1), zhi: curLiuYue.getGanZhi().substr(1, 1) };
-    w.zhu[9] = { type: 'liuDay', title: '流日', gan: gans[2], zhi: zhis[2] }; // 流日暂用日柱
+    // 流日：今日日柱干支（区别于命局日柱，用于看当日与命局作用）
+    const _todaySolar = Solar.fromDate(new Date());
+    const _todayGZ = _todaySolar.getLunar().getDayInGanZhi();
+    w.zhu[9] = { type: 'liuDay', title: '流日', gan: _todayGZ.substr(0, 1), zhi: _todayGZ.substr(1, 1) };
 
     // 胎元命宫身宫
     w.spzhu = calcTaiYuan(bazi, lunar);
@@ -544,6 +547,19 @@
       i += '<div class="unit ganzhi">' + U.wuXingColor(t.zhi) + '<span class="tiny ganshen">' + d + '</span></div>';
       i += '</div>';
     }
+    i += '</div>';
+
+    // 流日（今日日柱，与命局十神关系）
+    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日（今日）</div></div>';
+    i += '<div class="dtr dayRow">';
+    const _ld = Y.zhu[9];
+    const _lc = (_ld.ganShen && _ld.ganShen[0]) ? _ld.ganShen[0].short : '';
+    const _ldd = (_ld.zhiShen && _ld.zhiShen.length > 0) ? _ld.zhiShen[0].short : '';
+    i += '<div class="yunCol small current">';
+    i += '<div class="unit">今</div>';
+    i += '<div class="unit ganzhi gantext">' + U.wuXingColor(_ld.gan) + '<span class="tiny ganshen">' + _lc + '</span></div>';
+    i += '<div class="unit ganzhi">' + U.wuXingColor(_ld.zhi) + '<span class="tiny ganshen">' + _ldd + '</span></div>';
+    i += '</div>';
     i += '</div>';
 
     i += '</div>'; // bazipan_down
