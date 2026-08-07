@@ -140,51 +140,77 @@
     };
   }
 
-  // 旺衰（模拟 kentang2017 算法：4/3/2/1 种五行定旺）
+  // 旺衰（参考《金口诀旺衰判断》图片规则：课内四位人元干/贵神支/将神支/地分支的五行判断）
+  // 1. 四种五行齐全 → 不受克为旺（缺的五行所克者旺，如缺土→水不被土克→水旺）
+  // 2. 三种五行(2+1+1) → 克他爻为旺（课内实际存在的克关系中克者旺）
+  // 3. 两种五行(3+1) → 多者为旺（一个五行出三次，此五行最旺，无视生克）
+  // 4. 两种五行(2+2) → 克关系取克者旺；生关系取受生者旺
+  // 5. 一种五行 → 该五行旺
   function calcWangShuai(gzList) {
     var wxs = gzList.map(function (g) { return U.wuXingMap(g); });
     var cnt = {};
     wxs.forEach(function (w) { cnt[w] = (cnt[w] || 0) + 1; });
     var present = Object.keys(cnt);
     var wang = null;
+    // 判断 w 是否被课内其他五行克制
+    function isKeBy(w) {
+      for (var i = 0; i < present.length; i++) {
+        if (present[i] !== w && KE[present[i]] === w) return true;
+      }
+      return false;
+    }
+    // 课内存在的克关系中的克者集合
+    function keZhe() {
+      var out = [];
+      for (var i = 0; i < present.length; i++) {
+        for (var j = 0; j < present.length; j++) {
+          if (i !== j && KE[present[i]] === present[j]) { out.push(present[i]); break; }
+        }
+      }
+      return out;
+    }
     if (present.length === 4) {
-      var wuxing1 = present.slice();
-      for (var i = 0; i < wuxing1.length; i++) {
-        if (cnt[KE[wuxing1[i]]]) { wuxing1.splice(i, 1); i--; }
-      }
-      wang = wuxing1[0];
+      // 不受克为旺：唯一没有被课内五行克到的
+      var unKe = present.filter(function (w) { return !isKeBy(w); });
+      wang = unKe[0] || present[0];
     } else if (present.length === 3) {
-      var w2 = present.slice();
-      for (var j = 0; j < w2.length; j++) {
-        if (cnt[KE[w2[j]]]) { w2.splice(j, 1); j--; }
-      }
-      if (w2.length > 1) {
-        for (var k = 0; k < w2.length; k++) {
-          if (cnt[KE[w2[k]]] === undefined || cnt[KE[w2[k]]] === 0) { wang = w2[k]; break; }
+      // 克他爻为旺
+      var kers = keZhe();
+      if (kers.length === 1) {
+        wang = kers[0];
+      } else if (kers.length > 1) {
+        // 多个克者：优先取自身不受克者，再取成对者，再取数量多者
+        var unKe2 = kers.filter(function (x) { return !isKeBy(x); });
+        if (unKe2.length === 1) wang = unKe2[0];
+        else if (unKe2.length > 1) {
+          var pair2 = unKe2.filter(function (x) { return cnt[x] >= 2; });
+          wang = pair2[0] || unKe2[0];
+        } else {
+          var pair3 = kers.filter(function (x) { return cnt[x] >= 2; });
+          wang = pair3[0] || kers[0];
         }
       } else {
-        wang = w2[0];
+        // 无克关系（不常见）：取成对的五行
+        var pair = present.filter(function (x) { return cnt[x] >= 2; });
+        wang = pair[0] || present[0];
       }
     } else if (present.length === 2) {
-      var cishuFlag = 0;
-      for (var w3 in cnt) { if (cnt[w3] >= 3) { wang = w3; cishuFlag = 1; break; } }
-      if (!cishuFlag) {
-        var w4 = present.slice();
-        for (var m = 0; m < w4.length; m++) {
-          if (cnt[KE[w4[m]]]) { w4.splice(m, 1); m--; }
-        }
-        if (w4.length === 1) { wang = w4[0]; }
-        else {
-          // 相生取受生者为旺
-          for (var n = 0; n < present.length; n++) {
-            if (cnt[SHENG[present[n]]]) { wang = present[n]; break; }
-          }
-        }
+      var a = present[0], b = present[1];
+      if (cnt[a] >= 3 || cnt[b] >= 3) {
+        // 3+1：多者为旺（无视生克）
+        wang = cnt[a] >= 3 ? a : b;
+      } else {
+        // 2+2 二对：克关系→克者旺；生关系→受生者旺
+        if (KE[a] === b) wang = a;
+        else if (KE[b] === a) wang = b;
+        else if (SHENG[a] === b) wang = b;
+        else if (SHENG[b] === a) wang = a;
+        else wang = a;
       }
     } else {
-      wang = present[0];
+      wang = present[0]; // 一种五行
     }
-    // 旺相休囚死（囚=克旺、死=旺克，按 kentang2017）
+    // 旺相休囚死（旺=最旺者、相=旺所生、休=生旺者、囚=克旺者、死=旺所克）
     var res = {};
     wxs.forEach(function (w, idx) {
       var g = gzList[idx];
@@ -728,5 +754,5 @@
     $('#reroll-btn').on('click', reroll);
   });
 
-  window.Jinkoujue = { sync: sync, calcKe: calcKe, calcSanDong: calcSanDong };
+  window.Jinkoujue = { sync: sync, calcKe: calcKe, calcSanDong: calcSanDong, calcWangShuai: calcWangShuai };
 })();
