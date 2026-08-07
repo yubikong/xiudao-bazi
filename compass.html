@@ -60,6 +60,13 @@
   .bz-name { font-size: 0.9rem; color: #777; }
   .bz-q { font-size: 0.85rem; margin-top: 1px; }
   .bz-tip { font-size: 1.1rem; color: #999; text-align: center; padding: 10px; }
+  /* 八宅旋转盘（罗盘式：盘面旋转、顶部指针固定） */
+  .bz-wrap { position: relative; padding-top: 44px; }
+  .bz-pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; line-height: 1.15; }
+  .bz-tri { display: block; font-size: 1.7rem; color: #d41313; }
+  .bz-ptr-txt { display: block; font-size: 0.95rem; font-weight: 700; color: #d41313; white-space: nowrap; }
+  .bz-rotate { position: relative; transform-origin: 50% 50%; transition: transform 0.12s linear; }
+  .bz-seat-box { position: absolute; left: 50%; transform: translateX(-50%); bottom: -48px; width: 66%; padding: 5px 0; border: 1.5px dashed #6b98c0; border-radius: 5px; text-align: center; font-size: 1.05rem; font-weight: 700; color: #6b98c0; background: #f0f7fd; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .q-good { color: #228b22; }
   .q-bad { color: #d41313; }
   .q-best { color: #b8860b; }
@@ -160,6 +167,7 @@
   <!-- 按钮 -->
   <div class="btn-row">
     <button class="btn primary" id="start-btn">启动罗盘</button>
+    <button class="btn" id="lock-btn">锁定</button>
     <button class="btn" id="set-difen-btn">设为金口诀地分（寅）</button>
     <button class="btn" id="sim-btn" style="display:none;">模拟演示</button>
   </div>
@@ -175,9 +183,10 @@
     <p>① 点击「启动罗盘」并允许访问运动传感器（iOS 13+ 必须点击授权）。</p>
     <p>② <b>手机平放</b>，屏幕顶部对准要测的方向，盘面即显示当前朝向。</p>
     <p>③ 三种罗盘切换：<b>圆形罗盘</b>（二十四山+十二地支）、<b>八宅罗盘</b>（宅卦/命卦八方吉凶）、<b>玄空罗盘</b>（运盘+山向盘九宫飞星）。</p>
-    <p>④ 八宅：<b>指针指向为朝向（向）</b>，坐山（宅位）为朝向对面 180°（蓝框），宅卦按坐山定（伏位在坐山）；输入出生年+性别另显示个人命卦八方吉凶（生气/天医/延年/伏位吉，绝命/五鬼/六煞/祸害凶）。</p>
+    <p>④ 八宅：九宫盘随指南针旋转，<b>顶部红色小三角为指针（固定不动）</b>，指向当前朝向；坐山写在盘面底部蓝色虚线框（坐山=朝向对面 180°，宅卦按坐山定、伏位在坐山）；输入出生年+性别另显示个人命卦八方吉凶（生气/天医/延年/伏位吉，绝命/五鬼/六煞/祸害凶）。</p>
     <p>⑤ 玄空：输入建成年份+坐山（默认跟随朝向）显示三元九运九宫飞星盘。</p>
-    <p>⑥ 点击「设为金口诀地分（X）」把当前朝向地支带到金口诀页起课。</p>
+    <p>⑥ 圆形与八宅罗盘可点击「锁定」冻结当前指针朝向（用于固定宅向读数），再次点击「解锁」恢复跟随。</p>
+    <p>⑦ 点击「设为金口诀地分（X）」把当前朝向地支带到金口诀页起课。</p>
     <p class="tip">⚠ 需 HTTPS（GitHub Pages 已满足）；指南针受磁场干扰，远离金属磁铁，必要时沿"8"字形校准。</p>
     <p>💻 电脑无传感器：点击「模拟演示」可看到盘面自动旋转的效果。</p>
   </div>
