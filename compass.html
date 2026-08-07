@@ -53,6 +53,7 @@
   .bz-grid, .xk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; max-width: 360px; margin: 0 auto; }
   .bz-cell { border: 1px solid #a1a1a1; border-radius: 3px; text-align: center; padding: 6px 2px; background: #fff; min-height: 74px; display: flex; flex-direction: column; justify-content: center; }
   .bz-cell.bz-facing { background: #fdf8ef; border-color: #b98c51; }
+  .bz-cell.bz-seat { background: #f0f7fd; border-color: #6b98c0; }
   .bz-cell.bz-center { background: #f7f0e2; }
   .bz-dir, .xk-dir { font-size: 0.95rem; color: #999; }
   .bz-star { font-size: 1.4rem; font-weight: 700; line-height: 1.3; }
@@ -174,7 +175,7 @@
     <p>① 点击「启动罗盘」并允许访问运动传感器（iOS 13+ 必须点击授权）。</p>
     <p>② <b>手机平放</b>，屏幕顶部对准要测的方向，盘面即显示当前朝向。</p>
     <p>③ 三种罗盘切换：<b>圆形罗盘</b>（二十四山+十二地支）、<b>八宅罗盘</b>（宅卦/命卦八方吉凶）、<b>玄空罗盘</b>（运盘+山向盘九宫飞星）。</p>
-    <p>④ 八宅：输入出生年+性别显示个人命卦八方吉凶（生气/天医/延年/伏位吉，绝命/五鬼/六煞/祸害凶）。</p>
+    <p>④ 八宅：<b>指针指向为朝向（向）</b>，坐山（宅位）为朝向对面 180°（蓝框），宅卦按坐山定（伏位在坐山）；输入出生年+性别另显示个人命卦八方吉凶（生气/天医/延年/伏位吉，绝命/五鬼/六煞/祸害凶）。</p>
     <p>⑤ 玄空：输入建成年份+坐山（默认跟随朝向）显示三元九运九宫飞星盘。</p>
     <p>⑥ 点击「设为金口诀地分（X）」把当前朝向地支带到金口诀页起课。</p>
     <p class="tip">⚠ 需 HTTPS（GitHub Pages 已满足）；指南针受磁场干扰，远离金属磁铁，必要时沿"8"字形校准。</p>
