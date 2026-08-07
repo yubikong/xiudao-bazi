@@ -288,7 +288,7 @@
         var cellZhi = null;
         for (var z in POS) { if (POS[z][0] === r && POS[z][1] === c) { cellZhi = z; break; } }
         if (!cellZhi) {
-          // 中间 2x2 区域：横排四柱（年/月/日/时）+ 命宫/局数
+          // 中间 2x2 区域：仅 (2,2) 输出占 2x2 的中宫格，其余 3 格跳过（避免多余格子撑破 4x4 网格）
           if (r === 2 && c === 2) {
             const yGZ = info.bazi.getYear(), mGZ = info.bazi.getMonth(), dGZ = info.bazi.getDay(), tGZ = info.bazi.getTime();
             h += '<div class="zw-center-cell">';
@@ -300,9 +300,8 @@
             h += '<div class="zw-center-info">' + info.mingGongGZ + ' · ' + info.juName + '</div>';
             h += '<div class="zw-center-info2">身宫' + info.shenGong + '　紫微' + info.ziwei + '</div>';
             h += '</div>';
-          } else {
-            h += '<div class="zw-cell empty"></div>';
           }
+          // 其余中心格 (2,3)(3,2)(3,3) 已被中宫格 span 覆盖，不输出
           continue;
         }
         var pl = byPos[cellZhi];
