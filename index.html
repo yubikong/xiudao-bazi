@@ -16,6 +16,11 @@
   .firstLine h1 { color: #b98c51; padding: .2rem 0; font-size: 1.7rem; font-weight: 400; display: inline-block; margin: 0; }
   .firstLine .nowBazi { color: green; background: none; border: 1px solid green; border-radius: 4px; cursor: pointer; margin-left: 8px; padding: 1px 7px; font-size: 1.2rem; }
   .firstLine a.anchor { color: #b98c51; text-decoration: none; margin-left: 7px; font-size: 1.35rem; }
+  /* 全站统一切换导航（6 格等宽、字号一致、不左右变动） */
+  .page-nav { display: flex; gap: 3px; padding: 6px 8px 2px; }
+  .page-nav a { flex: 1 1 0; min-width: 0; text-align: center; padding: 7px 2px; font-size: 1.15rem; color: #7a5c2e; text-decoration: none; background: #faf6ee; border: 1px solid #e0d4bc; border-radius: 6px; white-space: nowrap; }
+  .page-nav a.active { background: #b98c51; color: #fff; font-weight: bold; border-color: #b98c51; }
+  @media (max-width: 415px) { .page-nav a { font-size: 1.02rem; } }
   .top { padding: 0 10px; }
   .input-wrap { position: relative; }
   #input { box-sizing: border-box; border: 1px solid #000; width: 100%; height: 1.8em; margin-top: .2rem; padding: 0 5px; font-size: 1.6rem; line-height: 1.8em; min-height: 1.8em; }
@@ -87,6 +92,27 @@
   .jsCopy { cursor: pointer; background-color: #e1e1e1; border-radius: 8%; }
   .jsInfo { cursor: pointer; }
   .text_a { color: inherit; text-decoration: none; }
+  /* 流日行：默认横向滚动，列宽与大运一致 */
+  .dtr.dayRow { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: .4rem; }
+  .dtr.dayRow .yunCol { flex: 0 0 auto; min-width: 46px; max-width: none; }
+  .dtr.dayRow::-webkit-scrollbar { height: 4px; }
+  .dtr.dayRow::-webkit-scrollbar-thumb { background: #c9b089; border-radius: 2px; }
+  /* 大运/流年/流月行：窄屏横向滚动，列宽固定可读 */
+  @media (max-width: 600px) {
+    .dtr.yunRow, .dtr.yearRow, .dtr.monthRow {
+      overflow-x: auto; justify-content: flex-start;
+      -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+      padding-bottom: .4rem;
+    }
+    .dtr.yunRow .yunCol, .dtr.yearRow .yunCol, .dtr.monthRow .yunCol {
+      flex: 0 0 auto; min-width: 46px; max-width: none;
+    }
+    /* 细滚动条样式 */
+    .dtr.yunRow::-webkit-scrollbar, .dtr.yearRow::-webkit-scrollbar,
+    .dtr.monthRow::-webkit-scrollbar { height: 4px; }
+    .dtr.yunRow::-webkit-scrollbar-thumb, .dtr.yearRow::-webkit-scrollbar-thumb,
+    .dtr.monthRow::-webkit-scrollbar-thumb { background: #c9b089; border-radius: 2px; }
+  }
   @media (max-width: 415px) { html { font-size: 2.5vw; } .keyboard { width: 80vw; } }
 </style>
 </head>
@@ -95,13 +121,16 @@
   <div class="firstLine">
     <h1><a href="index.html" class="superLink" style="color:inherit;text-decoration:none;">八字排盘</a> - <span class="fanTui" style="cursor:pointer;">八字反推</span></h1>
     <button class="nowBazi">此刻</button>
-    <a href="#" class="anchor riliAnchor">黄历</a>
-    <a href="jinkoujue.html" class="anchor jkjAnchor">金口诀</a>
-    <a href="#" class="anchor doushuAnchor">紫微</a>
     <a href="#" class="anchor analyseAnchor">分析</a>
-    <a href="compass.html" class="anchor">罗盘</a>
-    <a href="baziHelp.html" class="anchor">说明</a>
   </div>
+  <nav class="page-nav">
+    <a href="index.html" class="active">八字排盘</a>
+    <a href="jinkoujue.html" class="anchor jkjAnchor">金口诀</a>
+    <a href="rili.html" class="anchor riliAnchor">黄历</a>
+    <a href="doushu.html" class="anchor doushuAnchor">紫微</a>
+    <a href="compass.html" class="anchor">罗盘</a>
+    <a href="baziHelp.html" class="anchor">使用说明</a>
+  </nav>
   <div class="top">
     <div class="input-wrap">
       <div id="input" contenteditable="true"></div>
@@ -149,11 +178,11 @@
     <div class="key" type="zhi">卯</div><div class="key" type="zhi">巳</div><div class="key" type="zhi">未</div><div class="key" type="zhi">酉</div><div class="key" type="zhi">亥</div>
   </div>
 </div>
-<script src="js/lunar.js?v=20260808b"></script>
-<script src="js/rili_data.js?v=20260808b"></script>
-<script src="js/shensha_data.js?v=20260808b"></script>
-<script src="js/utils.js?v=20260808b"></script>
-<script src="js/jquery.min.js?v=20260808b"></script>
-<script src="js/bazi.js?v=20260808b"></script>
+<script src="js/lunar.js?v=20260808c"></script>
+<script src="js/rili_data.js?v=20260808c"></script>
+<script src="js/shensha_data.js?v=20260808c"></script>
+<script src="js/utils.js?v=20260808c"></script>
+<script src="js/jquery.min.js?v=20260808c"></script>
+<script src="js/bazi.js?v=20260808c"></script>
 </body>
 </html>
