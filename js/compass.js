@@ -142,27 +142,34 @@
   }
 
   // ============ 八宅方形罗盘 ============
-  // 3x3 布局固定（上南下北、左东右西）：[东南 南 西南 / 东 中 西 / 东北 北 西北]
-  // 盘面不旋转，顶部固定小三角（尖朝外）作指向标记；朝向/坐山标记与游年文字随指南针在不同宫位间变换
-  var BZ_GRID = [['东南', '南', '西南'], ['东', '中', '西'], ['东北', '北', '西北']];
+  // 格子位置固定（3x3），方位标注随朝向轮转：朝向永远显示在顶部中间（第一行中间）宫位
+  // 坐山（朝向对面 180°）永远显示在底部中间宫位，坐山定宅卦、伏位在坐山
+  var DIR8_ORDER = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+  // 上南下北盘面，各格基准方位在 DIR8_ORDER 中的索引（-1=中宫）：
+  // 顶部中间=南(idx4)，顺时针：右上=西南(5) 右中=西(6) 右下=西北(7) 底部=北(0) 左下=东北(1) 左中=东(2) 左上=东南(3)
+  var BZ_BASE = [
+    [3, 4, 5],
+    [2, -1, 6],
+    [1, 0, 7]
+  ];
   var QUALITY_CLS = { 吉: 'q-good', 凶: 'q-bad', 大吉: 'q-best', 大凶: 'q-worst', 中: 'q-mid' };
-  var _bzGuaNum = null; // 宅卦缓存（朝向跨宫位时重绘格子文字）
+  var _bzFi = null; // 朝向宫位索引缓存（跨宫位时重绘格子）
 
   // 动态更新：指针朝向文字 + 坐山矩形文字
   function updateBazhaiText(h) {
-    var dirIdx = Math.floor((h + 22.5) / 45) % 8;
+    var fi = Math.floor((h + 22.5) / 45) % 8;
     var ptr = document.getElementById('bz-ptr-txt');
-    if (ptr) ptr.textContent = '向：' + DIR8[dirIdx];
+    if (ptr) ptr.textContent = '向：' + DIR8_ORDER[fi];
     var seatBox = document.getElementById('bz-seat-box');
-    if (seatBox) seatBox.textContent = '坐山 · ' + DIR8[(dirIdx + 4) % 8];
+    if (seatBox) seatBox.textContent = '坐山 · ' + DIR8_ORDER[(fi + 4) % 8];
   }
 
   function renderBazhai(force) {
     var FS = window.FengShui;
     var h = currentHeading();
-    var dirIdx = Math.floor((h + 22.5) / 45) % 8;
-    var facing = DIR8[dirIdx];            // 朝向（宅向）= 指针指向
-    var seat = DIR8[(dirIdx + 4) % 8];    // 坐山 = 朝向的对面（180°）
+    var fi = Math.floor((h + 22.5) / 45) % 8;
+    var facing = DIR8_ORDER[fi];            // 朝向（宅向）= 指针指向
+    var seat = DIR8_ORDER[(fi + 4) % 8];    // 坐山 = 朝向的对面（180°）
     var houseGua = (function () {
       // 八宅以坐山定宅卦（坐山为宅位）
       var dirToGua = { 北: '坎', 东北: '艮', 东: '震', 东南: '巽', 南: '离', 西南: '坤', 西: '兑', 西北: '乾' };
@@ -173,32 +180,36 @@
       return m[houseGua];
     })() : 1;
 
-    // 宅卦未变且盘已渲染：只更新指针/坐山文字（盘面固定）
-    if (!force && _bzGuaNum === guaNum && document.getElementById('bz-grid')) {
+    // 朝向宫位未变且盘已渲染：只更新指针/坐山文字
+    if (!force && _bzFi === fi && document.getElementById('bz-grid')) {
       updateBazhaiText(h);
       return;
     }
-    _bzGuaNum = guaNum;
+    _bzFi = fi;
     var sectors = FS.bazhaiSectors(guaNum);
     var map = {};
     sectors.forEach(function (s) { map[s.direction] = s; });
 
     var h2 = '<div class="bz-pan-title">' + houseGua + '宅（大游年·伏位在坐山）</div>';
     h2 += '<div class="bz-wrap">';
-    // 顶部固定指针（尖朝外/朝上），指示当前朝向
+    // 顶部固定指针（尖朝外/朝上），指向当前朝向
     h2 += '<div class="bz-pointer"><span class="bz-tri">▲</span><span class="bz-ptr-txt" id="bz-ptr-txt">向：' + facing + '</span></div>';
     h2 += '<div class="bz-grid" id="bz-grid">';
     for (var r = 0; r < 3; r++) {
       for (var c = 0; c < 3; c++) {
-        var d = BZ_GRID[r][c];
-        if (d === '中') {
+        var base = BZ_BASE[r][c];
+        if (base === -1) { // 中宫
           h2 += '<div class="bz-cell bz-center"><div class="bz-star">' + houseGua + '</div><div class="bz-name">宅卦</div></div>';
           continue;
         }
+        // 方位随朝向轮转：朝向永远在顶部中间
+        var d = DIR8_ORDER[(base + fi - 4 + 8) % 8];
         var s = map[d];
         if (!s) { h2 += '<div class="bz-cell"></div>'; continue; }
-        var cls = d === seat ? ' bz-seat' : (d === facing ? ' bz-facing' : '');
-        var mark = d === facing ? '·向' : (d === seat ? '·坐' : '');
+        var isFacing = (r === 0 && c === 1); // 顶部中间 = 朝向
+        var isSeat = (r === 2 && c === 1);   // 底部中间 = 坐山
+        var cls = isSeat ? ' bz-seat' : (isFacing ? ' bz-facing' : '');
+        var mark = isFacing ? '·向' : (isSeat ? '·坐' : '');
         h2 += '<div class="bz-cell' + cls + '">';
         h2 += '<div class="bz-dir">' + d + mark + '</div>';
         h2 += '<div class="bz-star ' + QUALITY_CLS[s.quality] + '">' + s.star + '</div>';
