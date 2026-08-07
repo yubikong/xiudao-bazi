@@ -241,6 +241,31 @@
     var huaType = document.getElementById('zw-huatype') ? document.getElementById('zw-huatype').value : 'year';
     var school = document.getElementById('zw-school') ? document.getElementById('zw-school').value : 'sanhe';
     var ln = calcLiuNian(pan, liuYear);
+    var mingIdx = ZHI.indexOf(info.mingGong);
+    // 当前大限索引（默认=虚岁所在大限）
+    var daxianIdx = parseInt(document.getElementById('zw-daxian') ? document.getElementById('zw-daxian').value : '-1', 10);
+    if (isNaN(daxianIdx) || daxianIdx < 0) {
+      daxianIdx = 0;
+      for (var dxi = 0; dxi < 12; dxi++) {
+        var f0 = info.ju + dxi * 10, t0 = f0 + 9;
+        if (ln.age >= f0 && ln.age <= t0) { daxianIdx = dxi; break; }
+      }
+      if (document.getElementById('zw-daxian')) document.getElementById('zw-daxian').value = daxianIdx;
+    }
+    var dxZhiIdx = info.shun ? (mingIdx + daxianIdx) % 12 : (mingIdx - daxianIdx + 12) % 12;
+    // 四化来源
+    var huaSrc = null, huaLabel = '';
+    if (huaType === 'year') { huaSrc = pan.hua; huaLabel = info.yearGan + '生年'; }
+    else if (huaType === 'liunian') { huaSrc = ln.hua; huaLabel = ln.gan + '流年'; }
+    else if (huaType === 'daxian') {
+      var dxPalace = null;
+      for (var dpp = 0; dpp < pan.palaces.length; dpp++) { if (pan.palaces[dpp].zhiIdx === dxZhiIdx) { dxPalace = pan.palaces[dpp]; break; } }
+      var dxGan = dxPalace ? dxPalace.gongGan : info.yearGan;
+      var dh = HUA[dxGan] || [];
+      huaSrc = {};
+      for (var dhk = 0; dhk < dh.length; dhk++) huaSrc[dh[dhk][1]] = { star: dh[dhk][0], idx: info.stars[dh[dhk][0]] };
+      huaLabel = dxGan + '大限（' + (dxPalace ? dxPalace.name + '宫' : '') + '）';
+    }
 
     h += '<div class="info-box" id="birth-info">';
     h += '<p><strong>公历</strong> ' + info.solar.getYear() + '-' + U.pad(info.solar.getMonth()) + '-' + U.pad(info.solar.getDay()) + ' ' + U.pad(info.solar.getHour()) + ':' + U.pad(info.solar.getMinute()) + '　<strong>农历</strong> ' + info.lunar.getYearInChinese() + '年' + info.lunar.getMonthInChinese() + '月' + info.lunar.getDayInChinese() + '日 ' + info.hourZhi + '时</p>';
@@ -262,7 +287,24 @@
       for (var c = 1; c <= 4; c++) {
         var cellZhi = null;
         for (var z in POS) { if (POS[z][0] === r && POS[z][1] === c) { cellZhi = z; break; } }
-        if (!cellZhi) { h += '<div class="zw-cell empty"></div>'; continue; }
+        if (!cellZhi) {
+          // 中间 2x2 区域：竖排八字 + 命宫/局数
+          if (r === 2 && c === 2) {
+            h += '<div class="zw-center-cell">';
+            h += '<div class="zw-center-bazi">';
+            h += '<span>' + U.wuXingColor(info.bazi.getYear()) + '</span>';
+            h += '<span>' + U.wuXingColor(info.bazi.getMonth()) + '</span>';
+            h += '<span>' + U.wuXingColor(info.bazi.getDay()) + '</span>';
+            h += '<span>' + U.wuXingColor(info.bazi.getTime()) + '</span>';
+            h += '</div>';
+            h += '<div class="zw-center-info">' + info.mingGongGZ + ' · ' + info.juName + '</div>';
+            h += '<div class="zw-center-info2">身宫' + info.shenGong + '　紫微' + info.ziwei + '</div>';
+            h += '</div>';
+          } else {
+            h += '<div class="zw-cell empty"></div>';
+          }
+          continue;
+        }
         var pl = byPos[cellZhi];
         var isLnGong = (pl.zhiIdx === ln.gongIdx);
         var isXiaoXian = (pl.zhiIdx === ln.xiaoXianIdx);
@@ -274,13 +316,6 @@
         for (var s = 0; s < pl.stars.length; s++) {
           var nm = pl.stars[s];
           var huaMark = '';
-          // 四化标记按选择来源
-          var huaSrc = huaType === 'year' ? pan.hua : (huaType === 'liunian' ? ln.hua : null);
-          if (huaType === 'daxian') {
-            // 大限四化：当前大限宫干
-            var dxPalace = null;
-            for (var dp = 0; dp < pan.palaces.length; dp++) { if (pan.palaces[dp].zhiIdx === (info.mingGongZhi ? ZHI.indexOf(info.mingGong) : 0)) {} }
-          }
           if (huaSrc) { for (var hk in huaSrc) { if (huaSrc[hk].star === nm) { huaMark = '<span class="hua-mark ' + hk + '">' + hk + '</span>'; break; } } }
           var br = BRIGHT[nm] ? BRIGHT[nm][pl.zhiIdx] : '';
           var brHtml = br ? '<span class="zw-bright" style="color:' + (BRIGHT_CLR[br] || '#888') + '">' + br + '</span>' : '';
@@ -304,9 +339,30 @@
     }
     h += '</div>';
 
+    // 大限条（点击切换大限四化）
+    h += '<div class="info-box"><div class="zw-bar-title">大限（' + (info.shun ? '顺行' : '逆行') + '）</div><div class="zw-bar">';
+    for (var dxi2 = 0; dxi2 < 12; dxi2++) {
+      var dz2 = info.shun ? (mingIdx + dxi2) % 12 : (mingIdx - dxi2 + 12) % 12;
+      var dp2 = null;
+      for (var dq = 0; dq < pan.palaces.length; dq++) { if (pan.palaces[dq].zhiIdx === dz2) { dp2 = pan.palaces[dq]; break; } }
+      var f2 = info.ju + dxi2 * 10;
+      var cur2 = dxi2 === daxianIdx;
+      h += '<div class="zw-bar-item' + (cur2 ? ' cur' : '') + '" data-dx="' + dxi2 + '">' + (dp2 ? U.wuXingColor(dp2.gongGan + ZHI[dz2]) : '') + '<span>' + f2 + '岁起</span></div>';
+    }
+    h += '</div></div>';
+
+    // 流年条（点击切换流年）
+    h += '<div class="info-box"><div class="zw-bar-title">流年（点击切换）</div><div class="zw-bar">';
+    for (var ly2 = liuYear - 5; ly2 <= liuYear + 5; ly2++) {
+      var lso = Solar.fromYmdHms(ly2, 6, 1, 12, 0, 0);
+      var lz = lso.getLunar().getYearInGanZhiExact();
+      var cur3 = ly2 === liuYear;
+      h += '<div class="zw-bar-item' + (cur3 ? ' cur' : '') + '" data-ln="' + ly2 + '">' + U.wuXingColor(lz) + '<span>' + ly2 + '</span></div>';
+    }
+    h += '</div></div>';
+
     // 四化说明
-    var huaShow = huaType === 'year' ? pan.hua : (huaType === 'liunian' ? ln.hua : pan.hua);
-    var huaLabel = huaType === 'year' ? info.yearGan + '生年' : (huaType === 'liunian' ? ln.gan + '流年' : '大限');
+    var huaShow = huaSrc || pan.hua;
     h += '<div class="info-box">';
     h += '<p><strong>四化（' + huaLabel + '）：</strong>';
     var huaDesc = [];
