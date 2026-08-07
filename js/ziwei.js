@@ -232,6 +232,56 @@
     return out;
   }
 
+  // 常见格局检测（本命盘）
+  function detectGeJu(pan) {
+    var info = pan.info;
+    var stars = info.stars || {};       // 星名 → 宫索引
+    var mingIdx = ZHI.indexOf(info.mingGong);
+    var sanFang = {};                    // 命宫三方四正宫集
+    [mingIdx, (mingIdx + 4) % 12, (mingIdx + 6) % 12, (mingIdx + 8) % 12].forEach(function (i) { sanFang[i] = true; });
+    var inSanFang = function (star) { var i = stars[star]; return i !== undefined && sanFang[i]; };
+    var jia = function (star) { var i = stars[star]; return (i !== undefined && (i === (mingIdx + 11) % 12 || i === (mingIdx + 1) % 12)); };
+    var out = [];
+    var has = function (n) { return out.some(function (o) { return o.name === n; }); };
+    // 紫微坐命
+    if (stars['紫微'] === mingIdx) out.push({ name: '紫微坐命', desc: '紫微坐命，帝王之命，有领导才能与权威，宜从政、管理。' });
+    // 紫府同宫
+    if (stars['紫微'] !== undefined && stars['紫微'] === stars['天府']) out.push({ name: '紫府同宫', desc: '紫府同宫，财官双美，一生安稳富足，天府守财，主大器。' });
+    // 杀破狼
+    var sbp = ['七杀', '破军', '贪狼'].filter(function (s) { return inSanFang(s); });
+    if (sbp.length >= 2) out.push({ name: '杀破狼', desc: '杀破狼格局，动荡开创之命，人生多变动，宜军警、开拓性行业，先苦后成。' });
+    // 机月同梁
+    var jy = ['天机', '太阴', '天同', '天梁'].filter(function (s) { return inSanFang(s); });
+    if (jy.length >= 3) out.push({ name: '机月同梁', desc: '机月同梁，智慧安稳，宜公职、文职、策划，一生平稳少波折。' });
+    // 日月同宫
+    if (stars['太阳'] !== undefined && stars['太阳'] === stars['太阴']) out.push({ name: '日月同宫', desc: '日月同宫，阴阳调和，为人圆融，但日月相会一生多有起伏。' });
+    // 日丽中天
+    if (stars['太阳'] === 6) out.push({ name: '日丽中天', desc: '太阳居午，日丽中天，光明磊落，主贵，利公职与名望。' });
+    // 月朗天门
+    if (stars['太阴'] === 11) out.push({ name: '月朗天门', desc: '太阴居亥，月朗天门，清贵之命，才华内敛，女命尤佳。' });
+    // 三奇嘉会
+    var sanQi = [];
+    ['禄', '权', '科'].forEach(function (hk) { var h = pan.hua[hk]; if (h && h.idx !== undefined && sanFang[h.idx] && !sanQi.some(function (x) { return x === h.idx; })) sanQi.push(h.idx); });
+    if (sanQi.length >= 3) out.push({ name: '三奇嘉会', desc: '三奇嘉会，化禄化权化科会照命宫三方，才华与机遇兼备，大贵之格。' });
+    // 火贪格
+    if (stars['火星'] !== undefined && stars['火星'] === stars['贪狼']) out.push({ name: '火贪格', desc: '火贪格，暴发之象，财运横来横去，宜军警武职，把握时机可成大业。' });
+    // 铃贪格
+    if (stars['铃星'] !== undefined && stars['铃星'] === stars['贪狼']) out.push({ name: '铃贪格', desc: '铃贪格，偏财暴发，一生多意外之财，亦多波折，中年后发达。' });
+    // 羊陀夹命
+    if (jia('擎羊') && jia('陀罗')) out.push({ name: '羊陀夹命', desc: '羊陀夹命，劳碌受制，行事多阻碍，宜忍耐守成，不宜冒进。' });
+    // 火铃夹命
+    if (jia('火星') && jia('铃星')) out.push({ name: '火铃夹命', desc: '火铃夹命，性格急躁，是非较多，需修心养性，晚运可佳。' });
+    // 府相朝垣
+    if (jia('天府') && jia('天相')) out.push({ name: '府相朝垣', desc: '府相朝垣，稳重得贵，一生有贵人扶持，事业有成。' });
+    // 天乙拱命（昌曲夹命）
+    if (jia('文昌') && jia('文曲')) out.push({ name: '文星拱命', desc: '文昌文曲夹命，聪明多才，利考试文书，才华出众。' });
+    // 巨机同临
+    if (stars['巨门'] !== undefined && stars['天机'] !== undefined && (stars['巨门'] === stars['天机'] || (inSanFang('巨门') && inSanFang('天机')))) out.push({ name: '巨机同临', desc: '巨机同临，口才与智慧并用，思维敏捷，宜学术、外交、咨询。' });
+    // 天马禄存（禄马交驰）
+    if (stars['禄存'] !== undefined && stars['天马'] !== undefined && stars['禄存'] === stars['天马']) out.push({ name: '禄马交驰', desc: '禄存天马同宫，财源流动，宜外出发展、贸易运输，动中得财。' });
+    return out;
+  }
+
   // ============ 渲染 ============
   function render(pan) {
     var info = pan.info;
@@ -253,6 +303,18 @@
       if (document.getElementById('zw-daxian')) document.getElementById('zw-daxian').value = daxianIdx;
     }
     var dxZhiIdx = info.shun ? (mingIdx + daxianIdx) % 12 : (mingIdx - daxianIdx + 12) % 12;
+    // 当前大限对应的公历年份范围（虚岁 → 公历年 = 出生年 + 虚岁 - 1）
+    var dxYear0 = info.solar.getYear() + (info.ju + daxianIdx * 10) - 1;
+    var dxYear1 = dxYear0 + 9;
+    // 流年条范围 = 当前大限 10 年（点击流年只移动高亮、范围不变）
+    var liuYearStart = dxYear0, liuYearEnd = dxYear1;
+    // liunian 不在当前大限范围内时收敛到大限首年（并同步回输入框）
+    if (liuYear < liuYearStart || liuYear > liuYearEnd) {
+      liuYear = liuYearStart;
+      var lnInput = document.getElementById('zw-liunian');
+      if (lnInput) lnInput.value = liuYear;
+      ln = calcLiuNian(pan, liuYear);
+    }
     // 四化来源
     var huaSrc = null, huaLabel = '';
     if (huaType === 'year') { huaSrc = pan.hua; huaLabel = info.yearGan + '生年'; }
@@ -307,8 +369,9 @@
         var pl = byPos[cellZhi];
         var isLnGong = (pl.zhiIdx === ln.gongIdx);
         var isXiaoXian = (pl.zhiIdx === ln.xiaoXianIdx);
-        h += '<div class="zw-cell' + (pl.isMing ? ' ming' : '') + (pl.isShen ? ' shen' : '') + (isLnGong ? ' lngong' : '') + '">';
-        h += '<div class="zw-cell-head">' + pl.zhi + ' ' + pl.name + (pl.isMing ? '【命】' : '') + (pl.isShen ? '【身】' : '') + (isLnGong ? '【流】' : '') + (isXiaoXian ? '【限】' : '') + '</div>';
+        var isDxGong = (pl.zhiIdx === dxZhiIdx);
+        h += '<div class="zw-cell' + (pl.isMing ? ' ming' : '') + (pl.isShen ? ' shen' : '') + (isLnGong ? ' lngong' : '') + (isDxGong ? ' dxgong' : '') + '">';
+        h += '<div class="zw-cell-head">' + pl.zhi + ' ' + pl.name + (pl.isMing ? '【命】' : '') + (pl.isShen ? '【身】' : '') + (isLnGong ? '【流】' : '') + (isXiaoXian ? '【限】' : '') + (isDxGong ? '<span class="zw-dxmark">【大限】</span>' : '') + '</div>';
         h += '<div class="zw-daxian">' + pl.daXian + ' · 宫干' + pl.gongGan + '</div>';
         // 本命星 + 亮度
         var starHtml = '';
@@ -320,8 +383,8 @@
           var brHtml = br ? '<span class="zw-bright" style="color:' + (BRIGHT_CLR[br] || '#888') + '">' + br + '</span>' : '';
           starHtml += '<div class="zw-star zw-star-click" data-star="' + nm + '">' + starColor(nm) + huaMark + brHtml + '</div>';
         }
-        // 流年星（叠盘）
-        if (mode === 'die' && lnPalaceStars[pl.zhiIdx]) {
+        // 流年星（流年/叠盘模式显示）
+        if ((mode === 'liunian' || mode === 'die') && lnPalaceStars[pl.zhiIdx]) {
           var lns = lnPalaceStars[pl.zhiIdx];
           for (var li2 = 0; li2 < lns.length; li2++) starHtml += '<div class="zw-star zw-lnstar zw-star-click" data-star="' + lns[li2] + '">' + lns[li2] + '</div>';
         }
@@ -350,13 +413,25 @@
     }
     h += '</div></div>';
 
-    // 流年条（点击切换流年）
-    h += '<div class="info-box"><div class="zw-bar-title">流年（点击切换）</div><div class="zw-bar">';
-    for (var ly2 = liuYear - 5; ly2 <= liuYear + 5; ly2++) {
+    // 流年条（范围=当前大限 10 年，点击只移动高亮、范围不变）
+    h += '<div class="info-box"><div class="zw-bar-title">流年（' + liuYearStart + '~' + liuYearEnd + '，点击切换）</div><div class="zw-bar">';
+    for (var ly2 = liuYearStart; ly2 <= liuYearEnd; ly2++) {
       var lso = Solar.fromYmdHms(ly2, 6, 1, 12, 0, 0);
       var lz = lso.getLunar().getYearInGanZhiExact();
       var cur3 = ly2 === liuYear;
       h += '<div class="zw-bar-item' + (cur3 ? ' cur' : '') + '" data-ln="' + ly2 + '">' + U.wuXingColor(lz) + '<span>' + ly2 + '</span></div>';
+    }
+    h += '</div></div>';
+
+    // 常见格局
+    var geju = detectGeJu(pan);
+    h += '<div class="info-box"><div class="zw-bar-title">常见格局</div><div class="zw-geju">';
+    if (geju.length === 0) {
+      h += '<span class="zw-geju-none">未构成常见格局</span>';
+    } else {
+      for (var gj = 0; gj < geju.length; gj++) {
+        h += '<span class="zw-geju-item zw-geju-click" data-geju="' + geju[gj].name + '" data-desc="' + geju[gj].desc + '">' + geju[gj].name + '</span>';
+      }
     }
     h += '</div></div>';
 
