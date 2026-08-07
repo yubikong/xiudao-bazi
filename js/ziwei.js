@@ -288,14 +288,14 @@
         var cellZhi = null;
         for (var z in POS) { if (POS[z][0] === r && POS[z][1] === c) { cellZhi = z; break; } }
         if (!cellZhi) {
-          // 中间 2x2 区域：竖排八字 + 命宫/局数
+          // 中间 2x2 区域：横排四柱（年/月/日/时）+ 命宫/局数
           if (r === 2 && c === 2) {
+            const yGZ = info.bazi.getYear(), mGZ = info.bazi.getMonth(), dGZ = info.bazi.getDay(), tGZ = info.bazi.getTime();
             h += '<div class="zw-center-cell">';
             h += '<div class="zw-center-bazi">';
-            h += '<span>' + U.wuXingColor(info.bazi.getYear()) + '</span>';
-            h += '<span>' + U.wuXingColor(info.bazi.getMonth()) + '</span>';
-            h += '<span>' + U.wuXingColor(info.bazi.getDay()) + '</span>';
-            h += '<span>' + U.wuXingColor(info.bazi.getTime()) + '</span>';
+            h += '<div class="zw-cb-row zw-cb-head"><span>年</span><span>月</span><span>日</span><span>时</span></div>';
+            h += '<div class="zw-cb-row">' + U.wuXingColor(yGZ.substr(0, 1)) + U.wuXingColor(mGZ.substr(0, 1)) + U.wuXingColor(dGZ.substr(0, 1)) + U.wuXingColor(tGZ.substr(0, 1)) + '</div>';
+            h += '<div class="zw-cb-row">' + U.wuXingColor(yGZ.substr(1, 1)) + U.wuXingColor(mGZ.substr(1, 1)) + U.wuXingColor(dGZ.substr(1, 1)) + U.wuXingColor(tGZ.substr(1, 1)) + '</div>';
             h += '</div>';
             h += '<div class="zw-center-info">' + info.mingGongGZ + ' · ' + info.juName + '</div>';
             h += '<div class="zw-center-info2">身宫' + info.shenGong + '　紫微' + info.ziwei + '</div>';
