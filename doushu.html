@@ -63,10 +63,12 @@
   .zw-modal-title { font-size: 1.4rem; font-weight: bold; color: #b98c51; margin-bottom: 6px; }
   .zw-modal-desc { font-size: 1.15rem; color: #555; line-height: 1.6; }
   .zw-modal-close { position: absolute; top: 6px; right: 12px; cursor: pointer; font-size: 1.6rem; color: #999; }
-  /* 中间竖排八字 + 大运流年条 */
-  .zw-center-cell { grid-column: span 2; grid-row: span 2; border: 1px solid #888; border-radius: 2px; background: #fdf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-  .zw-center-bazi { writing-mode: vertical-rl; text-orientation: upright; font-size: 1.15em; letter-spacing: 2px; color: #5a4632; line-height: 1.4; }
-  .zw-center-bazi span { display: inline-block; margin: 0 2px; }
+  /* 中间横排四柱 + 大运流年条 */
+  .zw-center-cell { grid-column: span 2; grid-row: span 2; border: 1px solid #888; border-radius: 2px; background: #fdf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+  .zw-center-bazi { display: flex; flex-direction: column; gap: 1px; align-items: center; }
+  .zw-cb-row { display: flex; gap: 5px; font-size: 1.05em; line-height: 1.25; }
+  .zw-cb-row span { width: 1.3em; text-align: center; }
+  .zw-cb-head span { color: #b98c51; font-weight: bold; font-size: 0.8em; }
   .zw-center-info { font-size: 0.95em; color: #b98c51; font-weight: bold; }
   .zw-center-info2 { font-size: 0.8em; color: #999; }
   .zw-bar-title { font-size: 1.05rem; color: #b98c51; font-weight: bold; margin-bottom: 3px; }
@@ -137,11 +139,11 @@
     <div class="zw-modal-desc" id="zw-modal-desc"></div>
   </div></div>
 </div>
-<script src="js/lunar.js"></script>
-<script src="js/shensha_data.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/jquery.min.js"></script>
-<script src="js/ziwei.js"></script>
+<script src="js/lunar.js?v=20260808"></script>
+<script src="js/shensha_data.js?v=20260808"></script>
+<script src="js/utils.js?v=20260808"></script>
+<script src="js/jquery.min.js?v=20260808"></script>
+<script src="js/ziwei.js?v=20260808"></script>
 <script>
 $(function () {
   function getV() {
