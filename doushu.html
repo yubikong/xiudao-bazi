@@ -63,6 +63,18 @@
   .zw-modal-title { font-size: 1.4rem; font-weight: bold; color: #b98c51; margin-bottom: 6px; }
   .zw-modal-desc { font-size: 1.15rem; color: #555; line-height: 1.6; }
   .zw-modal-close { position: absolute; top: 6px; right: 12px; cursor: pointer; font-size: 1.6rem; color: #999; }
+  /* 中间竖排八字 + 大运流年条 */
+  .zw-center-cell { grid-column: span 2; grid-row: span 2; border: 1px solid #888; border-radius: 2px; background: #fdf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .zw-center-bazi { writing-mode: vertical-rl; text-orientation: upright; font-size: 1.15em; letter-spacing: 2px; color: #5a4632; line-height: 1.4; }
+  .zw-center-bazi span { display: inline-block; margin: 0 2px; }
+  .zw-center-info { font-size: 0.95em; color: #b98c51; font-weight: bold; }
+  .zw-center-info2 { font-size: 0.8em; color: #999; }
+  .zw-bar-title { font-size: 1.05rem; color: #b98c51; font-weight: bold; margin-bottom: 3px; }
+  .zw-bar { display: flex; flex-wrap: wrap; gap: 3px; }
+  .zw-bar-item { border: 1px solid #ddd; border-radius: 3px; padding: 2px 5px; font-size: 0.95em; text-align: center; cursor: pointer; line-height: 1.3; }
+  .zw-bar-item span { display: block; font-size: 0.75em; color: #999; }
+  .zw-bar-item.cur { border-color: #b98c51; background: #fdf8ef; font-weight: bold; }
+  .zw-bar-item:hover { background: #f5e9d8; }
   @media (max-width: 415px) { html { font-size: 2.5vw; } }
 </style>
 </head>
@@ -107,6 +119,7 @@
         <option value="sanhe">三合盘</option>
         <option value="feixing">飞星盘</option>
       </select></label>
+      <input type="hidden" id="zw-daxian" value="-1">
     </div>
   </div>
 
@@ -211,6 +224,17 @@ $(function () {
   });
   $('#zw-modal-close, #zw-modal').on('click', function (e) {
     if (e.target === this) $('#zw-modal').css('display', 'none');
+  });
+  // 大限条点击：切换大限四化
+  $('#zw-pan').on('click', '.zw-bar-item[data-dx]', function () {
+    $('#zw-daxian').val($(this).data('dx'));
+    $('#zw-huatype').val('daxian');
+    renderPan();
+  });
+  // 流年条点击：切换流年
+  $('#zw-pan').on('click', '.zw-bar-item[data-ln]', function () {
+    $('#zw-liunian').val($(this).data('ln'));
+    renderPan();
   });
 });
 </script>
