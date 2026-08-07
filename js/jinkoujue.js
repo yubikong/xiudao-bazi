@@ -707,14 +707,22 @@
       var bazi = lunar.getEightChar();
       bazi.setSect(1);
       var df = bazi.getTimeZhi() || '子';
-      // 罗盘联动：若从罗盘页跳转（localStorage 带 compass_difen），优先用罗盘朝向地支作为地分
+      // 罗盘联动：URL 参数 difen 优先（罗盘页跳转），其次 localStorage（备用）
+      var fromUrl = false;
       try {
-        var cd = localStorage.getItem('compass_difen');
-        if (cd && '子丑寅卯辰巳午未申酉戌亥'.indexOf(cd) >= 0) {
-          df = cd;
-          localStorage.removeItem('compass_difen'); // 用一次即清除
-        }
+        var p = new URLSearchParams(location.search);
+        var dp = p.get('difen');
+        if (dp && '子丑寅卯辰巳午未申酉戌亥'.indexOf(dp) >= 0) { df = dp; fromUrl = true; }
       } catch (e) {}
+      if (!fromUrl) {
+        try {
+          var cd = localStorage.getItem('compass_difen');
+          if (cd && '子丑寅卯辰巳午未申酉戌亥'.indexOf(cd) >= 0) {
+            df = cd;
+            localStorage.removeItem('compass_difen'); // 用一次即清除
+          }
+        } catch (e) {}
+      }
       _state = { solar: solar, difen: df };
     } else {
       _state.solar = solar;
