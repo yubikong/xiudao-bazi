@@ -122,12 +122,13 @@
     var FS = window.FengShui;
     var h = smoothHeading || 0;
     var dirIdx = Math.floor((h + 22.5) / 45) % 8;
-    var facing = DIR8[dirIdx];            // 朝向（宅向）
-    var houseGua = FS.GUA_NAMES[FS.mingGuaSectors(1).sectors[0].gua] ? (function () {
-      // 朝向 → 宅卦（八宅以朝向定宅卦，朝向的八卦）
+    var facing = DIR8[dirIdx];            // 朝向（宅向）= 指针指向
+    var seat = DIR8[(dirIdx + 4) % 8];    // 坐山 = 朝向的对面（180°）
+    var houseGua = (function () {
+      // 八宅以坐山定宅卦（坐山为宅位）
       var dirToGua = { 北: '坎', 东北: '艮', 东: '震', 东南: '巽', 南: '离', 西南: '坤', 西: '兑', 西北: '乾' };
-      return dirToGua[facing];
-    })() : '坎';
+      return dirToGua[seat];
+    })();
     var guaNum = FS.GUA_NAMES ? (function () {
       var m = { 坎: 1, 坤: 2, 震: 3, 巽: 4, 乾: 6, 兑: 7, 艮: 8, 离: 9 };
       return m[houseGua];
@@ -137,20 +138,20 @@
     var map = {};
     sectors.forEach(function (s) { map[s.direction] = s; });
 
-    var h2 = '<div class="bz-pan-title">' + facing + '向 · ' + houseGua + '宅（大游年）</div>';
+    var h2 = '<div class="bz-pan-title">' + seat + '山' + facing + '向 · ' + houseGua + '宅（大游年·伏位在坐山）</div>';
     h2 += '<div class="bz-grid">';
     for (var r = 0; r < 3; r++) {
       for (var c = 0; c < 3; c++) {
         var d = BZ_GRID[r][c];
         if (d === '中') {
-          h2 += '<div class="bz-cell bz-center"><div class="bz-star">' + houseGua + '</div><div class="bz-name">宅卦</div><div class="bz-gz">' + facing + '向</div></div>';
+          h2 += '<div class="bz-cell bz-center"><div class="bz-star">' + houseGua + '</div><div class="bz-name">宅卦·坐' + seat + '</div><div class="bz-gz">' + facing + '向</div></div>';
           continue;
         }
         var s = map[d];
         if (!s) { h2 += '<div class="bz-cell"></div>'; continue; }
-        var isFacing = d === facing;
-        h2 += '<div class="bz-cell' + (isFacing ? ' bz-facing' : '') + '">';
-        h2 += '<div class="bz-dir">' + d + '</div>';
+        var cls = d === seat ? ' bz-seat' : (d === facing ? ' bz-facing' : '');
+        h2 += '<div class="bz-cell' + cls + '">';
+        h2 += '<div class="bz-dir">' + d + (d === seat ? '·坐' : '') + '</div>';
         h2 += '<div class="bz-star ' + QUALITY_CLS[s.quality] + '">' + s.star + '</div>';
         h2 += '<div class="bz-name">' + s.xing + '·' + s.wx + '</div>';
         h2 += '<div class="bz-q ' + QUALITY_CLS[s.quality] + '">' + s.quality + '</div>';
