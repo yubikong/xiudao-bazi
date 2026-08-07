@@ -223,7 +223,7 @@
     }
     const objs = [];
     for (let dd = 0; dd < 30; dd++) {
-      const _dso = Solar.fromYmdHms(_ds0.getYear(), _ds0.getMonth(), _ds0.getDay() + dd, 12, 0, 0);
+      const _dso = _ds0.next(dd); // next() 自动跨月，避免 day 溢出
       objs.push(_dso.getLunar());
     }
     w.liuD.arr = getLiuInfoArr(bazi, 'day', objs);
@@ -934,12 +934,17 @@
     }
     const suffix = $('#gender_man').prop('checked') ? '+' : '-';
     const numericV = String(v).replace(/[^\d]/g, '');
-    if (numericV.length >= 4) {
-      $('#input').html(numericV + suffix);
-      render(numericV + suffix);
-    } else {
-      $('#input').html(v);
-      render(v);
+    // 防御：渲染异常不应阻断后续事件绑定（导航等）
+    try {
+      if (numericV.length >= 4) {
+        $('#input').html(numericV + suffix);
+        render(numericV + suffix);
+      } else {
+        $('#input').html(v);
+        render(v);
+      }
+    } catch (err) {
+      $('#pan').html('<div class="tip"><p>排盘失败：' + (err && err.message ? err.message : err) + '</p></div>');
     }
 
     // 输入框变化
