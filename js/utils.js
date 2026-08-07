@@ -14,6 +14,13 @@ window.Utils = (function () {
     var r = wuXingMap(t) || t;
     var o = wuXingColorMap[r] || "";
     if (!o && 3 === String(t).length) { o = wuXingColorMap[String(t).substr(2, 1)] || ""; }
+    // 双字干支（如"甲寅""丙辰"）：拆开分别按天干、地支五行着色
+    if (!o && 2 === String(t).length) {
+      var g0 = String(t).charAt(0), z0 = String(t).charAt(1);
+      if ('甲乙丙丁戊己庚辛壬癸'.indexOf(g0) >= 0 && '子丑寅卯辰巳午未申酉戌亥'.indexOf(z0) >= 0) {
+        return wuXingColor(g0, n, e) + wuXingColor(z0, n, e);
+      }
+    }
     if (e) { o = "c-suse"; }
     if ("" === n) { return t; }
     return '<' + n + ' class="' + o + '">' + t + '</' + n + '>';
