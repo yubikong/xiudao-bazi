@@ -981,24 +981,23 @@
       render($('#input').text());
     });
 
-    // 黄历跳转
+    // 黄历跳转（同页跳转，避免弹窗拦截）
     $('.riliAnchor').on('click', function (e) {
       e.preventDefault();
       const v2 = String($('#input').text()).replace(/[^\d]/g, '');
       if (v2.length >= 12) {
-        window.open('rili.html?v=' + v2, '_blank');
+        location.href = 'rili.html?v=' + v2;
       } else {
-        window.open('rili.html', '_blank');
+        location.href = 'rili.html';
       }
     });
 
-    // 斗数跳转（紫微）
+    // 斗数跳转（紫微，同页跳转）
     $('.doushuAnchor').on('click', function (e) {
       e.preventDefault();
       const v2 = String($('#input').text()).replace(/[^\d]/g, '');
       const gender = $('#gender_man').prop('checked') ? 1 : 0;
-      const url = 'doushu.html?v=' + v2 + '&gender=' + gender;
-      window.open(url, '_blank');
+      location.href = 'doushu.html?v=' + v2 + '&gender=' + gender;
     });
 
     // 分析面板
