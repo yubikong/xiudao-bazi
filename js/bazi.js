@@ -596,7 +596,7 @@
   function parseInput(v) {
     v = String(v || '').trim();
     // 八字反推：支持多种格式
-    // 男：甲戌 癸酉 戊午 甲寅
+    // 男：庚辰 丁亥 癸巳 甲寅
     // 女/坤造：壬寅 丁未 丙戌 丙申
     // 乾：壬寅，丁未，丙戌，丙申
     // 坤造 壬寅 丁未 丙戌 丙申
@@ -656,10 +656,10 @@
           </div>
           <div class="ft-body">
             <p class="ft-tip">输入四柱（空格或逗号分隔），可选男/女/乾/坤前缀（默认男）</p>
-            <textarea id="ft-text" placeholder="例：男：甲戌 癸酉 戊午 甲寅&#10;或：乾 壬寅 丁未 丙戌 丙申&#10;或：甲戌癸酉戊午甲寅" class="ft-textarea"></textarea>
+            <textarea id="ft-text" placeholder="例：男：庚辰 丁亥 癸巳 甲寅&#10;或：乾 壬寅 丁未 丙戌 丙申&#10;或：庚辰丁亥癸巳甲寅" class="ft-textarea"></textarea>
             <div class="ft-presets">
               <span class="ft-preset" data-v="壬寅 丁未 丙戌 丙申">试例 1</span>
-              <span class="ft-preset" data-v="甲戌 癸酉 戊午 甲寅">试例 2</span>
+              <span class="ft-preset" data-v="庚辰 丁亥 癸巳 甲寅">试例 2</span>
               <span class="ft-preset" data-v="甲子 丙寅 辛酉 癸巳">试例 3</span>
             </div>
           </div>
@@ -693,7 +693,7 @@
   function render(vStr) {
     const parsed = parseInput(vStr);
     if (!parsed) {
-      $('#pan').html('<div class="tip"><p>录入一段日期信息到框中，如199409290322+代表1994年9月29日3点22分生男。<a target="_blank" href="./baziHelp.html">使用说明</a></p></div>');
+      $('#pan').html('<div class="tip"><p>录入一段日期信息到框中，如200012010322+代表2000年12月1日3点22分生男。<a target="_blank" href="./baziHelp.html">使用说明</a></p></div>');
       return;
     }
     const sect = $('#sect').prop('checked') ? 2 : 1;
