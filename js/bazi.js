@@ -178,6 +178,9 @@
       } else if ('month' === type) {
         u.monthC = o.getMonthInChinese();
         u.ganzhi = o.getGanZhi();
+      } else if ('day' === type) {
+        u.dayC = o.getDayInChinese();
+        u.ganzhi = o.getDayInGanZhi();
       }
       u.gan = u.ganzhi.substr(0, 1);
       u.zhi = u.ganzhi.substr(1, 1);
@@ -203,12 +206,40 @@
   }
 
   // 司权
-  function getSiQuan(zhi, days) {
-    const map = RD.SI_QUAN[zhi] || [];
+  function getSiQuan(zhi, days) {    const map = RD.SI_QUAN[zhi] || [];
     for (let e of map) {
       if (days < e[0]) return e[1];
     }
     return '';
+  }
+
+  // 流日数组：流月（农历月）逐日 30 天，默认选中今日日柱
+  function genLiuDayArr(curLiuYue, bazi, w) {
+    let _ds0 = null;
+    try {
+      _ds0 = Lunar.fromYmd(curLiuYue.getYear(), curLiuYue.getMonth(), 1).getSolar();
+    } catch (e) {
+      _ds0 = w.info.solar;
+    }
+    const objs = [];
+    for (let dd = 0; dd < 30; dd++) {
+      const _dso = Solar.fromYmdHms(_ds0.getYear(), _ds0.getMonth(), _ds0.getDay() + dd, 12, 0, 0);
+      objs.push(_dso.getLunar());
+    }
+    w.liuD.arr = getLiuInfoArr(bazi, 'day', objs);
+    const _tgz = w.now.bazi.getDayGan() + w.now.bazi.getDayZhi();
+    let _di = 0;
+    for (let k = 0; k < w.liuD.arr.length; k++) {
+      if (w.liuD.arr[k].ganzhi === _tgz) { _di = k; break; }
+    }
+    w.sel.st.day = _di;
+    w.sel.def.day = _di;
+    const _cd = w.liuD.arr[_di];
+    if (_cd) {
+      w.zhu[9].gan = _cd.gan;
+      w.zhu[9].zhi = _cd.zhi;
+      w.zhu[9].ganzhi = _cd.ganzhi;
+    }
   }
 
   // ============ 排盘数据准备 ============
@@ -221,9 +252,9 @@
     const w = {
       info: { solar: solar, lunar: lunar, bazi: bazi, gender: gender },
       now: { lunar: Lunar.fromDate(new Date()) },
-      sel: { st: { yun: 1, year: 0, month: 0 }, def: null },
+      sel: { st: { yun: 1, year: 0, month: 0, day: 0 }, def: null },
       opt: { bPureBaZi: false },
-      zhu: [], spzhu: [], yun: { arr: [] }, liuY: { arr: [] }, liuM: { arr: [] }
+      zhu: [], spzhu: [], yun: { arr: [] }, liuY: { arr: [] }, liuM: { arr: [] }, liuD: { arr: [] }
     };
     w.now.solar = w.now.lunar.getSolar();
     w.now.bazi = w.now.lunar.getEightChar();
@@ -281,10 +312,9 @@
     w.sel.def.month = curMonthIdx;
     const curLiuYue = liuYueArr[curMonthIdx];
     w.zhu[8] = { type: 'liuMonth', title: '流月', gan: curLiuYue.getGanZhi().substr(0, 1), zhi: curLiuYue.getGanZhi().substr(1, 1) };
-    // 流日：今日日柱干支（区别于命局日柱，用于看当日与命局作用）
-    const _todaySolar = Solar.fromDate(new Date());
-    const _todayGZ = _todaySolar.getLunar().getDayInGanZhi();
-    w.zhu[9] = { type: 'liuDay', title: '流日', gan: _todayGZ.substr(0, 1), zhi: _todayGZ.substr(1, 1) };
+    // 流日：流月农历月逐日 30 天，默认选中今日
+    w.zhu[9] = { type: 'liuDay', title: '流日', gan: '', zhi: '' };
+    genLiuDayArr(curLiuYue, bazi, w);
 
     // 胎元命宫身宫
     w.spzhu = calcTaiYuan(bazi, lunar);
@@ -549,17 +579,21 @@
     }
     i += '</div>';
 
-    // 流日（今日日柱，与命局十神关系）
-    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日（今日）</div></div>';
+    // 流日（流月逐日，可点击切换）
+    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日（农历月）</div></div>';
     i += '<div class="dtr dayRow">';
-    const _ld = Y.zhu[9];
-    const _lc = (_ld.ganShen && _ld.ganShen[0]) ? _ld.ganShen[0].short : '';
-    const _ldd = (_ld.zhiShen && _ld.zhiShen.length > 0) ? _ld.zhiShen[0].short : '';
-    i += '<div class="yunCol small current">';
-    i += '<div class="unit">今</div>';
-    i += '<div class="unit ganzhi gantext">' + U.wuXingColor(_ld.gan) + '<span class="tiny ganshen">' + _lc + '</span></div>';
-    i += '<div class="unit ganzhi">' + U.wuXingColor(_ld.zhi) + '<span class="tiny ganshen">' + _ldd + '</span></div>';
-    i += '</div>';
+    for (let ed in Y.liuD.arr) {
+      const td = Y.liuD.arr[ed];
+      const curd = parseInt(ed) === Y.sel.st.day;
+      const ad = curd ? ' current' : '';
+      const cd = td.ganShen[0].short;
+      const dd = td.zhiShen.length > 0 ? td.zhiShen[0].short : '';
+      i += '<div class="yunCol small' + ad + '" type="day" ind="' + ed + '">';
+      i += '<div class="unit">' + (td.dayC || '') + '</div>';
+      i += '<div class="unit ganzhi gantext">' + U.wuXingColor(td.gan) + '<span class="tiny ganshen">' + cd + '</span></div>';
+      i += '<div class="unit ganzhi">' + U.wuXingColor(td.zhi) + '<span class="tiny ganshen">' + dd + '</span></div>';
+      i += '</div>';
+    }
     i += '</div>';
 
     i += '</div>'; // bazipan_down
@@ -746,6 +780,11 @@
         // 流月：取第一个流年的流月（童限或大运1 都用第一个流年）
         if (n2.length > 0) {
           _w.liuM.arr = getLiuInfoArr(bazi, 'month', n2[0].getLiuYue());
+          // 重置流日（随新流月）
+          _w.sel.st.day = 0;
+          _w.sel.def.day = 0;
+          const _fy0 = n2[0].getLiuYue();
+          if (_fy0.length > 0) genLiuDayArr(_fy0[0], bazi, _w);
         }
         // 更新大运干支
         const dYunGanZhi = t2.getGanZhi() || bazi.getMonthGan() + bazi.getMonthZhi();
@@ -783,8 +822,12 @@
         _w.zhu[7].zhi = liuNian.getGanZhi().substr(1, 1);
         _w.zhu[7].ganzhi = liuNian.getGanZhi();
         const liuYue = liuNian.getLiuYue()[0];
-        _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);
-        _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
+        _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);        _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
+        // 重置流日（随新流月）
+        _w.sel.st.day = 0;
+        _w.sel.def.day = 0;
+        const _fy1 = liuNian.getLiuYue();
+        if (_fy1.length > 0) genLiuDayArr(_fy1[0], bazi, _w);
         calcShenSha(_w);
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
@@ -802,6 +845,24 @@
         const liuYue = liuNian.getLiuYue()[ind];
         _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);
         _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
+        // 重置流日（随新流月）
+        _w.sel.st.day = 0;
+        _w.sel.def.day = 0;
+        const _fy2 = liuNian.getLiuYue();
+        if (_fy2.length > 0) genLiuDayArr(_fy2[ind], bazi, _w);
+        $('#pan').html(renderPan(_w, suse));
+        $('#analyse').html(renderAnalyse(_w));
+        bindPanClick();
+      } else if (type === 'day') {
+        _w.sel.st.day = ind;
+        _w.sel.def.day = ind;
+        const _td = _w.liuD.arr[ind];
+        if (_td) {
+          _w.zhu[9].gan = _td.gan;
+          _w.zhu[9].zhi = _td.zhi;
+          _w.zhu[9].ganzhi = _td.ganzhi;
+        }
+        const suse = $('#suse').prop('checked');
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
