@@ -37,25 +37,14 @@
     return '';
   }
 
-  // 董公是否为吉：董公择日文本按日干细分（如"惟甲寅正四废凶""余午不吉"）
-  // 规则：当天日柱被凶（bad）标记关联 → 凶；被吉（good）标记关联 → 吉；
-  //       未关联任何日干时 → 以吉标记多于凶标记为吉
+  // 董公是否为吉（严格）：董公择日文本有吉（good）标记且无任何凶（bad）标记
+  // 宁缺毋滥——若整月无大吉日为正常现象
   function isDongGongGood(solar) {
     const dg = getDongGong(solar);
     if (!dg) return false;
-    const ec = solar.getLunar().getEightChar();
-    ec.setSect(1);
-    const gz = ec.getDayGan() + ec.getDayZhi();
-    let goodCnt = 0, badCnt = 0, ganBad = false, ganGood = false;
-    const parts = dg.split(/<i class="(good|bad)">/);
-    for (let i = 1; i < parts.length; i += 2) {
-      const cls = parts[i];
-      const txt = parts[i + 1] || '';
-      if (cls === 'good') { goodCnt++; if (txt.indexOf(gz) >= 0) ganGood = true; }
-      else { badCnt++; if (txt.indexOf(gz) >= 0) ganBad = true; }
-    }
-    if (ganBad) return false;
-    return ganGood || goodCnt > badCnt;
+    const good = (dg.match(/class="good"/g) || []).length;
+    const bad = (dg.match(/class="bad"/g) || []).length;
+    return good > 0 && bad === 0;
   }
 
   // 是否为"大吉"日：董公吉 且 二十八星宿吉
@@ -295,10 +284,10 @@
         if (0 === f || 6 === f) L = true;
         if (wk) L = !wk.isWork();
         k = L ? 'holiday' : '';
-        // 大吉：董公吉 + 二十八星宿吉
+        // 大吉：董公吉 + 二十八星宿吉（仅文字标注，不加边框）
         const daJi = isDaJi(e, t);
 
-        g += '<div class="cal-item cal-day ' + S + ' ' + y + ' ' + m + ' ' + k + (daJi ? ' da-ji' : '') + '" time="' + p + '" gan="' + o.getDayGan() + '" zhi="' + o.getDayZhi() + '">';
+        g += '<div class="cal-item cal-day ' + S + ' ' + y + ' ' + m + ' ' + k + '" time="' + p + '" gan="' + o.getDayGan() + '" zhi="' + o.getDayZhi() + '">';
         g += '<div class="cal-item-day">' + h + '</div>';
         g += '<div class="cal-item-info">' + t.getDayInChinese() + '</div>';
         g += '<div class="cal-item-info">' + U.wuXingColor(o.getDayGan()) + U.wuXingColor(o.getDayZhi()) + '</div>';
