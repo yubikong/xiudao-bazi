@@ -304,6 +304,20 @@
     }
   }
 
+  // ============ 月份跳转（保持同一天，目标月无此日则取月末） ============
+  function shiftMonth(delta) {
+    const solar = parseInput($('#input').val());
+    if (!solar) return;
+    let ny = solar.getYear(), nm = solar.getMonth() + delta;
+    if (nm < 1) { nm = 12; ny--; }
+    if (nm > 12) { nm = 1; ny++; }
+    const lastDay = new Date(ny, nm, 0).getDate();
+    const nd = Math.min(solar.getDay(), lastDay);
+    const v = Solar.fromYmdHms(ny, nm, nd, solar.getHour(), solar.getMinute(), 0).toYmdHms().replace(/[- :]/gim, '').substr(0, 12);
+    $('#input').val(v);
+    render(v);
+  }
+
   // ============ 主渲染 ============
   function render(vStr) {
     const solar = parseInput(vStr);
@@ -350,6 +364,9 @@
 
     $('#calendar').html(renderCalendar(w));
     $('#info').html(renderInfo(w));
+    // 月份标签
+    const ml = document.getElementById('month-label');
+    if (ml) ml.textContent = solar.getYear() + '年' + solar.getMonth() + '月';
 
     $('.calendar').off('click').on('click', '.cal-day', function () {
       const time = $(this).attr('time');
@@ -405,6 +422,10 @@
       $('#input').val(v2);
       render(v2);
     });
+
+    // 月份跳转：左箭头=上个月，右箭头=下个月
+    $('#month-prev').on('click', function () { shiftMonth(-1); });
+    $('#month-next').on('click', function () { shiftMonth(1); });
   });
 
   window.Rili = {
