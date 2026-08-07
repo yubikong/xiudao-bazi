@@ -213,19 +213,41 @@
     return '';
   }
 
-  // 流日数组：流月（农历月）逐日 30 天，默认选中今日日柱
-  function genLiuDayArr(curLiuYue, bazi, w) {
-    let _ds0 = null;
+  // 月支 → 节（流月起算节气）
+  const ZHI_JIE = { 寅: '立春', 卯: '惊蛰', 辰: '清明', 巳: '立夏', 午: '芒种', 未: '小暑', 申: '立秋', 酉: '白露', 戌: '寒露', 亥: '立冬', 子: '大雪', 丑: '小寒' };
+
+  // 流月起始日（节）：默认取今天所在的流月（最近的节）
+  function getLiuYueStartSolar(liuYueZhi, liuNian) {
     try {
-      _ds0 = Lunar.fromYmd(curLiuYue.getYear(), curLiuYue.getMonth(), 1).getSolar();
-    } catch (e) {
-      _ds0 = w.info.solar;
+      if (liuNian) {
+        const tbl = liuNian.getLunar().getJieQiTable();
+        const jieName = ZHI_JIE[liuYueZhi];
+        if (jieName && tbl[jieName] && tbl[jieName].toYmd) {
+          const s = tbl[jieName];
+          return Solar.fromYmd(s.getYear(), s.getMonth(), s.getDay());
+        }
+      }
+    } catch (e) { /* fallthrough */ }
+    // 回退：今天流月起始
+    try {
+      return Solar.fromDate(new Date()).getLunar().getPrevJie(true).getSolar();
+    } catch (e2) {
+      return Solar.fromDate(new Date());
+    }
+  }
+
+  // 流日数组：从流月起始日（节）起 30 天，随所选流月变动；今天在序列内则高亮今天
+  function genLiuDayArr(w, startSolar) {
+    let _ds0 = startSolar || null;
+    if (!_ds0) {
+      try { _ds0 = Solar.fromDate(new Date()).getLunar().getPrevJie(true).getSolar(); }
+      catch (e) { _ds0 = Solar.fromDate(new Date()); }
     }
     const objs = [];
     for (let dd = 0; dd < 30; dd++) {
-      const _dso = _ds0.next(dd); // next() 自动跨月，避免 day 溢出
-      objs.push(_dso.getLunar());
+      objs.push(_ds0.next(dd).getLunar());
     }
+    const bazi = w.info.bazi;
     w.liuD.arr = getLiuInfoArr(bazi, 'day', objs);
     const _tgz = w.now.bazi.getDayGan() + w.now.bazi.getDayZhi();
     let _di = 0;
@@ -312,9 +334,9 @@
     w.sel.def.month = curMonthIdx;
     const curLiuYue = liuYueArr[curMonthIdx];
     w.zhu[8] = { type: 'liuMonth', title: '流月', gan: curLiuYue.getGanZhi().substr(0, 1), zhi: curLiuYue.getGanZhi().substr(1, 1) };
-    // 流日：流月农历月逐日 30 天，默认选中今日
+    // 流日：从命局流月（节）起 30 天，随流月切换变动；今天在序列内则高亮
     w.zhu[9] = { type: 'liuDay', title: '流日', gan: '', zhi: '' };
-    genLiuDayArr(curLiuYue, bazi, w);
+    genLiuDayArr(w, getLiuYueStartSolar(bazi.getMonthZhi(), curLiuNian));
 
     // 胎元命宫身宫
     w.spzhu = calcTaiYuan(bazi, lunar);
@@ -579,8 +601,8 @@
     }
     i += '</div>';
 
-    // 流日（流月逐日，可点击切换）
-    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日（农历月）</div></div>';
+    // 流日（随流月变动，可点击切换）
+    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日</div></div>';
     i += '<div class="dtr dayRow">';
     for (let ed in Y.liuD.arr) {
       const td = Y.liuD.arr[ed];
@@ -740,6 +762,18 @@
 
   // 主渲染
   let _w = null;
+  // 窄屏下把各行的当前列滚动到可视区中央
+  function scrollYunToCurrent() {
+    if (window.innerWidth > 600) return;
+    setTimeout(function () {
+      const rows = document.querySelectorAll('#pan .yunRow, #pan .yearRow, #pan .monthRow, #pan .dayRow');
+      rows.forEach(function (row) {
+        const cur = row.querySelector('.yunCol.current');
+        if (cur) row.scrollLeft = cur.offsetLeft - (row.clientWidth - cur.clientWidth) / 2;
+      });
+    }, 0);
+  }
+
   function render(vStr) {
     const parsed = parseInput(vStr);
     if (!parsed) {
@@ -753,6 +787,7 @@
     $('#pan').html(renderPan(w, suse));
     $('#analyse').html(renderAnalyse(w));
     bindPanClick();
+    scrollYunToCurrent();
   }
 
   // 绑定大运/流年/流月点击
@@ -780,11 +815,8 @@
         // 流月：取第一个流年的流月（童限或大运1 都用第一个流年）
         if (n2.length > 0) {
           _w.liuM.arr = getLiuInfoArr(bazi, 'month', n2[0].getLiuYue());
-          // 重置流日（随新流月）
-          _w.sel.st.day = 0;
-          _w.sel.def.day = 0;
-          const _fy0 = n2[0].getLiuYue();
-          if (_fy0.length > 0) genLiuDayArr(_fy0[0], bazi, _w);
+          // 重置流日（回到命局流月起始）
+          genLiuDayArr(_w, getLiuYueStartSolar(bazi.getMonthZhi(), null));
         }
         // 更新大运干支
         const dYunGanZhi = t2.getGanZhi() || bazi.getMonthGan() + bazi.getMonthZhi();
@@ -806,6 +838,7 @@
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
+        scrollYunToCurrent();
       } else if (type === 'year') {
         _w.sel.st.year = ind;
         _w.sel.def.year = ind;
@@ -823,15 +856,13 @@
         _w.zhu[7].ganzhi = liuNian.getGanZhi();
         const liuYue = liuNian.getLiuYue()[0];
         _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);        _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
-        // 重置流日（随新流月）
-        _w.sel.st.day = 0;
-        _w.sel.def.day = 0;
-        const _fy1 = liuNian.getLiuYue();
-        if (_fy1.length > 0) genLiuDayArr(_fy1[0], bazi, _w);
+        // 重置流日（回到命局流月起始）
+        genLiuDayArr(_w, getLiuYueStartSolar(bazi.getMonthZhi(), null));
         calcShenSha(_w);
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
+        scrollYunToCurrent();
       } else if (type === 'month') {
         _w.sel.st.month = ind;
         const suse = $('#suse').prop('checked');
@@ -845,14 +876,12 @@
         const liuYue = liuNian.getLiuYue()[ind];
         _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);
         _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
-        // 重置流日（随新流月）
-        _w.sel.st.day = 0;
-        _w.sel.def.day = 0;
-        const _fy2 = liuNian.getLiuYue();
-        if (_fy2.length > 0) genLiuDayArr(_fy2[ind], bazi, _w);
+        // 流日随所选流月变动（从该流月的节起始日起 30 天）
+        genLiuDayArr(_w, getLiuYueStartSolar(liuYue.getGanZhi().substr(1, 1), liuNian));
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
+        scrollYunToCurrent();
       } else if (type === 'day') {
         _w.sel.st.day = ind;
         _w.sel.def.day = ind;
@@ -866,6 +895,7 @@
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
+        scrollYunToCurrent();
       }
     });
 
