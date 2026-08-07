@@ -37,6 +37,32 @@
     return '';
   }
 
+  // 董公是否为吉：董公择日文本按日干细分（如"惟甲寅正四废凶""余午不吉"）
+  // 规则：当天日柱被凶（bad）标记关联 → 凶；被吉（good）标记关联 → 吉；
+  //       未关联任何日干时 → 以吉标记多于凶标记为吉
+  function isDongGongGood(solar) {
+    const dg = getDongGong(solar);
+    if (!dg) return false;
+    const ec = solar.getLunar().getEightChar();
+    ec.setSect(1);
+    const gz = ec.getDayGan() + ec.getDayZhi();
+    let goodCnt = 0, badCnt = 0, ganBad = false, ganGood = false;
+    const parts = dg.split(/<i class="(good|bad)">/);
+    for (let i = 1; i < parts.length; i += 2) {
+      const cls = parts[i];
+      const txt = parts[i + 1] || '';
+      if (cls === 'good') { goodCnt++; if (txt.indexOf(gz) >= 0) ganGood = true; }
+      else { badCnt++; if (txt.indexOf(gz) >= 0) ganBad = true; }
+    }
+    if (ganBad) return false;
+    return ganGood || goodCnt > badCnt;
+  }
+
+  // 是否为"大吉"日：董公吉 且 二十八星宿吉
+  function isDaJi(solar, lunar) {
+    return isDongGongGood(solar) && lunar.getXiuLuck() === '吉';
+  }
+
   function getZhiXingHtml(lunar) {
     const h = lunar.getZhiXing();
     let u = '';
@@ -269,8 +295,10 @@
         if (0 === f || 6 === f) L = true;
         if (wk) L = !wk.isWork();
         k = L ? 'holiday' : '';
+        // 大吉：董公吉 + 二十八星宿吉
+        const daJi = isDaJi(e, t);
 
-        g += '<div class="cal-item cal-day ' + S + ' ' + y + ' ' + m + ' ' + k + '" time="' + p + '" gan="' + o.getDayGan() + '" zhi="' + o.getDayZhi() + '">';
+        g += '<div class="cal-item cal-day ' + S + ' ' + y + ' ' + m + ' ' + k + (daJi ? ' da-ji' : '') + '" time="' + p + '" gan="' + o.getDayGan() + '" zhi="' + o.getDayZhi() + '">';
         g += '<div class="cal-item-day">' + h + '</div>';
         g += '<div class="cal-item-info">' + t.getDayInChinese() + '</div>';
         g += '<div class="cal-item-info">' + U.wuXingColor(o.getDayGan()) + U.wuXingColor(o.getDayZhi()) + '</div>';
@@ -278,6 +306,7 @@
         if (_) g += '<div class="cal-item-left-bottom">' + t.getMonthInChinese() + '月</div>';
         if (x) g += '<div class="cal-item-right-top">' + x + '</div>';
         if ('01' === h) g += '<div class="cal-item-top">' + e.getMonth() + '月</div>' + '<div class="cal-item-bottom">' + e.getYear() + '</div>';
+        if (daJi) g += '<div class="cal-item-daji">大吉</div>';
         g += '</div>';
       }
       g += '</div>';
@@ -432,6 +461,8 @@
     render: render,
     getXingXiu: getXingXiu,
     getXingXiuShortSong: getXingXiuShortSong,
-    getXingXiuLongSong: getXingXiuLongSong
+    getXingXiuLongSong: getXingXiuLongSong,
+    isDongGongGood: isDongGongGood,
+    isDaJi: isDaJi
   };
 })();
