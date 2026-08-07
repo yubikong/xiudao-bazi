@@ -17,8 +17,35 @@
   var simMode = false;
   var simTimer = null;
   var curType = 'circular'; // circular | bazhai | xuankong
+  var locked = false;         // 锁定罗盘：冻结指针朝向
+  var lockedHeading = null;
 
   function norm360(d) { d = d % 360; if (d < 0) d += 360; return d; }
+
+  // 当前生效朝向（锁定优先）
+  function currentHeading() {
+    if (locked && lockedHeading !== null) return lockedHeading;
+    return smoothHeading !== null ? smoothHeading : 0;
+  }
+
+  function toggleLock() {
+    if (!locked) {
+      locked = true;
+      lockedHeading = smoothHeading !== null ? smoothHeading : heading;
+      if (lockedHeading === null) lockedHeading = 0;
+    } else {
+      locked = false;
+      lockedHeading = null;
+    }
+    var btn = document.getElementById('lock-btn');
+    if (btn) btn.textContent = locked ? '解锁' : '锁定';
+    var st = document.getElementById('status');
+    if (st) {
+      st.textContent = locked ? '已锁定朝向：' + Math.round(lockedHeading) + '°（点击「解锁」恢复跟随）' : '罗盘已解锁，继续跟随指南针';
+      st.className = locked ? 'warn' : '';
+    }
+    updateUI();
+  }
 
   function getHeadingFromEvent(e) {
     if (e.webkitCompassHeading !== undefined) return norm360(e.webkitCompassHeading);
@@ -36,7 +63,7 @@
 
   // ============ 信息卡更新（共用） ============
   function updateInfo() {
-    var h = smoothHeading || 0;
+    var h = currentHeading();
     var deg = Math.round(h) % 360;
     var shanIdx = Math.floor((h + 7.5) / 15) % 24;
     var zhiIdx = Math.floor((h + 15) / 30) % 12;
@@ -109,19 +136,32 @@
   }
 
   function updateCircular() {
-    var h = smoothHeading || 0;
+    var h = currentHeading();
     var dial = document.getElementById('dial');
     if (dial) dial.setAttribute('transform', 'rotate(' + (-h - 180) + ' 200 200)');
   }
 
   // ============ 八宅方形罗盘 ============
   // 3x3 布局（上南下北、左东右西，传统持盘方向）：[东南 南 西南 / 东 中 西 / 东北 北 西北]
+  // 罗盘式：盘面随指南针旋转，顶部指针（小三角）固定指向当前朝向，坐山写在盘面底部矩形
   var BZ_GRID = [['东南', '南', '西南'], ['东', '中', '西'], ['东北', '北', '西北']];
   var QUALITY_CLS = { 吉: 'q-good', 凶: 'q-bad', 大吉: 'q-best', 大凶: 'q-worst', 中: 'q-mid' };
+  var _bzGuaNum = null; // 宅卦缓存（避免朝向微动时频繁重绘网格）
 
-  function renderBazhai() {
+  // 动态更新：旋转盘面 + 指针文字 + 坐山矩形
+  function updateBazhaiRotate(h) {
+    var rot = document.getElementById('bz-rotate');
+    if (rot) rot.style.transform = 'rotate(' + (-h - 180) + 'deg)';
+    var dirIdx = Math.floor((h + 22.5) / 45) % 8;
+    var ptr = document.getElementById('bz-ptr-txt');
+    if (ptr) ptr.textContent = '向：' + DIR8[dirIdx];
+    var seatBox = document.getElementById('bz-seat-box');
+    if (seatBox) seatBox.textContent = '坐山 · ' + DIR8[(dirIdx + 4) % 8];
+  }
+
+  function renderBazhai(force) {
     var FS = window.FengShui;
-    var h = smoothHeading || 0;
+    var h = currentHeading();
     var dirIdx = Math.floor((h + 22.5) / 45) % 8;
     var facing = DIR8[dirIdx];            // 朝向（宅向）= 指针指向
     var seat = DIR8[(dirIdx + 4) % 8];    // 坐山 = 朝向的对面（180°）
@@ -135,32 +175,45 @@
       return m[houseGua];
     })() : 1;
 
-    var sectors = FS.bazhaiSectors(guaNum);
-    var map = {};
-    sectors.forEach(function (s) { map[s.direction] = s; });
+    // 宅卦未变且盘已渲染：只更新旋转与文字
+    if (!force && _bzGuaNum === guaNum && document.getElementById('bz-rotate')) {
+      updateBazhaiRotate(h);
+    } else {
+      _bzGuaNum = guaNum;
+      var sectors = FS.bazhaiSectors(guaNum);
+      var map = {};
+      sectors.forEach(function (s) { map[s.direction] = s; });
 
-    var h2 = '<div class="bz-pan-title">' + seat + '山' + facing + '向 · ' + houseGua + '宅（大游年·伏位在坐山）</div>';
-    h2 += '<div class="bz-grid">';
-    for (var r = 0; r < 3; r++) {
-      for (var c = 0; c < 3; c++) {
-        var d = BZ_GRID[r][c];
-        if (d === '中') {
-          h2 += '<div class="bz-cell bz-center"><div class="bz-star">' + houseGua + '</div><div class="bz-name">宅卦·坐' + seat + '</div><div class="bz-gz">' + facing + '向</div></div>';
-          continue;
+      var h2 = '<div class="bz-pan-title">' + houseGua + '宅（大游年·伏位在坐山）</div>';
+      h2 += '<div class="bz-wrap">';
+      h2 += '<div class="bz-pointer"><span class="bz-tri">▼</span><span class="bz-ptr-txt" id="bz-ptr-txt">向：' + facing + '</span></div>';
+      h2 += '<div class="bz-rotate" id="bz-rotate">';
+      h2 += '<div class="bz-grid">';
+      for (var r = 0; r < 3; r++) {
+        for (var c = 0; c < 3; c++) {
+          var d = BZ_GRID[r][c];
+          if (d === '中') {
+            h2 += '<div class="bz-cell bz-center"><div class="bz-star">' + houseGua + '</div><div class="bz-name">宅卦</div></div>';
+            continue;
+          }
+          var s = map[d];
+          if (!s) { h2 += '<div class="bz-cell"></div>'; continue; }
+          var cls = d === seat ? ' bz-seat' : (d === facing ? ' bz-facing' : '');
+          h2 += '<div class="bz-cell' + cls + '">';
+          h2 += '<div class="bz-dir">' + d + '</div>';
+          h2 += '<div class="bz-star ' + QUALITY_CLS[s.quality] + '">' + s.star + '</div>';
+          h2 += '<div class="bz-name">' + s.xing + '·' + s.wx + '</div>';
+          h2 += '<div class="bz-q ' + QUALITY_CLS[s.quality] + '">' + s.quality + '</div>';
+          h2 += '</div>';
         }
-        var s = map[d];
-        if (!s) { h2 += '<div class="bz-cell"></div>'; continue; }
-        var cls = d === seat ? ' bz-seat' : (d === facing ? ' bz-facing' : '');
-        h2 += '<div class="bz-cell' + cls + '">';
-        h2 += '<div class="bz-dir">' + d + (d === seat ? '·坐' : '') + '</div>';
-        h2 += '<div class="bz-star ' + QUALITY_CLS[s.quality] + '">' + s.star + '</div>';
-        h2 += '<div class="bz-name">' + s.xing + '·' + s.wx + '</div>';
-        h2 += '<div class="bz-q ' + QUALITY_CLS[s.quality] + '">' + s.quality + '</div>';
-        h2 += '</div>';
       }
+      h2 += '</div>';
+      h2 += '<div class="bz-seat-box" id="bz-seat-box">坐山 · ' + seat + '</div>';
+      h2 += '</div>'; // bz-rotate
+      h2 += '</div>'; // bz-wrap
+      document.getElementById('bazhai-pan').innerHTML = h2;
+      updateBazhaiRotate(h);
     }
-    h2 += '</div>';
-    document.getElementById('bazhai-pan').innerHTML = h2;
 
     // 命卦
     var by = parseInt(document.getElementById('birth-year').value, 10);
@@ -205,7 +258,7 @@
     var year = parseInt(document.getElementById('xk-year').value, 10) || new Date().getFullYear();
     // 坐山：下拉选择优先，否则跟随当前朝向
     var sel = document.getElementById('xk-shan');
-    var shanIdx = sel && sel.value !== '' ? parseInt(sel.value, 10) : FS.shanIndexFromDegree(smoothHeading || 0);
+    var shanIdx = sel && sel.value !== '' ? parseInt(sel.value, 10) : FS.shanIndexFromDegree(currentHeading());
     if (sel) sel.value = shanIdx;
     var pan = FS.xuankongPan(year, shanIdx);
     var cellMap = {};
@@ -244,7 +297,10 @@
     for (var k in bodies) {
       document.getElementById(bodies[k]).className = (k === type ? '' : 'hidden');
     }
-    if (type === 'bazhai') renderBazhai();
+    // 锁定按钮：圆形/八宅显示，玄空隐藏
+    var lockBtn = document.getElementById('lock-btn');
+    if (lockBtn) lockBtn.style.display = (type === 'circular' || type === 'bazhai') ? '' : 'none';
+    if (type === 'bazhai') renderBazhai(true);
     if (type === 'xuankong') renderXuankong();
   }
 
@@ -252,7 +308,7 @@
   function updateUI() {
     var info = updateInfo();
     if (curType === 'circular') updateCircular();
-    else if (curType === 'bazhai') renderBazhai();
+    else if (curType === 'bazhai') renderBazhai(false);
     else if (curType === 'xuankong') renderXuankong();
   }
 
@@ -337,6 +393,8 @@
     document.getElementById('start-btn').addEventListener('click', requestPermissionAndStart);
     document.getElementById('sim-btn').addEventListener('click', toggleSim);
     document.getElementById('set-difen-btn').addEventListener('click', setDifen);
+    var lockBtn = document.getElementById('lock-btn');
+    if (lockBtn) lockBtn.addEventListener('click', toggleLock);
 
     // 类型切换
     var tabs = document.querySelectorAll('.type-tabs .tab');
