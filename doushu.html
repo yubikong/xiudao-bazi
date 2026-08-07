@@ -23,6 +23,21 @@
   .ctrl-btn:hover { background: #f5e9d8; }
   .ctrl-btn.primary:hover { background: #a07b46; }
   .ctrl-tip { font-size: 1.0rem; color: #999; padding: 2px 0 0; }
+  /* 时辰增减 */
+  .hour-btn { flex: 0 0 auto; font-weight: bold; }
+  /* 十二宫固定高度：切换流年/大限时内容增减不跳动（约7行） */
+  .zw-cell { min-height: 108px; display: flex; flex-direction: column; }
+  .zw-stars { flex: 1 1 auto; }
+  /* 常见格局 */
+  .zw-geju { display: flex; flex-wrap: wrap; gap: 4px; }
+  .zw-geju-item { border: 1px solid #c9b089; background: #fdf8ef; color: #7a5c2e; border-radius: 10px; padding: 1px 9px; font-size: 1.0rem; cursor: pointer; }
+  .zw-geju-item:hover { background: #f5e9d8; }
+  .zw-geju-none { color: #999; font-size: 1.05rem; }
+  /* 全站统一切换导航：6 格等宽、字号一致、不左右变动 */
+  .page-nav { display: flex; gap: 3px; padding: 8px 8px 2px; }
+  .page-nav a { flex: 1 1 0; min-width: 0; text-align: center; padding: 7px 2px; font-size: 1.15rem; color: #7a5c2e; text-decoration: none; background: #faf6ee; border: 1px solid #e0d4bc; border-radius: 6px; white-space: nowrap; }
+  .page-nav a.active { background: #b98c51; color: #fff; font-weight: bold; border-color: #b98c51; }
+  @media (max-width: 415px) { .page-nav a { font-size: 1.02rem; } }
   /* 信息块 */
   .info-box { background: #fbfbfb; border: 1px solid #e1e1e1; border-radius: 4px; padding: 6px 8px; margin: 5px 0; font-size: 1.25rem; }
   .info-box p { padding: 2px 0; line-height: 1.5; }
@@ -34,16 +49,16 @@
   .c-fire { color: #d41313; }
   .c-earth { color: #a17323; }
   /* 紫微盘面 */
-  .zw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 8px 0; }
-  .zw-cell { border: 1px solid #888; border-radius: 2px; padding: 3px; background: #fff; }
+  .zw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 6px 0; }
+  .zw-cell { border: 1px solid #888; border-radius: 2px; padding: 2px; background: #fff; }
   .zw-cell.empty { border-color: transparent; min-height: 0; }
   .zw-cell.ming { background: #fff8e1; border-color: #b98c51; }
   .zw-cell.shen { box-shadow: inset 0 0 0 2px #f0e6d0; }
-  .zw-cell-head { font-weight: bold; color: #b98c51; text-align: center; padding: 1px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
-  .zw-daxian { text-align: center; font-size: 0.75em; color: #999; padding: 1px 0; }
-  .zw-stars { padding: 2px 0; }
-  .zw-star { display: flex; justify-content: center; align-items: center; padding: 0; font-size: 0.9em; line-height: 1.35em; }
-  .hua-mark { font-size: 0.7em; margin-left: 2px; font-weight: bold; }
+  .zw-cell-head { font-weight: bold; color: #b98c51; text-align: center; padding: 0; border-bottom: 1px solid #eee; font-size: 0.72em; line-height: 1.35; }
+  .zw-daxian { text-align: center; font-size: 0.6em; color: #999; padding: 0; line-height: 1.3; }
+  .zw-stars { padding: 1px 0; }
+  .zw-star { display: flex; justify-content: center; align-items: center; padding: 0; font-size: 0.7em; line-height: 1.25em; }
+  .hua-mark { font-size: 0.6em; margin-left: 1px; font-weight: bold; }
   .hua-mark.禄 { color: #228b22; }
   .hua-mark.权 { color: #b98c51; }
   .hua-mark.科 { color: #007bff; }
@@ -51,11 +66,13 @@
   .btn-group { display: flex; gap: 8px; margin: 10px 0; }
   .btn { padding: 6px 14px; background: #b98c51; color: #fff; border: 0; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 1.3rem; }
   .btn:hover { background: #a07b46; }
-  /* 紫微增强：星曜亮度/流年星/宫干四化/流年命宫/释义弹窗 */
-  .zw-bright { font-size: 0.65em; margin-left: 2px; font-weight: bold; }
-  .zw-lnstar { color: #6b98c0; font-size: 0.8em !important; }
-  .zw-gonghua { font-size: 0.7em; color: #888; text-align: center; padding: 1px 0; line-height: 1.3; }
+  /* 紫微增强：星曜亮度/流年星/宫干四化/流年命宫/大限命宫/释义弹窗 */
+  .zw-bright { font-size: 0.55em; margin-left: 1px; font-weight: bold; }
+  .zw-lnstar { color: #6b98c0; font-size: 0.66em !important; }
+  .zw-gonghua { font-size: 0.58em; color: #888; text-align: center; padding: 0; line-height: 1.2; }
   .zw-cell.lngong { box-shadow: inset 0 0 0 2px #6b98c0; }
+  .zw-cell.dxgong { box-shadow: inset 0 0 0 2px #b98c51; }
+  .zw-dxmark { color: #b98c51; font-weight: bold; }
   .zw-star-click { cursor: pointer; }
   .zw-star-click:hover { background: #f5e9d8; border-radius: 2px; }
   .zw-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.4); z-index: 1000; display: none; }
@@ -96,7 +113,9 @@
   <div class="ctrl-bar">
     <div class="ctrl-row">
       <label>时间：</label>
+      <button class="ctrl-btn hour-btn" id="zw-hour-prev" title="前一时辰（-2小时）">◀时</button>
       <input id="zw-input" type="text" placeholder="200012010322" maxlength="14">
+      <button class="ctrl-btn hour-btn" id="zw-hour-next" title="后一时辰（+2小时）">时▶</button>
     </div>
     <div class="ctrl-row">
       <label><input type="radio" name="zw-gender" id="zw-man" value="1" checked> 男</label>
@@ -128,10 +147,14 @@
   <div id="zw-pan">
     <div class="info-box" id="birth-info"><p>正在排盘...</p></div>
   </div>
-  <div class="btn-group">
-    <a href="index.html" class="btn">八字排盘</a>
-    <a href="rili.html" class="btn">黄历</a>
-  </div>
+  <nav class="page-nav">
+    <a href="index.html">八字排盘</a>
+    <a href="jinkoujue.html">金口诀</a>
+    <a href="rili.html">黄历</a>
+    <a href="doushu.html" class="active">紫微</a>
+    <a href="compass.html">罗盘</a>
+    <a href="baziHelp.html">使用说明</a>
+  </nav>
   <!-- 星曜释义弹窗 -->
   <div class="zw-modal" id="zw-modal"><div class="zw-modal-box">
     <span class="zw-modal-close" id="zw-modal-close">×</span>
@@ -139,11 +162,11 @@
     <div class="zw-modal-desc" id="zw-modal-desc"></div>
   </div></div>
 </div>
-<script src="js/lunar.js?v=20260808b"></script>
-<script src="js/shensha_data.js?v=20260808b"></script>
-<script src="js/utils.js?v=20260808b"></script>
-<script src="js/jquery.min.js?v=20260808b"></script>
-<script src="js/ziwei.js?v=20260808b"></script>
+<script src="js/lunar.js?v=20260808c"></script>
+<script src="js/shensha_data.js?v=20260808c"></script>
+<script src="js/utils.js?v=20260808c"></script>
+<script src="js/jquery.min.js?v=20260808c"></script>
+<script src="js/ziwei.js?v=20260808c"></script>
 <script>
 $(function () {
   function getV() {
@@ -196,6 +219,8 @@ $(function () {
   // 初始化
   $('#zw-input').val(getV());
   if (getGender() === 0) $('#zw-woman').prop('checked', true);
+  // 流年默认值（必须在首次 renderPan 之前设置，否则流年条会以出生年为中心）
+  if (!$('#zw-liunian').val()) $('#zw-liunian').val(new Date().getFullYear());
   renderPan();
 
   // 排盘按钮
@@ -212,8 +237,6 @@ $(function () {
   });
   // 性别切换
   $('input[name=zw-gender]').on('change', renderPan);
-  // 流年默认值
-  if (!$('#zw-liunian').val()) $('#zw-liunian').val(new Date().getFullYear());
   // 流年/模式/四化/流派联动
   $('#zw-liunian,#zw-mode,#zw-huatype,#zw-school').on('input change', renderPan);
   // 星曜释义弹窗（事件委托，盘面重绘后仍生效）
@@ -227,16 +250,43 @@ $(function () {
   $('#zw-modal-close, #zw-modal').on('click', function (e) {
     if (e.target === this) $('#zw-modal').css('display', 'none');
   });
-  // 大限条点击：切换大限四化
+  // 大限条点击：切换大限四化 + 盘面大限标记 + 下方流年条更新为该大限10年
   $('#zw-pan').on('click', '.zw-bar-item[data-dx]', function () {
     $('#zw-daxian').val($(this).data('dx'));
     $('#zw-huatype').val('daxian');
+    $('#zw-mode').val('ben'); // 回到本命盘，显示大限命宫标记与四化
     renderPan();
   });
-  // 流年条点击：切换流年
+  // 流年条点击：切换流年（范围不变），盘面显示流年星与流年四化
   $('#zw-pan').on('click', '.zw-bar-item[data-ln]', function () {
     $('#zw-liunian').val($(this).data('ln'));
+    $('#zw-mode').val('liunian'); // 盘面叠加流年星
+    $('#zw-huatype').val('liunian'); // 四化切到流年
     renderPan();
+  });
+  // 时辰增减（±2小时，跨日自动进位）
+  function shiftHour(delta) {
+    const raw = $('#zw-input').val().trim();
+    const v = raw.replace(/[^\d]/g, '');
+    if (v.length < 8) return;
+    const y = parseInt(v.substr(0, 4), 10);
+    const m = parseInt(v.substr(4, 2), 10);
+    const d = parseInt(v.substr(6, 2), 10);
+    const h = v.length >= 10 ? parseInt(v.substr(8, 2), 10) : 12;
+    const mi = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
+    const dt = new Date(y, m - 1, d, h, mi);
+    dt.setHours(dt.getHours() + delta * 2);
+    const pad = function (n) { return String(n).padStart(2, '0'); };
+    $('#zw-input').val('' + dt.getFullYear() + pad(dt.getMonth() + 1) + pad(dt.getDate()) + pad(dt.getHours()) + pad(dt.getMinutes()));
+    renderPan();
+  }
+  $('#zw-hour-prev').on('click', function () { shiftHour(-1); });
+  $('#zw-hour-next').on('click', function () { shiftHour(1); });
+  // 格局点击：弹窗解说（复用星曜释义弹窗）
+  $('#zw-pan').on('click', '.zw-geju-click', function () {
+    $('#zw-modal-title').text($(this).data('geju'));
+    $('#zw-modal-desc').text($(this).data('desc'));
+    $('#zw-modal').css('display', 'block');
   });
 });
 </script>
