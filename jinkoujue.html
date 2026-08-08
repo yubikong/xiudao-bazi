@@ -114,6 +114,36 @@
   .ss-row .desc .c-fire { color: #d41313; }
   .ss-row .desc .c-earth { color: #a17323; }
 
+  /* ===== 神煞按四位分布 ===== */
+  .wei-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 6px; }
+  .wei-row .name { color: #b98c51; font-weight: 700; margin-right: 2px; }
+  .wei-item { font-size: 1.15rem; padding: 0 6px; border-radius: 9px; cursor: pointer; border: 1px solid #ddd; }
+  .wei-item.wei-ji { color: #1d6b1d; background: #f0f8f0; border-color: #9fd0a0; }
+  .wei-item.wei-xiong { color: #a05a5a; background: #fdf3f3; border-color: #d4a0a0; }
+  .wei-item.wei-za { color: #7a5c2e; background: #faf6ee; border-color: #d8c9a8; }
+  .wei-item:hover { filter: brightness(.96); }
+  .wei-expand { cursor: pointer; color: #b98c51; font-weight: bold; padding: 0 3px; font-size: 1.2rem; }
+
+  /* ===== 课体速断 / 格局区 ===== */
+  .rs-section { background: #fff; padding: 5px 10px; border-bottom: 1px solid #eee; }
+  .geju-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: 3px 0; }
+  .geju-item { display: inline-block; font-size: 1.15rem; padding: 2px 8px; border-radius: 12px; cursor: pointer; border: 1px solid #c9b089; background: #fdf8ef; color: #7a5c2e; }
+  .geju-item.geju-ji { border-color: #66bb6a; background: #f0f8f0; color: #1d6b1d; }
+  .geju-item.geju-xiong { border-color: #d4a0a0; background: #fdf3f3; color: #a05a5a; }
+  .geju-item.geju-za { border-color: #c9b089; background: #faf6ee; color: #7a5c2e; }
+  .geju-item:hover { filter: brightness(.96); }
+  .jkj-shen .gn { cursor: pointer; text-decoration: underline dotted #6b98c0; }
+
+  /* ===== 释义弹窗 ===== */
+  .jkl-modal { position: fixed; inset: 0; z-index: 9999; }
+  .jkl-modal-mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+  .jkl-modal-box { position: relative; width: 86%; max-width: 380px; margin: 22vh auto 0; background: #fff; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.28); overflow: hidden; }
+  .jkl-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 11px 16px; background: #b98c51; color: #fff; }
+  .jkl-modal-title { font-size: 1.5rem; font-weight: 700; }
+  .jkl-modal-close { cursor: pointer; font-size: 2.2rem; line-height: 1; padding: 0 4px; }
+  .jkl-modal-close:hover { color: #ffeb3b; }
+  .jkl-modal-body { padding: 14px 16px; font-size: 1.3rem; line-height: 1.75; color: #333; max-height: 55vh; overflow-y: auto; }
+
   /* ===== 三动五动区 ===== */
   .sd-section { background: #fff; padding: 6px 10px; border-bottom: 1px solid #eee; }
   .sd-row { padding: 3px 0; font-size: 1.25rem; line-height: 1.5em; }

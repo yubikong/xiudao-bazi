@@ -12,6 +12,96 @@
   // 贵神地支特殊顺序（贵人腾蛇朱雀六合勾陈青龙天空白虎太常玄武太阴天后）
   var GUI_DIZHI = '丑巳午卯辰寅戌申未子酉亥'.split('');
   var GUI_SHEN = ['贵人', '腾蛇', '朱雀', '六合', '勾陈', '青龙', '天空', '白虎', '太常', '玄武', '太阴', '天后'];
+  // 神将释义（《金口诀入门与进阶》第六章第5节）
+  var GUI_DESC = {
+    贵人: '官贵之神，遇之易有当官的插手或本身为官。受克主诅咒仇害；受生有官贵之喜；囚主牢狱。',
+    腾蛇: '惊异、惊怪、虚惊。不受克为文章喜美、公信、财帛酒食；受克主不正经女人、虚惊、病患、怀疑。',
+    朱雀: '文字印信、口舌。不受克为文书、印信、权力、公侯；凶为口舌、惊恐、官司、虚诈、血光。',
+    六合: '婚姻、交易、合作。不受克为婚姻、交易、求财、喜美庆会；受克为官司、损财、过失、交易不明。',
+    勾陈: '勾连、斗争。不受克为官职（尤其武官）、有权；凶为官司争竞、勾连、走失。',
+    青龙: '官贵、财喜。不受克为财喜、官职、文书、婚姻之喜；受克为穷苦、破财、官职有损。',
+    天空: '虚假、走失、斗讼。不受克为僧人、考试吉利、权力之象；受克为虚假不实。',
+    白虎: '伤亡、斗争。不受克为生意、武官、道路奔跑；受克为战争、凶丧。',
+    太常: '酒食、婚姻、宴会。不受克为女人、酒食、婚姻、财物；受克为毒药、呕吐。',
+    玄武: '欺骗、盗窃。不受克（旺）为聪明、见贵人得财；受克为偷盗、欺骗、死丧、破财。',
+    太阴: '阴私。不受克为金银、钱物、阴私喜美荫佑；凶为奸淫、逃亡、迟滞、失财。',
+    天后: '赏赐、冤枉、阴私喜美、良家。不受克为赏赐、征召、婚姻；受克为暗昧不明、奸淫。'
+  };
+  var JIANG_DESC = {
+    登明: '征召、生气、婚姻', 河魁: '斗讼、骸骨、争竞', 从魁: '隐私、女人',
+    传送: '奔跑、驿马', 小吉: '酒食、女人', 胜光: '信息、惊恐、财物',
+    太乙: '惊怪、多言、是非、生气、招外婿', 天罡: '斗讼、战斗', 太冲: '财物、伤人、贼',
+    功曹: '官事、手续、文章', 大吉: '诅咒', 神后: '妄想、奸淫、失望、贼'
+  };
+  // 神煞释义（《金口诀入门与进阶》第六章"神煞解释"）
+  var SHEN_DESC = {
+    天德: '课中见天德，主有贵人相助，在哪个位置表示哪类人帮你。',
+    月德: '课中见月德，主有贵人相助，能解百祸。',
+    天德合: '与天德相合之地支，能解百祸，但力量没天德大。',
+    月德合: '与月德相合之地支，能解百祸，但力量没月德大。',
+    天赦: '卦中见天赦，家中必有人常行善事或敬神佛；遇司法机关捉拿时最喜此神；测天气为晴天；测人运气表示做错事易被原谅。',
+    三奇: '主奇遇、奇巧、贵人帮忙之事。甲戊庚与佛道司法领导有关、天时好；乙丙丁最管用、明显有人帮忙；壬癸辛为私下之义气人帮忙。',
+    六丁六甲: '人元见甲为喜事、求职文书俱吉；人元见丁主惊吓、忧愁、惊恐不安。',
+    驿马: '主快，见驿马为快；为官见之升迁。',
+    天马: '比驿马更快更远；马星逢合则止；逢马星宜物流类职业。',
+    劫煞: '主灾，速度极快；逢劫临什么表示什么灾；测病或生孩子临劫需手术。',
+    灾煞: '主灾，与劫煞类似；疾病、六畜相关。',
+    天罗: '非官灾即病灾；测事主不通之象。',
+    地网: '非官灾即病灾；测事主不通之象。',
+    关隔锁: '阻碍不通、关节不通、信息不灵；酉寅关、卯辰戌隔、卯申锁。',
+    旬空: '吉凶不成、空想；近病逢空则愈，久病逢空则死。',
+    四绝: '凶神、断绝；占病必死、占婚离异。',
+    月破: '占忧逢月破反而为好事（否定之否定）；非占忧之事临月破为梦碎、有阻挡。',
+    太岁: '吉凶参半；占官为好，常人反有官司牵连。',
+    天盗: '自己不偷人也要被人偷；天盗见卯再有贼动百分百被偷；逢合则不为灾。',
+    地煞: '一般为不顺利，有解则开始不顺利后来解决。',
+    五鬼: '一般有神鬼作怪；也为穷神，遇五鬼常爱挥霍。',
+    生气: '主新开拓、有前途；用旺临生气为事业新起。',
+    死气: '主乐极生悲、走下坡路；用死临死气彻底没戏。',
+    天喜: '主喜庆之事；占老年人病不好为喜丧。',
+    天医: '主大医院、国家正规医院；用爻临天医病易愈。',
+    地医: '指地方小医院或民营医院。',
+    禄倒: '主丢官罢职、名誉损失；测病易死亡；测考试白考。',
+    马倒: '主不顺。',
+    禄神: '主有工资、吃国家工资钱，不一定是正式公务员。',
+    丧门: '测工作表示要辞职或换部门；与死亡信息有关。',
+    吊客: '占事表示此事落实不下来、吊着。',
+    丧车: '指灵车，丧车克人元必死；有吉神救可九死一生。',
+    四墓: '占病与此病跟风水有关、要改风水；占运气表示压抑。',
+    三丘: '占病与此病跟风水有关、要改风水；占运气表示压抑如墓压顶。',
+    病符: '必有疾病缠身，但不一定是大病；占事情表示旧事干扰。',
+    桃花: '也为赌神、穷神；占事难成易败露、节外生枝；子午卯酉为桃花。',
+    灭门: '占事表示没门、没有门路；最忌占婚姻与怀孕，遇之必流产离婚；也主口舌是非。',
+    截命灾煞: '遇之见仇人、生产不顺、病危险。',
+    日德: '日德入课解凶。',
+    日禄: '禄神，主有俸禄。',
+    解神: '解神与天解同入课，占病解除厄难。',
+    天诏: '与天医同，主遇良医、恩诏之事，现指上级调令。',
+    日鬼: '克日干之同性地支，凶神，主官非。',
+    支鬼: '克日支之同性地支，凶神，主官非。',
+    墓神: '用神入墓主暗昧、不通、不自由之命。',
+    小耗: '主破耗，钱花了没起作用。',
+    哭神: '主哭丧之事，如见水尤为凶。',
+    天狱: '为国家监狱，如坐监狱；见勾陈与朱雀相配易被拘留。',
+    往亡: '主行人有灾。',
+    天鬼: '容易此事被鬼干扰，一般为冤死鬼或短命鬼。',
+    天盘: '申临辰戌为天盘，入课主难以解脱。',
+    地结: '申临巳亥为地结，入课主难以解脱。',
+    飞魂: '主做恶梦、神魂不定。',
+    丧魄: '主占病，凶。',
+    游都: '游鲁入课均凶，尤其占出外，可能犯劫路之人或盗贼。',
+    鲁都: '游都对冲，游鲁入课均凶，占出外恐有盗贼。',
+    月厌: '最忌占病（连绵不绝）；平时占为唉声叹气；灾煞与月厌同现则灾难躲。',
+    天目: '主占疾病和家宅，可能有神鬼作祟。',
+    隔角: '主别扭；占夫妻关系主双方性格不同造成矛盾。',
+    亡神: '亡神月厌加临，灾祸不好躲。',
+    大祸: '与灭门相反，主祸事。',
+    披头星: '主丧亡六亲。',
+    红鸾: '婚姻之喜神。',
+    官符: '占病符；占人有官职且容易是清官。',
+    天解: '与解神同入课，占病解除厄难。',
+    金神煞: '主破碎或白衣；占病与白虎相见大凶。'
+  };
   // 地支方位
   var DIRECTION = { 子: '北', 丑: '东北', 寅: '东北', 卯: '东', 辰: '东南', 巳: '东南', 午: '南', 未: '西南', 申: '西南', 酉: '西', 戌: '西北', 亥: '西北' };
   // 五行相生（SHENG[a]=b 表示 a 生 b）与相克（KE[a]=b 表示 a 克 b）
@@ -29,7 +119,82 @@
   var HE_GAN = { 甲: '己', 乙: '庚', 丙: '辛', 丁: '壬', 戊: '癸', 己: '甲', 庚: '乙', 辛: '丙', 壬: '丁', 癸: '戊' };
   var LIU_PO = { 子: '酉', 丑: '辰', 寅: '亥', 卯: '午', 辰: '丑', 巳: '申', 午: '卯', 未: '戌', 申: '巳', 酉: '子', 戌: '未', 亥: '寅' };
 
-  var COMMON_SHEN = ['天乙贵人', '驿马', '天德贵人', '月德贵人', '空亡（日柱）', '空亡（年柱）', '六破', '禄神', '桃花', '华盖', '将星', '劫煞', '灾煞', '亡神', '阳刃', '红鸾', '天喜', '天医', '魁罡', '金舆', '文昌'];
+  // 常用神煞（按《金口诀入门与进阶》第六章主表划分）
+  var COMMON_SHEN = ['天德', '月德', '天德合', '月德合', '天赦', '驿马', '天马', '劫煞', '六丁六甲', '天罗', '地网', '关隔锁', '旬空', '四绝', '月破', '太岁', '天盗', '地煞', '五鬼', '生气', '死气', '天喜', '天医', '地医', '禄倒', '马倒', '丧门', '吊客', '丧车', '四墓', '三丘', '病符', '灾煞', '桃花', '灭门', '截命灾煞', '三奇'];
+
+  // ============ 书版神煞数据表（《金口诀入门与进阶》） ============
+  // 天德（月→见字，可为干或支）
+  var TD_BY_MONTH = { 1: '丁', 2: '申', 3: '壬', 4: '辛', 5: '亥', 6: '甲', 7: '癸', 8: '寅', 9: '丙', 10: '乙', 11: '巳', 12: '庚' };
+  // 月德（月支三合→干）
+  var YD_BY_SANHE = { 寅: '丙', 午: '丙', 戌: '丙', 亥: '甲', 卯: '甲', 未: '甲', 申: '壬', 子: '壬', 辰: '壬', 巳: '庚', 酉: '庚', 丑: '庚' };
+  var GAN_HE = { 甲: '己', 乙: '庚', 丙: '辛', 丁: '壬', 戊: '癸', 己: '甲', 庚: '乙', 辛: '丙', 壬: '丁', 癸: '戊' };
+  var ZHI_HE = { 子: '丑', 丑: '子', 寅: '亥', 卯: '戌', 辰: '酉', 巳: '申', 午: '未', 未: '午', 申: '巳', 酉: '辰', 戌: '卯', 亥: '寅' };
+  // 天赦（季→干支）
+  var TIAN_SHE = { 寅: '戊寅', 卯: '戊寅', 辰: '戊寅', 巳: '甲午', 午: '甲午', 未: '甲午', 申: '戊申', 酉: '戊申', 戌: '戊申', 亥: '甲子', 子: '甲子', 丑: '甲子' };
+  // 天马（月→支）
+  var TIAN_MA = { 1: '午', 7: '午', 2: '申', 8: '申', 3: '戌', 9: '戌', 4: '子', 10: '子', 5: '寅', 11: '寅', 6: '辰', 12: '辰' };
+  // 地煞（三合→支）
+  var DI_SHA = { 寅: '辰', 午: '辰', 戌: '辰', 申: '戌', 子: '戌', 辰: '戌', 巳: '未', 酉: '未', 丑: '未', 亥: '丑', 卯: '丑', 未: '丑' };
+  // 五鬼（日干→支）
+  var WU_GUI = { 甲: ['巳', '午'], 己: ['巳', '午'], 乙: ['寅', '卯'], 庚: ['寅', '卯'], 丙: ['子', '丑'], 辛: ['子', '丑'], 丁: ['戌', '亥'], 壬: ['戌', '亥'], 戊: ['申', '酉'], 癸: ['申', '酉'] };
+  // 生气（月支→支，对冲为死气）
+  var SHENG_QI = { 寅: '子', 卯: '丑', 辰: '寅', 巳: '卯', 午: '辰', 未: '巳', 申: '午', 酉: '未', 戌: '申', 亥: '酉', 子: '戌', 丑: '亥' };
+  // 天喜/天医（月支→支，对冲为地医；正月戌顺行）
+  var TIAN_XI_YY = { 寅: '戌', 卯: '亥', 辰: '子', 巳: '丑', 午: '寅', 未: '卯', 申: '辰', 酉: '巳', 戌: '午', 亥: '未', 子: '申', 丑: '酉' };
+  // 禄倒（年干→支）
+  var LU_DAO = { 甲: '卯', 乙: '辰', 丙: '午', 丁: '未', 戊: '午', 己: '未', 庚: '酉', 辛: '戌', 壬: '子', 癸: '丑' };
+  // 马倒（年支三合→支）
+  var MA_DAO = { 寅: '酉', 午: '酉', 戌: '酉', 申: '卯', 子: '卯', 辰: '卯', 亥: '午', 卯: '午', 未: '午', 巳: '子', 酉: '子', 丑: '子' };
+  // 丧车（季→支）
+  var SANG_CHE = { 寅: '酉', 卯: '酉', 辰: '酉', 巳: '子', 午: '子', 未: '子', 申: '卯', 酉: '卯', 戌: '卯', 亥: '午', 子: '午', 丑: '午' };
+  // 三丘四墓（月支→墓，对冲为丘）
+  var SI_MU = { 寅: '未', 卯: '未', 辰: '未', 巳: '戌', 午: '戌', 未: '戌', 申: '丑', 酉: '丑', 戌: '丑', 亥: '辰', 子: '辰', 丑: '辰' };
+  // 灭门（月支→支）：阳月逆3，阴月顺3
+  var MIE_MEN = { 子: '酉', 寅: '亥', 辰: '丑', 午: '卯', 申: '巳', 戌: '未', 丑: '辰', 卯: '午', 巳: '申', 未: '戌', 酉: '子', 亥: '寅' };
+  // 截命灾煞（日干→支）
+  var JIE_MING = { 甲: ['申', '酉'], 己: ['申', '酉'], 乙: ['午', '未'], 庚: ['午', '未'], 丙: ['辰', '巳'], 辛: ['辰', '巳'], 丁: ['寅', '卯'], 壬: ['寅', '卯'], 戊: ['子', '丑'], 癸: ['子', '丑'] };
+  // 日德（日干→支）
+  var RI_DE = { 甲: '寅', 己: '寅', 乙: '申', 庚: '申', 丙: '巳', 辛: '巳', 戊: '巳', 癸: '巳', 丁: '亥', 壬: '亥' };
+  // 日禄（日干→支）
+  var RI_LU = { 甲: '寅', 乙: '卯', 丙: '巳', 戊: '巳', 丁: '午', 己: '午', 庚: '申', 辛: '酉', 壬: '亥', 癸: '子' };
+  // 解神（月→支）
+  var JIE_SHEN = { 1: '申', 2: '申', 3: '戌', 4: '戌', 5: '子', 6: '子', 7: '寅', 8: '寅', 9: '辰', 10: '辰', 11: '午', 12: '午' };
+  // 墓神（三合→墓）
+  var MU_SHEN = { 寅: '戌', 午: '戌', 戌: '戌', 亥: '未', 卯: '未', 未: '未', 申: '辰', 子: '辰', 辰: '辰', 巳: '丑', 酉: '丑', 丑: '丑' };
+  // 小耗（寅月从未顺行）
+  var XIAO_HAO = { 寅: '未', 卯: '申', 辰: '酉', 巳: '戌', 午: '亥', 未: '子', 申: '丑', 酉: '寅', 戌: '卯', 亥: '辰', 子: '巳', 丑: '午' };
+  // 哭神（季→支）
+  var KU_SHEN = { 寅: '未', 卯: '未', 辰: '未', 巳: '戌', 午: '戌', 未: '戌', 申: '丑', 酉: '丑', 戌: '丑', 亥: '辰', 子: '辰', 丑: '辰' };
+  // 天狱（季→支）
+  var TIAN_YU = { 寅: '卯', 卯: '卯', 辰: '卯', 巳: '午', 午: '午', 未: '午', 申: '酉', 酉: '酉', 戌: '酉', 亥: '子', 子: '子', 丑: '子' };
+  // 往亡（月→支）
+  var WANG_WANG = { 1: '寅', 2: '巳', 3: '申', 4: '亥', 5: '卯', 6: '午', 7: '酉', 8: '子', 9: '辰', 10: '未', 11: '戌', 12: '丑' };
+  // 天鬼（月→支）
+  var TIAN_GUI = { 1: '酉', 5: '酉', 9: '酉', 2: '午', 6: '午', 10: '午', 3: '卯', 7: '卯', 11: '卯', 4: '子', 8: '子', 12: '子' };
+  // 飞魂（正月起亥顺行）
+  var FEI_HUN = { 寅: '亥', 卯: '子', 辰: '丑', 巳: '寅', 午: '卯', 未: '辰', 申: '巳', 酉: '午', 戌: '未', 亥: '申', 子: '酉', 丑: '戌' };
+  // 丧魄（月→支）
+  var SANG_PO = { 1: '未', 5: '未', 9: '未', 2: '辰', 6: '辰', 10: '辰', 3: '丑', 8: '丑', 11: '丑', 4: '戌', 7: '戌', 12: '戌' };
+  // 游都（日干→支，对冲为鲁都）
+  var YOU_DU = { 甲: '丑', 己: '丑', 乙: '子', 庚: '子', 丙: '寅', 辛: '寅', 丁: '巳', 壬: '巳', 戊: '申', 癸: '申' };
+  // 月厌（正月戌逆序）
+  var YUE_YAN = { 1: '戌', 2: '酉', 3: '申', 4: '未', 5: '午', 6: '巳', 7: '辰', 8: '卯', 9: '寅', 10: '丑', 11: '子', 12: '亥' };
+  // 天目（季→支）
+  var TIAN_MU = { 寅: '辰', 卯: '辰', 辰: '辰', 巳: '未', 午: '未', 未: '未', 申: '戌', 酉: '戌', 戌: '戌', 亥: '丑', 子: '丑', 丑: '丑' };
+  // 亡神（三合→支）
+  var WANG_SHEN = { 寅: '巳', 午: '巳', 戌: '巳', 亥: '寅', 卯: '寅', 未: '寅', 申: '亥', 子: '亥', 辰: '亥', 巳: '申', 酉: '申', 丑: '申' };
+  // 大祸（与灭门相反）
+  var DA_HUO = { 子: '卯', 寅: '巳', 辰: '未', 午: '酉', 申: '亥', 戌: '丑', 丑: '戌', 卯: '子', 巳: '寅', 未: '辰', 酉: '午', 亥: '申' };
+  // 披头星（年支→支）
+  var PI_TOU = { 子: '辰', 丑: '卯', 寅: '寅', 卯: '丑', 辰: '子', 巳: '亥', 午: '戌', 未: '酉', 申: '申', 酉: '未', 戌: '午', 亥: '巳' };
+  // 天解（月支→支）
+  var TIAN_JIE = { 寅: '申', 卯: '未', 辰: '午', 巳: '巳', 午: '辰', 未: '卯', 申: '寅', 酉: '丑', 戌: '子', 亥: '亥', 子: '戌', 丑: '酉' };
+  // 金神煞（日支→支）
+  var JIN_SHEN_SHA = { 子: '巳', 午: '巳', 卯: '酉', 酉: '酉', 寅: '酉', 申: '酉', 巳: '酉', 亥: '酉', 辰: '丑', 戌: '丑', 丑: '丑', 未: '丑' };
+  // 四绝（成对）
+  var SI_JUE = [['酉', '寅'], ['卯', '申'], ['午', '亥'], ['子', '巳']];
+  // 关隔锁（破锁/毁隔/斩关 判断对）
+  var GUAN_JIAN_SUO = [['酉', '寅', '关'], ['寅', '申', '斩关'], ['卯', '辰', '隔'], ['卯', '戌', '隔'], ['辰', '寅', '毁隔'], ['戌', '寅', '毁隔'], ['卯', '申', '锁'], ['申', '午', '破锁']];
 
   var _state = null;
 
@@ -299,29 +464,33 @@
     return found;
   }
   function hitStr(found) { return found.length ? '✓' + found.join('、') : ''; }
-  function push(name, tag, val, hit) {
-    var item = { name: name, tag: tag, val: val, hit: hit || '' };
+  function push(name, tag, val, hit, hitArr) {
+    var item = { name: name, tag: tag, val: val, hit: hit || '', hitArr: hitArr || [] };
     P.push(item);
     if (isCommon(name)) P_COMMON.push(item); else P_RARE.push(item);
   }
   function pushZhi(name, tag, zhiArr, src) {
     var arr = Array.isArray(zhiArr) ? zhiArr : [zhiArr];
     var found = hitZhiArr(arr);
-    push(name, tag, arr.join('、') + '（' + src + '）', hitStr(found));
+    push(name, tag, arr.join('、') + '（' + src + '）', hitStr(found), found);
   }
   function pushGan(name, tag, ganArr, src) {
     var arr = Array.isArray(ganArr) ? ganArr : [ganArr];
     var found = hitGanArr(arr);
-    push(name, tag, arr.join('、') + '（' + src + '）', hitStr(found));
+    push(name, tag, arr.join('、') + '（' + src + '）', hitStr(found), found);
   }
   function pushRizhu(name, tag, ok, dayGZ, listStr) {
-    push(name, tag, ok ? '✓ ' + dayGZ + ' 入格' : '— ' + dayGZ + ' 不入格' + (listStr ? '（' + listStr + '）' : ''), '');
+    push(name, tag, ok ? '✓ ' + dayGZ + ' 入格' : '— ' + dayGZ + ' 不入格' + (listStr ? '（' + listStr + '）' : ''), '', []);
   }
   function yiMaZhi(map, name) {
     if (!map) return '';
     for (var k in map) if (map[k] === name) return k;
     return '';
   }
+  function keGans() { return [ke.bazi.yearGan, ke.bazi.monthGan, ke.bazi.dayGan, ke.bazi.timeGan, ke.renyuan, ke.gui.gan, ke.jiang.gan]; }
+  function keZhis() { return [ke.bazi.yearZhi, ke.bazi.monthZhi, ke.bazi.dayZhi, ke.bazi.timeZhi, ke.difen, ke.jiang.zhi]; }
+  function hitGZ(gz) { var g = gz.substr(0, 1), z = gz.substr(1, 1); return keGans().indexOf(g) >= 0 && keZhis().indexOf(z) >= 0; }
+  function pushGZ(name, tag, gz, src) { if (GAN.indexOf(gz) >= 0) pushGan(name, tag, gz, src); else pushZhi(name, tag, gz, src); }
 
   function calcShenSha() {
     resetP();
@@ -331,46 +500,95 @@
     var sanHeD = SS.sanHe[b.dayZhi];
     var yiMaY = SS.yiMa[sanHeY] || {};
     var yiMaD = SS.yiMa[sanHeD] || {};
-    var de = SS.erDe[b.monthZhi] || ['', ''];
+    var mzhi = b.monthZhi, mzNum = ZHI.indexOf(mzhi) + 1; // 月支→月数（寅=1）
+    var zArr4 = [ke.gui.zhi, ke.jiang.zhi, ke.difen];   // 课内三位地支（贵神/将神/地分）
+    var zArrAll = [b.yearZhi, b.monthZhi, b.dayZhi, b.timeZhi, ke.difen, ke.jiang.zhi];
 
-    // ---- 常用神煞 ----
-    pushZhi('天乙贵人', '吉', SS.tianYi[b.dayGan] || [], '日干' + b.dayGan);
-    pushZhi('驿马', '吉', [yiMaZhi(yiMaY, '驿马'), yiMaZhi(yiMaD, '驿马')].filter(Boolean), '年支' + b.yearZhi + '/日支' + b.dayZhi);
-    if (de[0]) pushGan('天德贵人', '吉', de[0], '月支' + b.monthZhi);
-    if (de[1]) pushGan('月德贵人', '吉', de[1], '月支' + b.monthZhi);
-    var kongWang = U.xunKong(dayGZ);
-    pushZhi('空亡（日柱）', '凶', [kongWang.substr(0, 1), kongWang.substr(1, 1)], '日柱' + dayGZ + '旬空');
-    pushZhi('空亡（年柱）', '凶', SS.jieKong[b.yearGan] || [], '年干' + b.yearGan);
-    var poZhis = [];
-    var po1 = LIU_PO[b.yearZhi], po2 = LIU_PO[b.dayZhi];
-    if (po1) poZhis.push(po1);
-    if (po2 && poZhis.indexOf(po2) < 0) poZhis.push(po2);
-    pushZhi('六破', '凶', poZhis, '年支' + b.yearZhi + '/日支' + b.dayZhi + '之破');
-    pushZhi('禄神', '吉', SS.luShen[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('桃花', '杂', SS.taoHua[sanHeY] || SS.taoHua[sanHeD] || '', '三合' + sanHeY);
-    pushZhi('华盖', '吉', [yiMaZhi(yiMaY, '华盖'), yiMaZhi(yiMaD, '华盖')].filter(Boolean), '三合' + sanHeY);
-    pushZhi('将星', '吉', [yiMaZhi(yiMaY, '将星'), yiMaZhi(yiMaD, '将星')].filter(Boolean), '三合' + sanHeY);
+    // ============ 常用神煞（《金口诀入门与进阶》主表） ============
+    // 天德（书版：月→干或支）
+    var td = TD_BY_MONTH[mzNum];
+    if (td) pushGZ('天德', '吉', td, mzhi + '月见' + td);
+    // 月德
+    var yds = YD_BY_SANHE[mzhi];
+    if (yds) pushGan('月德', '吉', yds, mzhi + '月（三合' + sanHeY + '）见' + yds);
+    // 天德合 / 月德合
+    if (td) { var tdHe = GAN.indexOf(td) >= 0 ? HE_GAN[td] : (ZHI_HE[td] || ''); if (tdHe) pushGZ('天德合', '吉', tdHe, '天德' + td + '之合'); }
+    if (yds) pushGan('月德合', '吉', HE_GAN[yds] || '', '月德' + yds + '之合');
+    // 天赦
+    var tshe = TIAN_SHE[mzhi];
+    if (tshe) push('天赦', '吉', tshe + '（' + mzhi + '月）', hitGZ(tshe) ? '✓课内见' + tshe : '');
+    // 驿马
+    pushZhi('驿马', '吉', [yiMaZhi(yiMaY, '驿马'), yiMaZhi(yiMaD, '驿马')].filter(Boolean), '年/日支');
+    // 天马
+    var tma = TIAN_MA[mzNum];
+    if (tma) pushZhi('天马', '吉', tma, mzhi + '月见' + tma);
+    // 劫煞
     pushZhi('劫煞', '凶', yiMaZhi(yiMaY, '劫煞'), '三合' + sanHeY);
+    // 六丁六甲（人元）
+    if (ke.renyuan === '甲') push('六丁六甲', '吉', '人元见甲，主喜事、求职文书俱吉', '✓人元甲');
+    if (ke.renyuan === '丁') push('六丁六甲', '凶', '人元见丁，主忧愁、惊恐不安', '✓人元丁');
+    // 天罗地网
+    var tianLuo = (b.dayZhi === '戌' || b.dayZhi === '亥' || b.yearZhi === '戌' || b.yearZhi === '亥');
+    var diWang = (b.dayZhi === '辰' || b.dayZhi === '巳' || b.yearZhi === '辰' || b.yearZhi === '巳');
+    push('天罗', tianLuo ? '凶' : '杂', tianLuo ? '✓ 日/年支见戌亥' : '—（戌亥为天罗）', tianLuo ? '✓' : '');
+    push('地网', diWang ? '凶' : '杂', diWang ? '✓ 日/年支见辰巳' : '—（辰巳为地网）', diWang ? '✓' : '');
+    // 关隔锁
+    var gls = [];
+    for (var gz2 = 0; gz2 < GUAN_JIAN_SUO.length; gz2++) {
+      var p2 = GUAN_JIAN_SUO[gz2];
+      if (zArr4.indexOf(p2[0]) >= 0 && zArr4.indexOf(p2[1]) >= 0) gls.push(p2[2]);
+    }
+    if (gls.length) push('关隔锁', '凶', '✓课内' + gls.join('、'), '✓');
+    else push('关隔锁', '杂', '酉寅关/卯辰戌隔/卯申锁（斩关·毁隔·破锁为解）', '');
+    // 旬空
+    var kongWang = U.xunKong(dayGZ);
+    pushZhi('旬空', '凶', [kongWang.substr(0, 1), kongWang.substr(1, 1)], '日柱' + dayGZ + '旬空');
+    // 四绝
+    var sjHit = [];
+    for (var sj = 0; sj < SI_JUE.length; sj++) { var p3 = SI_JUE[sj]; if (zArrAll.indexOf(p3[0]) >= 0 && zArrAll.indexOf(p3[1]) >= 0) sjHit.push(p3[0] + p3[1] + '绝'); }
+    if (sjHit.length) push('四绝', '凶', '✓课内' + sjHit.join('、'), '✓');
+    else push('四绝', '杂', '酉寅金绝/卯申木绝/午亥火绝/子巳水绝', '');
+    // 月破
+    pushZhi('月破', '凶', ZHI_HE[mzhi] || '', '月支' + mzhi + '之冲');
+    // 太岁
+    pushZhi('太岁', '杂', b.yearZhi, '年支入课');
+    // 天盗
+    var tdPos = [];
+    if (zArr4.indexOf('子') >= 0) tdPos.push('子');
+    ['卯', '酉', '亥'].forEach(function (z) { if (zArr4.indexOf(z) >= 0) tdPos.push(z); });
+    if (tdPos.length) push('天盗', '凶', '✓课内' + tdPos.join('、'), '✓');
+    else push('天盗', '杂', '课内见子水、卯酉亥为天盗', '');
+    // 地煞
+    pushZhi('地煞', '凶', DI_SHA[sanHeY] || '', '三合' + sanHeY);
+    // 五鬼
+    pushZhi('五鬼', '凶', WU_GUI[b.dayGan] || [], '日干' + b.dayGan);
+    // 生气死气
+    var sq = SHENG_QI[mzhi];
+    if (sq) { pushZhi('生气', '吉', sq, mzhi + '月生气'); pushZhi('死气', '凶', ZHI_HE[sq] || '', mzhi + '月死气'); }
+    // 天喜（书版）
+    pushZhi('天喜', '吉', TIAN_XI_YY[mzhi] || '', mzhi + '月见');
+    // 天医地医
+    var tyi = TIAN_XI_YY[mzhi];
+    if (tyi) { pushZhi('天医', '吉', tyi, mzhi + '月天医'); pushZhi('地医', '吉', ZHI_HE[tyi] || '', mzhi + '月地医'); }
+    // 禄倒马倒
+    var ldao = LU_DAO[b.yearGan]; if (ldao) pushZhi('禄倒', '凶', ldao, '年干' + b.yearGan);
+    var mdao = MA_DAO[b.yearZhi]; if (mdao) pushZhi('马倒', '凶', mdao, '年支' + b.yearZhi);
+    // 丧门吊客 / 丧车
+    pushZhi('丧门', '凶', SS.sangMen[b.yearZhi] || '', '年支' + b.yearZhi);
+    pushZhi('吊客', '凶', SS.diaoKe[b.yearZhi] || '', '年支' + b.yearZhi);
+    pushZhi('丧车', '凶', SANG_CHE[mzhi] || '', mzhi + '月');
+    // 三丘四墓
+    var sm = SI_MU[mzhi];
+    if (sm) { pushZhi('四墓', '凶', sm, mzhi + '月墓'); pushZhi('三丘', '凶', ZHI_HE[sm] || '', mzhi + '月丘'); }
+    // 病符 / 灾煞 / 桃花
+    pushZhi('病符', '凶', SS.bingFu[b.yearZhi] || '', '年支后一位');
     pushZhi('灾煞', '凶', yiMaZhi(yiMaY, '灾煞'), '三合' + sanHeY);
-    pushZhi('亡神', '凶', yiMaZhi(yiMaY, '亡神'), '三合' + sanHeY);
-    pushZhi('阳刃', '凶', SS.yangRen[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('红鸾', '吉', SS.hongLuan[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('天喜', '吉', SS.tianXi[b.monthZhi] || '', '月支' + b.monthZhi);
-    pushZhi('天医', '吉', SS.tianYiZhi[b.monthZhi] || '', '月支' + b.monthZhi);
-    pushRizhu('魁罡', '吉', SS.kuiGang.indexOf(dayGZ) >= 0, dayGZ, SS.kuiGang.join('、'));
-    pushZhi('金舆', '吉', SS.jinYu[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('文昌', '吉', [SS.wenChang[b.yearGan] || '', SS.wenChang[b.dayGan] || ''].filter(Boolean), '年干' + b.yearGan + '/日干' + b.dayGan);
-
-    // ---- 不常见神煞 ----
-    pushZhi('太极贵人', '吉', TAI_JI[b.dayGan] || [], '日干' + b.dayGan);
-    if (de[0]) pushGan('天德合', '吉', HE_GAN[de[0]], '天德' + de[0] + '之合');
-    if (de[1]) pushGan('月德合', '吉', HE_GAN[de[1]], '月德' + de[1] + '之合');
-    pushZhi('国印', '吉', GUO_YIN[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('学堂', '吉', SS.xueTang[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('词馆', '吉', CI_GUAN[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('福星贵人', '吉', FU_XING[b.dayGan] || '', '日干' + b.dayGan);
-    var tianShe = SS.tianSheRi[b.monthZhi];
-    if (tianShe) pushRizhu('天赦日', '吉', dayGZ === tianShe, dayGZ, tianShe + '为' + b.monthZhi + '月天赦');
+    pushZhi('桃花', '杂', SS.taoHua[sanHeY] || SS.taoHua[sanHeD] || '', '三合' + sanHeY);
+    // 灭门
+    pushZhi('灭门', '凶', MIE_MEN[mzhi] || '', mzhi + '月');
+    // 截命灾煞
+    pushZhi('截命灾煞', '凶', JIE_MING[b.dayGan] || [], '日干' + b.dayGan);
+    // 三奇
     var gans = [b.yearGan, b.monthGan, b.dayGan, b.timeGan];
     var shen3 = '';
     for (var i = 0; i <= 1; i++) {
@@ -378,70 +596,77 @@
       if (gans[i] + gans[i + 1] + gans[i + 2] === '乙丙丁') shen3 = '地下三奇';
       if (gans[i] + gans[i + 1] + gans[i + 2] === '壬癸辛') shen3 = '人中三奇';
     }
-    push('三奇贵人', shen3 ? '吉' : '杂', shen3 || '无（甲戊庚/乙丙丁/壬癸辛）', shen3 ? '✓四柱连见' : '');
-    var dx = DE_XIU[sanHeD] || DE_XIU[sanHeY];
-    if (dx) {
-      var deGan = gans.filter(function (g) { return dx.de.indexOf(g) >= 0; });
-      var xiuGan = gans.filter(function (g) { return dx.xiu.indexOf(g) >= 0; });
-      push('德秀贵人', (deGan.length || xiuGan.length) ? '吉' : '杂', '德见' + (deGan.join('') || '无') + ' 秀见' + (xiuGan.join('') || '无') + '（' + (sanHeD || sanHeY) + '月）', '');
-    }
-    pushZhi('攀鞍', '吉', [yiMaZhi(yiMaY, '攀鞍'), yiMaZhi(yiMaD, '攀鞍')].filter(Boolean), '三合' + sanHeY);
-    pushRizhu('十灵日', '吉', SS.shiLingRi.indexOf(dayGZ) >= 0, dayGZ, SS.shiLingRi.join('、'));
-    pushRizhu('十富日', '吉', SS.shiFuRi.indexOf(dayGZ) >= 0, dayGZ, SS.shiFuRi.join('、'));
-    var ly = SS.liuYaoTianXi[sanHeD] || SS.liuYaoTianXi[sanHeY];
-    pushZhi('六曜天喜', '吉', ly || '', '三合' + (sanHeD || sanHeY));
-    pushZhi('阴刃', '凶', SS.yinRen[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('飞刃', '凶', SS.feiRen[b.dayGan] || '', '日干' + b.dayGan);
-    pushZhi('红艳', '凶', [SS.hongYan[b.dayGan] || '', SS.hongYan[b.yearGan] || ''].filter(Boolean), '日干/年干');
-    pushZhi('流霞', '凶', [SS.liuXia[b.dayGan] || '', SS.liuXia[b.yearGan] || ''].filter(Boolean), '日干' + b.dayGan + '/年干' + b.yearGan);
-    pushRizhu('孤鸾', '凶', SS.guNuan.indexOf(dayGZ) >= 0, dayGZ, SS.guNuan.join('、'));
-    var tianLuo = (b.dayZhi === '戌' || b.dayZhi === '亥' || b.yearZhi === '戌' || b.yearZhi === '亥');
-    var diWang = (b.dayZhi === '辰' || b.dayZhi === '巳' || b.yearZhi === '辰' || b.yearZhi === '巳');
-    push('天罗', tianLuo ? '凶' : '杂', tianLuo ? '✓ 日/年支见戌亥' : '—（戌亥为天罗）', tianLuo ? '✓' : '');
-    push('地网', diWang ? '凶' : '杂', diWang ? '✓ 日/年支见辰巳' : '—（辰巳为地网）', diWang ? '✓' : '');
-    pushZhi('天哭', '凶', SS.tianKuMap[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('天虚', '凶', SS.tianXuMap[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushRizhu('进神', '杂', SS.jinBuShen.indexOf(dayGZ) >= 0, dayGZ, SS.jinBuShen.join('、'));
-    pushRizhu('退神', '凶', SS.tuiBuShen.indexOf(dayGZ) >= 0, dayGZ, SS.tuiBuShen.join('、'));
-    var yiMaList = [['天煞', yiMaZhi(yiMaY, '天煞')], ['地煞', yiMaZhi(yiMaY, '地煞')], ['年煞', yiMaZhi(yiMaY, '年煞')], ['月煞', yiMaZhi(yiMaY, '月煞')], ['六害', yiMaZhi(yiMaY, '六害')]];
-    for (var t = 0; t < yiMaList.length; t++) if (yiMaList[t][1]) pushZhi(yiMaList[t][0], '凶', yiMaList[t][1], '三合' + sanHeY);
-    var gg = SS.guGua[sanHeY] || SS.guGua[sanHeD];
-    if (gg) { pushZhi('孤辰', '凶', gg[0], '三合' + sanHeY); pushZhi('寡宿', '凶', gg[1], '三合' + sanHeY); }
-    pushRizhu('阴差阳错', '凶', SS.yinChaYangCuo.indexOf(dayGZ) >= 0, dayGZ, SS.yinChaYangCuo.join('、'));
-    pushRizhu('八专', '凶', SS.baZhuan.indexOf(dayGZ) >= 0, dayGZ, SS.baZhuan.join('、'));
-    pushRizhu('九丑', '凶', SS.jiuChou.indexOf(dayGZ) >= 0, dayGZ, SS.jiuChou.join('、'));
-    pushRizhu('十恶大败', '凶', SS.shiEDaBai.indexOf(dayGZ) >= 0, dayGZ, SS.shiEDaBai.join('、'));
-    pushRizhu('金神', '凶', SS.jinShen.indexOf(dayGZ) >= 0, dayGZ, SS.jinShen.join('、'));
-    var tianZhuan = SS.tianZhuan[b.monthZhi]; if (tianZhuan) pushRizhu('天转', '凶', dayGZ === tianZhuan, dayGZ, b.monthZhi + '月' + tianZhuan);
-    var diZhuan = SS.diZhuan[b.monthZhi]; if (diZhuan) pushRizhu('地转', '凶', dayGZ === diZhuan, dayGZ, b.monthZhi + '月' + diZhuan);
-    var siFei = SS.siFeiRi[b.monthZhi]; if (siFei) pushRizhu('四废日', '凶', dayGZ === siFei, dayGZ, b.monthZhi + '月' + siFei);
-    pushRizhu('阴阳差错', '凶', SS.yinYang.indexOf(dayGZ) >= 0, dayGZ, SS.yinYang.join('、'));
-    var shuiNi = SS.shuiNi[b.dayGan] || []; if (shuiNi.length) pushZhi('水溺', '凶', shuiNi, '日干' + b.dayGan);
-    pushZhi('埋儿煞', '凶', SS.maiEr[b.monthZhi] || '', '月支' + b.monthZhi);
-    pushZhi('阴注阳受', '凶', SS.yinZhuYangShou[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('年干沐浴', '杂', SS.nianGanMuYu[b.yearGan] || '', '年干' + b.yearGan);
-    var ziYi = SS.ziYi[b.dayZhi] || SS.ziYi[b.yearZhi];
-    if (ziYi) pushZhi('自缢', '凶', ziYi, '日支/年支' + (SS.ziYi[b.dayZhi] ? b.dayZhi : b.yearZhi));
-    var poArr = ['子午卯酉', '寅申巳亥', '辰戌丑未'];
-    var poZhi = '';
-    for (var q = 0; q < 3; q++) { if (poArr[q].indexOf(b.yearZhi) >= 0) { poZhi = SS.poSui[poArr[q]]; break; } }
-    pushZhi('破碎', '凶', poZhi || '', '年支' + b.yearZhi);
+    push('三奇', shen3 ? '吉' : '杂', shen3 || '无（甲戊庚/乙丙丁/壬癸辛）', shen3 ? '✓四柱连见' : '');
+
+    // ============ 不常见神煞（书补充 + 八字神煞） ============
+    // 书补充神煞
+    var rde = RI_DE[b.dayGan]; if (rde) pushZhi('日德', '吉', rde, '日干' + b.dayGan);
+    var zde = ZHI[(ZHI.indexOf(b.dayZhi) + 5) % 12]; pushZhi('支德', '吉', zde, '日支前五辰');
+    var rlu = RI_LU[b.dayGan]; if (rlu) pushZhi('日禄', '吉', rlu, '日干' + b.dayGan);
+    var js2 = JIE_SHEN[mzNum]; if (js2) pushZhi('解神', '吉', js2, mzhi + '月');
+    if (tyi) pushZhi('天诏', '吉', tyi, '与天医同');
+    var riGui = '';
+    var ganWX = { 甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水' };
+    var zhiWX = { 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
+    var KE = { 木: '土', 火: '金', 土: '水', 金: '木', 水: '火' };
+    var dayGanWX = ganWX[b.dayGan];
+    // 日鬼：克日干之同性地支
+    for (var rz = 0; rz < ZHI.length; rz++) { var z0 = ZHI[rz]; if (KE[zhiWX[z0]] === dayGanWX) { riGui = z0; break; } }
+    if (riGui) pushZhi('日鬼', '凶', riGui, '克日干' + b.dayGan + '之支');
+    // 支鬼：克日支之同性地支
+    var zhiGui = '';
+    for (var rz2 = 0; rz2 < ZHI.length; rz2++) { var z1 = ZHI[rz2]; if (KE[zhiWX[z1]] === zhiWX[b.dayZhi]) { zhiGui = z1; break; } }
+    if (zhiGui) pushZhi('支鬼', '凶', zhiGui, '克日支' + b.dayZhi + '之支');
+    // 墓神
+    pushZhi('墓神', '凶', MU_SHEN[sanHeY] || '', '三合' + sanHeY + '之墓');
+    // 小耗
+    pushZhi('小耗', '凶', XIAO_HAO[mzhi] || '', mzhi + '月');
+    // 哭神（如见水）
+    var ksh = KU_SHEN[mzhi]; if (ksh) pushZhi('哭神', '凶', ksh, mzhi + '月（见水尤凶）');
+    // 天狱
+    pushZhi('天狱', '凶', TIAN_YU[mzhi] || '', mzhi + '月');
+    // 往亡
+    pushZhi('往亡', '凶', WANG_WANG[mzNum] || '', mzhi + '月');
+    // 天鬼
+    pushZhi('天鬼', '凶', TIAN_GUI[mzNum] || '', mzhi + '月');
+    // 天盘地结（申临辰戌为天盘，临巳亥为地结）
+    if (zArr4.indexOf('申') >= 0) {
+      if (zArr4.indexOf('辰') >= 0 || zArr4.indexOf('戌') >= 0) push('天盘', '凶', '✓申临辰戌', '✓');
+      if (zArr4.indexOf('巳') >= 0 || zArr4.indexOf('亥') >= 0) push('地结', '凶', '✓申临巳亥', '✓');
+    } else push('天盘地结', '杂', '申临辰戌为天盘、临巳亥为地结', '');
+    // 飞魂
+    pushZhi('飞魂', '凶', FEI_HUN[mzhi] || '', mzhi + '月');
+    // 丧魄
+    pushZhi('丧魄', '凶', SANG_PO[mzNum] || '', mzhi + '月');
+    // 游都/鲁都
+    var yd2 = YOU_DU[b.dayGan];
+    if (yd2) { pushZhi('游都', '凶', yd2, '日干' + b.dayGan); pushZhi('鲁都', '凶', ZHI_HE[yd2] || '', '游都对冲'); }
+    // 月厌
+    pushZhi('月厌', '凶', YUE_YAN[mzNum] || '', mzhi + '月');
+    // 天目
+    pushZhi('天目', '凶', TIAN_MU[mzhi] || '', mzhi + '月');
+    // 隔角
     var geJiaoHit = '';
-    for (var g = 0; g < SS.geJiao.length; g++) { var pair = SS.geJiao[g]; var zArr = [b.yearZhi, b.monthZhi, b.dayZhi, b.timeZhi]; if (zArr.indexOf(pair[0]) >= 0 && zArr.indexOf(pair[1]) >= 0) { geJiaoHit = '✓ ' + pair; break; } }
-    push('隔角', geJiaoHit ? '凶' : '杂', geJiaoHit || '—（' + SS.geJiao.join('、') + '）', geJiaoHit ? '✓' : '');
-    pushZhi('丧门', '凶', SS.sangMen[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('吊客', '凶', SS.diaoKe[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('勾煞', '凶', SS.gouSha[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('绞煞', '凶', SS.jiaoSha[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('白虎', '凶', SS.baiHu[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('官符', '凶', SS.guanFu[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('病符', '凶', SS.bingFu[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('死符', '凶', SS.siFu[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('大耗', '凶', SS.daHao[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('宅煞', '凶', SS.zhaiSha[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('墓煞', '凶', SS.muSha[b.yearZhi] || '', '年支' + b.yearZhi);
-    pushZhi('三丘', '凶', SS.sanQiu[b.monthZhi] || '', '月支' + b.monthZhi);
-    pushZhi('五墓', '凶', SS.wuMu[b.monthZhi] || '', '月支' + b.monthZhi);
+    var gePairs = ['丑寅', '辰巳', '戌亥', '未申'];
+    for (var ge = 0; ge < gePairs.length; ge++) { var p = gePairs[ge]; if (zArrAll.indexOf(p[0]) >= 0 && zArrAll.indexOf(p[1]) >= 0) { geJiaoHit = '✓ ' + p; break; } }
+    push('隔角', geJiaoHit ? '凶' : '杂', geJiaoHit || '—（丑寅/辰巳/戌亥/未申）', geJiaoHit ? '✓' : '');
+    // 亡神
+    pushZhi('亡神', '凶', WANG_SHEN[sanHeY] || '', '三合' + sanHeY);
+    // 大祸
+    pushZhi('大祸', '凶', DA_HUO[mzhi] || '', mzhi + '月');
+    // 披头星
+    pushZhi('披头星', '凶', PI_TOU[b.yearZhi] || '', '年支' + b.yearZhi);
+    // 红鸾
+    pushZhi('红鸾', '吉', SS.hongLuan[b.yearZhi] || '', '年支' + b.yearZhi);
+    // 官符（甲戊庚日昼未夜丑）
+    if ('甲戊庚'.indexOf(b.dayGan) >= 0) {
+      var gf = (b.timeZhi >= '巳' && b.timeZhi <= '申') ? '未' : '丑';
+      pushZhi('官符', '凶', gf, '甲戊庚日昼未夜丑');
+    }
+    // 天解
+    pushZhi('天解', '吉', TIAN_JIE[mzhi] || '', mzhi + '月');
+    // 金神煞
+    pushZhi('金神煞', '凶', JIN_SHEN_SHA[b.dayZhi] || '', '日支' + b.dayZhi);
   }
 
   // ============ 三动五动（课内四位生克，非日干） ============
@@ -483,11 +708,103 @@
     return { wuDong: wuDong, sanDong: sanDong };
   }
 
+  // ============ 格局检测 + 入式歌速断（《金口诀入门与进阶》第十二、十三章） ============
+  var GAN_LU2 = { 甲: '寅', 乙: '卯', 丙: '巳', 戊: '巳', 丁: '午', 己: '午', 庚: '申', 辛: '酉', 壬: '亥', 癸: '子' };
+  var ZHI_CHONG2 = { 子: '午', 午: '子', 丑: '未', 未: '丑', 寅: '申', 申: '寅', 卯: '酉', 酉: '卯', 辰: '戌', 戌: '辰', 巳: '亥', 亥: '巳' };
+  var SANHE_SET = ['寅午戌', '申子辰', '巳酉丑', '亥卯未'];
+  function sanHeWX2(z1, z2, z3) {
+    for (var i = 0; i < SANHE_SET.length; i++) { if (SANHE_SET[i].indexOf(z1) >= 0 && SANHE_SET[i].indexOf(z2) >= 0 && SANHE_SET[i].indexOf(z3) >= 0) return { '寅午戌': '火', '申子辰': '水', '巳酉丑': '金', '亥卯未': '木' }[SANHE_SET[i]]; }
+    return '';
+  }
+  function isThreeConsecutive(arr) {
+    var a = arr.slice().sort(function (x, y) { return x - y; });
+    if (a[1] === a[0] + 1 && a[2] === a[0] + 2) return true;
+    if (a[0] === 0 && a[1] === 1 && a[2] === 11) return true;
+    if (a[0] === 0 && a[1] === 10 && a[2] === 11) return true;
+    if (a[0] === 10 && a[1] === 11 && a[2] === 0) return false;
+    return false;
+  }
+  function calcGeJu() {
+    var g = ke.renyuanWX, s = ke.gui.wx, j = ke.jiang.wx, f = ke.difenWX;
+    var gz = ke.renyuan, sz = ke.gui.zhi, jz = ke.jiang.zhi, fz = ke.difen;
+    var b = ke.bazi;
+    var kongWang = U.xunKong(b.dayGan + b.dayZhi);
+    var kw = [kongWang.substr(0, 1), kongWang.substr(1, 1)];
+    var out = [];
+    var p = function (name, tag, desc) { out.push({ name: name, tag: tag, desc: desc }); };
+    // 1. 一类朝元课（人元干禄三支同）
+    var luZ = GAN_LU2[gz];
+    if (luZ && sz === luZ && jz === luZ && fz === luZ) p('一类朝元课', '吉', '人元' + gz + '见本属三支' + sz + sz + sz + '，朝元见贵，论考试比赛上下一气得胜，论他事多维持原状；忌见克刑冲。');
+    // 2. 四位俱比课
+    if (g === s && s === j && j === f) p('四位俱比课', '凶', '四位五行皆' + g + '（' + gz + sz + jz + fz + '），事体重叠、牵连干扰多；遇此年反凶、遇合反吉。');
+    // 3. 空亡卦
+    var sKong = kw.indexOf(sz) >= 0, jKong = kw.indexOf(jz) >= 0;
+    if (sKong && jKong) p('空亡卦（神将皆空）', '凶', '贵神将神皆空，求事稀松，事成亦失；婚姻多有名无实。');
+    else if (sKong) p('空亡卦（贵神空）', '凶', '贵神空亡，主事有名无实、贵人无力；旺空尚可，死空则无望。');
+    else if (jKong) p('空亡卦（将神空）', '凶', '将神空亡，事成而有缺陷、得而复失；为事之主体虚空。');
+    // 4. 新创卦（方克将）
+    if (KE[f] === j) p('新创卦', '杂', '地分克将神（' + fz + '克' + jz + '），主准备重新开始、或有新目标新追求。');
+    // 5. 云腾卦
+    if (SHENG[f] === j && SHENG[j] === s && SHENG[s] === g) p('云腾卦', '吉', '从地分依次上升（' + fz + '生' + jz + '生' + sz + '生' + gz + '），主外出喜事顺利；出外求财利而不一定得财。');
+    // 6. 两降卦
+    if (SHENG[g] === s && SHENG[s] === j && SHENG[j] === f) p('两降卦', '吉', '从上依次下降（' + gz + '生' + sz + '生' + jz + '生' + fz + '），最利求财，主喜从外来、一喜百喜。');
+    // 7. 促装卦
+    if (KE[f] === j && KE[j] === s && KE[s] === g) p('促装卦', '凶', '层层上克（' + fz + '克' + jz + '克' + sz + '克' + gz + '），主被迫外出、突破重重阻力或恶性连锁之灾；最终事在高处有结果。');
+    // 8. 寇攘卦
+    if (KE[g] === s && KE[s] === j && KE[j] === f) p('寇攘卦', '凶', '层层下克（' + gz + '克' + sz + '克' + jz + '克' + fz + '），主被迫返回、外人索取、连锁之灾；克到家底，婚姻财散人离。');
+    // 9. 回头生卦
+    if (KE[j] === f && SHENG[g] === f) p('回头生卦', '吉', '末位回头生（人元' + gz + '生地分' + fz + '，解将' + jz + '克地分），最后关头有救，终得外援；找物多在归途或家中发现。');
+    // 10. 连菇卦
+    if (isThreeConsecutive([ZHI.indexOf(sz), ZHI.indexOf(jz), ZHI.indexOf(fz)])) p('连菇卦', '杂', '贵神将神地分连续（' + sz + jz + fz + '），主持续状态或牵连多人；婚姻防第三者，须以桃花等信息佐证。');
+    // 11. 引火烧身卦
+    var hWX = sanHeWX2(sz, jz, fz);
+    if (hWX && KE[hWX] === g) p('引火烧身卦', '凶', '课内' + sz + jz + fz + '合' + hWX + '局克人元' + gz + '，事由己起、困苦自致；合局为快，亦主快速了结。');
+    // 12. 日时比合卦
+    if (b.dayZhi === b.timeZhi || ZHI_HE[b.dayZhi] === b.timeZhi || ZHI_HE[b.timeZhi] === b.dayZhi) p('日时比合卦', '吉', '日支' + b.dayZhi + '与' + b.timeZhi + '比合，主和合、事易成。');
+    // 13. 神将冲合
+    if (ZHI_CHONG2[sz] === jz) p('神将相冲', '凶', '贵神将神相冲（' + sz + '冲' + jz + '），先合后破、事多反复，合局遇冲易离异散失。');
+    if (ZHI_HE[sz] === jz || ZHI_HE[jz] === sz) p('神将六合', '吉', '贵神将神六合（' + sz + '合' + jz + '），主和合、喜庆、交易有成。');
+    // 14. 分局卦
+    if (g === s && j === f && g !== j) p('分局卦', '凶', '上（人元贵神）与下（将神地分）分局各比，主分离之象；神将相生则平安分手、相克则矛盾分手。');
+    // 15. 内外交战卦（人元地分相克）
+    if (KE[g] === f || KE[f] === g) p('内外交战卦', '凶', '人元地分相克（' + gz + '与' + fz + '），内外不合、上下交战，多生口舌争端。');
+    return out;
+  }
+
+  function calcRuShi() {
+    var g = ke.renyuanWX, s = ke.gui.wx, j = ke.jiang.wx, f = ke.difenWX;
+    var out = [];
+    var count = {};
+    [g, s, j, f].forEach(function (w) { count[w] = (count[w] || 0) + 1; });
+    var wxs = ['木', '火', '土', '金', '水'];
+    var rushiName = { 木: '二木为爻求难得', 火: '二火为灾百事残', 土: '二土比合迟晚看', 金: '二金刑克都无顺', 水: '二水皆为大吉象' };
+    var rushiDet = { 木: '课中两木，求事多艰难，按人元贵神/贵神将神/将神地分见木分前中后', 火: '课中两火，百事凋残，多是非官灾火烧烫伤', 土: '课中两土，办事迟缓反复，迟晚乃成', 金: '课中两金，刑克不顺，见生则化解', 水: '课中两水多吉，尤水生人元则事成' };
+    for (var w = 0; w < wxs.length; w++) { var w2 = wxs[w]; if ((count[w2] || 0) >= 2) out.push({ name: rushiName[w2], desc: rushiDet[w2], tag: (w2 === '水' ? '吉' : '凶') }); }
+    var kePairNames = { '金木': '金入木乡忧口舌', '火金': '火临金位有屯迁', '木土': '木来入土为刑狱', '土水': '土行水上竞庄田', '水木': '水来入木', '木火': '木来生火' };
+    var pairs = [[g, s, '人元', '贵神'], [s, j, '贵神', '将神'], [j, f, '将神', '地分'], [s, f, '贵神', '地分'], [g, j, '人元', '将神']];
+    for (var k = 0; k < pairs.length; k++) {
+      var a = pairs[k][0], bb = pairs[k][1];
+      if (KE[a] === bb) {
+        var key = a + bb;
+        if (kePairNames[key]) out.push({ name: kePairNames[key], desc: a + '克' + bb + '（' + pairs[k][2] + '克' + pairs[k][3] + '），主口舌是非、艰难困阻，看克在何位断对应之事', tag: '凶' });
+      }
+    }
+    if (KE[g] === f) out.push({ name: '上克下兮从外入', desc: '人元克地分（外克内），主外来之扰、外事牵连进门', tag: '凶' });
+    if (KE[f] === g) out.push({ name: '下克上兮向外迁', desc: '地分克人元（内克外），主向外发展、离家迁移变动', tag: '凶' });
+    if (KE[g] === s) out.push({ name: '客克主兮来索物', desc: '人元克贵神（客克主），外来索取欺内，占官司我败他胜', tag: '凶' });
+    if (KE[s] === g) out.push({ name: '主克客兮客空还', desc: '贵神克人元（主克客，即官动），我主动出击可胜，占官司我胜他败', tag: '吉' });
+    var allSheng = (SHENG[f] === j || f === j) && (SHENG[j] === s || j === s) && (SHENG[s] === g || s === g);
+    if (allSheng) out.push({ name: '四位相生百事吉', desc: '四位相生（含比和），百事吉昌，内有刑克则忧患缠身', tag: '吉' });
+    return out;
+  }
+
   // ============ 渲染 ============
   function renderAll() {
     ke = calcKe(_state.solar, _state.difen, _state.jiang || null);
     calcShenSha();
     var sd = calcSanDong();
+    var geju = calcGeJu();
+    var rushi = calcRuShi();
     var suse = $('#suse').prop('checked') ? 1 : 0;
     var solar = _state.solar;
     var lunar = solar.getLunar();
@@ -582,15 +899,41 @@
     h += '<div class="jkj-desc">';
     h += '<span class="k">人元</span>' + U.wuXingColor(ke.renyuan, 'span') + '　<span class="k">贵神</span>' + U.wuXingColor(ke.gui.ganzhi, 'span') + ke.gui.shen + '　<span class="k">将神</span>' + U.wuXingColor(ke.jiang.ganzhi, 'span') + ke.jiang.name + '　<span class="k">地分</span>' + U.wuXingColor(ke.difen, 'span') + ke.difenDir;
     h += '</div>';
-
-    // 神煞
+    // ===== 神煞（按四位分布，书第六章） =====
     h += '<div class="ss-section">';
-    h += '<div class="ss-title">常用神煞（' + P_COMMON.length + '）</div>';
-    h += renderShenShaList(P_COMMON, 8);
-    h += '<div class="ss-title" style="margin-top:8px;">不常见神煞（' + P_RARE.length + '）</div>';
-    h += renderShenShaList(P_RARE, 0);    h += '</div>';
+    h += '<div class="ss-title">神煞（按四位分布，点击查看取法）</div>';
+    h += renderShenShaByWei();
+    h += '</div>';
 
-    // 三动五动（课内四位生克）
+    // ===== 课体速断（入式歌，书第十三章） =====
+    h += '<div class="rs-section">';
+    h += '<div class="ss-title">课体速断（入式歌）</div>';
+    if (rushi.length) {
+      h += '<div class="geju-wrap">';
+      for (var rs = 0; rs < rushi.length; rs++) {
+        h += '<span class="geju-item ' + (rushi[rs].tag === '凶' ? 'geju-xiong' : 'geju-ji') + ' geju-click" data-desc="' + rushi[rs].desc + '">' + rushi[rs].name + '</span>';
+      }
+      h += '</div>';
+    } else {
+      h += '<div class="ss-row"><span class="desc">无（可依五行生克细断）</span></div>';
+    }
+    h += '</div>';
+
+    // ===== 格局（书第十二章） =====
+    h += '<div class="rs-section">';
+    h += '<div class="ss-title">格局（点击查看详解）</div>';
+    if (geju.length) {
+      h += '<div class="geju-wrap">';
+      for (var gj = 0; gj < geju.length; gj++) {
+        h += '<span class="geju-item ' + (geju[gj].tag === '凶' ? 'geju-xiong' : (geju[gj].tag === '杂' ? 'geju-za' : 'geju-ji')) + ' geju-click" data-desc="' + geju[gj].desc + '">' + geju[gj].name + '</span>';
+      }
+      h += '</div>';
+    } else {
+      h += '<div class="ss-row"><span class="desc">无成格</span></div>';
+    }
+    h += '</div>';
+
+    // ===== 三动五动（课内四位生克） =====
     h += '<div class="sd-section">';
     // 五动
     h += '<div class="sd-row"><span class="name">五动</span>（课内相克）';
@@ -625,7 +968,7 @@
   }
 
   function renderKeRow(name, gz, gn, wxYY, ws, wsCls, isYong) {
-    var h = '<div class="jkj-ke">';
+    var h = '<div class="jkj-ke' + (gn ? ' jkj-shen' : '') + '"' + (gn ? ' data-shen="' + gn + '"' : '') + '>';
     h += '<span class="name">' + name + (isYong ? '（用）' : '') + '</span>';
     h += '<span class="gz">' + U.wuXingColor(gz, 'span') + '</span>';
     if (gn) h += '<span class="gn">' + gn + '</span>';
@@ -633,6 +976,20 @@
     h += '<span class="ws ' + (wsCls[ws] || '') + '">' + (ws || '') + '</span>';
     h += '</div>';
     return h;
+  }
+
+  // 弹窗显示（格局/入式歌/神将释义）
+  function showDesc(title, desc) {
+    var $m = $('#jkl-modal');
+    if (!$m.length) {
+      $('body').append('<div id="jkl-modal" class="jkl-modal" style="display:none;"><div class="jkl-modal-mask"></div><div class="jkl-modal-box"><div class="jkl-modal-head"><span class="jkl-modal-title"></span><span class="jkl-modal-close">×</span></div><div class="jkl-modal-body"></div></div></div>');
+      $m = $('#jkl-modal');
+      $m.off('click.mask').on('click.mask', '.jkl-modal-mask', function () { $m.hide(); });
+      $m.off('click.close').on('click.close', '.jkl-modal-close', function () { $m.hide(); });
+    }
+    $m.find('.jkl-modal-title').text(title);
+    $m.find('.jkl-modal-body').html(desc);
+    $m.show();
   }
 
   // 神煞渲染：maxShow 限制条数，其余折叠（点击展开）
@@ -664,6 +1021,29 @@
     if (typeof maxShow === 'number' && total > maxShow) {
       var hideCnt = total - Math.min(maxShow, total);
       h += '<div class="ss-more-btn" data-state="closed" data-cnt="' + hideCnt + '" style="cursor:pointer;color:#b98c51;font-size:1.15rem;padding:4px 0;text-align:center;">展开全部神煞（' + hideCnt + '）▾</div>';
+    }
+    return h;
+  }
+
+  // 神煞按四位分布渲染（人元/贵神/将神/地分 四行，常见优先、超6折叠）
+  function renderShenShaByWei() {
+    var WEI = ['人元', '贵神', '将神', '地分'];
+    var MAX = 6;
+    var h = '';
+    for (var w = 0; w < WEI.length; w++) {
+      var wei = WEI[w];
+      var items = P.filter(function (it) { return it.hitArr.indexOf(wei) >= 0; });
+      var ordered = items.filter(function (it) { return isCommon(it.name); }).concat(items.filter(function (it) { return !isCommon(it.name); }));
+      if (!ordered.length) { h += '<div class="ss-row wei-row"><span class="name">' + wei + '神煞</span><span class="desc">—</span></div>'; continue; }
+      h += '<div class="ss-row wei-row"><span class="name">' + wei + '神煞</span>';
+      for (var i = 0; i < ordered.length; i++) {
+        var it = ordered[i];
+        var hidden = i >= MAX;
+        var cls = 'wei-item ' + (it.tag === '吉' ? 'wei-ji' : (it.tag === '凶' ? 'wei-xiong' : 'wei-za')) + (hidden ? ' wei-more' : '');
+        h += '<span class="' + cls + '"' + (hidden ? ' style="display:none;"' : '') + ' data-desc="' + it.val + '">' + it.name + '</span>';
+      }
+      if (ordered.length > MAX) h += '<span class="wei-expand" data-state="closed">▾</span>';
+      h += '</div>';
     }
     return h;
   }
@@ -720,6 +1100,35 @@
       $('#input').val(newV + suffix);
       sync(newV + suffix);
       updateBirthTitle();
+    });
+
+    // 格局/入式歌点击 → 弹窗详解
+    $('#content').off('click.geju', '.geju-click').on('click.geju', '.geju-click', function () {
+      showDesc($(this).text().trim(), $(this).attr('data-desc') || '');
+    });
+
+    // 神煞条目点击 → 取法 + 书中释义
+    $('#content').off('click.wei', '.wei-item').on('click.wei', '.wei-item', function () {
+      var nm = $(this).text();
+      var desc = $(this).attr('data-desc') || '';
+      var explain = SHEN_DESC[nm];
+      showDesc(nm, desc + (explain ? '<br><br><b>释义：</b>' + explain : ''));
+    });
+    // 神煞行展开/折叠
+    $('#content').off('click.weixp', '.wei-expand').on('click.weixp', '.wei-expand', function () {
+      var $row = $(this).closest('.wei-row');
+      var isOpen = $(this).attr('data-state') === 'open';
+      $row.find('.wei-item.wei-more').css('display', isOpen ? 'none' : '');
+      $(this).attr('data-state', isOpen ? 'closed' : 'open');
+      $(this).text(isOpen ? '▾' : '▴');
+    });
+
+    // 贵神/将神点击 → 释义弹窗
+    $('#content').off('click.shenyi', '.jkj-shen').on('click.shenyi', '.jkj-shen', function () {
+      var nm = $(this).attr('data-shen');
+      if (!nm) return;
+      var desc = GUI_DESC[nm] || JIANG_DESC[nm];
+      if (desc) showDesc(nm + '释义', desc);
     });
   }
 
