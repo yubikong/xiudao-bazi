@@ -232,53 +232,113 @@
     return out;
   }
 
-  // 常见格局检测（本命盘）
-  function detectGeJu(pan) {
+  // ============ 常见格局检测（按《紫微斗数全书》成格规则） ============
+  // src: { hua: 四化源, yang/tuo/lu: 羊陀禄星名（本命或流年）, extra: 额外星（流禄/流羊/流陀） }
+  // 本命格局用生年四化+本命羊陀禄；大限格局用大限四化；流年格局用流年四化+流羊流陀流禄
+  function detectGeJu(pan, src) {
+    src = src || {};
     var info = pan.info;
-    var stars = info.stars || {};       // 星名 → 宫索引
+    var stars = {};
+    for (var sk in (info.stars || {})) stars[sk] = info.stars[sk];
+    for (var ek in (src.extra || {})) stars[ek] = src.extra[ek];
+    var huaSrc = src.hua || pan.hua || {};
+    var YANG = src.yang || '擎羊', TUO = src.tuo || '陀罗', LU = src.lu || '禄存';
     var mingIdx = ZHI.indexOf(info.mingGong);
-    var sanFang = {};                    // 命宫三方四正宫集
+    var at = function (s) { var i = stars[s]; return i === undefined ? -1 : i; };
+    var same = function (a, b) { return at(a) >= 0 && at(a) === at(b); };
+    var dui = function (i) { return (i + 6) % 12; };                 // 对宫
+    var jia = function (s) { var i = at(s); return i === (mingIdx + 11) % 12 || i === (mingIdx + 1) % 12; }; // 夹命宫
+    var sanFang = {};                                                // 命宫三方四正
     [mingIdx, (mingIdx + 4) % 12, (mingIdx + 6) % 12, (mingIdx + 8) % 12].forEach(function (i) { sanFang[i] = true; });
-    var inSanFang = function (star) { var i = stars[star]; return i !== undefined && sanFang[i]; };
-    var jia = function (star) { var i = stars[star]; return (i !== undefined && (i === (mingIdx + 11) % 12 || i === (mingIdx + 1) % 12)); };
+    var inSf = function (s) { return sanFang[at(s)] === true; };
+    var bright = function (s) { return (BRIGHT[s] && at(s) >= 0) ? BRIGHT[s][at(s)] : ''; };
+    var isMiao = function (s) { return bright(s) === '庙' || bright(s) === '旺'; };
     var out = [];
-    var has = function (n) { return out.some(function (o) { return o.name === n; }); };
-    // 紫微坐命
-    if (stars['紫微'] === mingIdx) out.push({ name: '紫微坐命', desc: '紫微坐命，帝王之命，有领导才能与权威，宜从政、管理。' });
-    // 紫府同宫
-    if (stars['紫微'] !== undefined && stars['紫微'] === stars['天府']) out.push({ name: '紫府同宫', desc: '紫府同宫，财官双美，一生安稳富足，天府守财，主大器。' });
-    // 杀破狼
-    var sbp = ['七杀', '破军', '贪狼'].filter(function (s) { return inSanFang(s); });
-    if (sbp.length >= 2) out.push({ name: '杀破狼', desc: '杀破狼格局，动荡开创之命，人生多变动，宜军警、开拓性行业，先苦后成。' });
-    // 机月同梁
-    var jy = ['天机', '太阴', '天同', '天梁'].filter(function (s) { return inSanFang(s); });
-    if (jy.length >= 3) out.push({ name: '机月同梁', desc: '机月同梁，智慧安稳，宜公职、文职、策划，一生平稳少波折。' });
-    // 日月同宫
-    if (stars['太阳'] !== undefined && stars['太阳'] === stars['太阴']) out.push({ name: '日月同宫', desc: '日月同宫，阴阳调和，为人圆融，但日月相会一生多有起伏。' });
-    // 日丽中天
-    if (stars['太阳'] === 6) out.push({ name: '日丽中天', desc: '太阳居午，日丽中天，光明磊落，主贵，利公职与名望。' });
-    // 月朗天门
-    if (stars['太阴'] === 11) out.push({ name: '月朗天门', desc: '太阴居亥，月朗天门，清贵之命，才华内敛，女命尤佳。' });
-    // 三奇嘉会
-    var sanQi = [];
-    ['禄', '权', '科'].forEach(function (hk) { var h = pan.hua[hk]; if (h && h.idx !== undefined && sanFang[h.idx] && !sanQi.some(function (x) { return x === h.idx; })) sanQi.push(h.idx); });
-    if (sanQi.length >= 3) out.push({ name: '三奇嘉会', desc: '三奇嘉会，化禄化权化科会照命宫三方，才华与机遇兼备，大贵之格。' });
-    // 火贪格
-    if (stars['火星'] !== undefined && stars['火星'] === stars['贪狼']) out.push({ name: '火贪格', desc: '火贪格，暴发之象，财运横来横去，宜军警武职，把握时机可成大业。' });
-    // 铃贪格
-    if (stars['铃星'] !== undefined && stars['铃星'] === stars['贪狼']) out.push({ name: '铃贪格', desc: '铃贪格，偏财暴发，一生多意外之财，亦多波折，中年后发达。' });
-    // 羊陀夹命
-    if (jia('擎羊') && jia('陀罗')) out.push({ name: '羊陀夹命', desc: '羊陀夹命，劳碌受制，行事多阻碍，宜忍耐守成，不宜冒进。' });
-    // 火铃夹命
-    if (jia('火星') && jia('铃星')) out.push({ name: '火铃夹命', desc: '火铃夹命，性格急躁，是非较多，需修心养性，晚运可佳。' });
-    // 府相朝垣
-    if (jia('天府') && jia('天相')) out.push({ name: '府相朝垣', desc: '府相朝垣，稳重得贵，一生有贵人扶持，事业有成。' });
-    // 天乙拱命（昌曲夹命）
-    if (jia('文昌') && jia('文曲')) out.push({ name: '文星拱命', desc: '文昌文曲夹命，聪明多才，利考试文书，才华出众。' });
-    // 巨机同临
-    if (stars['巨门'] !== undefined && stars['天机'] !== undefined && (stars['巨门'] === stars['天机'] || (inSanFang('巨门') && inSanFang('天机')))) out.push({ name: '巨机同临', desc: '巨机同临，口才与智慧并用，思维敏捷，宜学术、外交、咨询。' });
-    // 天马禄存（禄马交驰）
-    if (stars['禄存'] !== undefined && stars['天马'] !== undefined && stars['禄存'] === stars['天马']) out.push({ name: '禄马交驰', desc: '禄存天马同宫，财源流动，宜外出发展、贸易运输，动中得财。' });
+    var push = function (type, name, desc) { out.push({ type: type, name: name, desc: desc }); };
+    var mingStars = [];                       // 命宫所坐主星（14主星）
+    (function () {
+      for (var p = 0; p < pan.palaces.length; p++) {
+        if (pan.palaces[p].zhiIdx === mingIdx) {
+          for (var si = 0; si < pan.palaces[p].stars.length; si++) {
+            if (STAR14.indexOf(pan.palaces[p].stars[si]) >= 0) mingStars.push(pan.palaces[p].stars[si]);
+          }
+        }
+      }
+    })();
+    var huaStarAt = {};                       // 化星 → 所在宫
+    for (var hk in huaSrc) { if (huaSrc[hk].idx !== undefined) huaStarAt[hk] = huaSrc[hk].idx; }
+
+    // ===== 吉格 =====
+    // 1. 紫微坐命（紫微在命宫且庙旺）
+    if (at('紫微') === mingIdx) push('吉', '紫微坐命', '紫微坐命，帝王之命，具领导才能与权威，宜从政、管理。' + (isMiao('紫微') ? '紫微得地，格局更佳。' : '紫微落陷，威权有减，宜修德补之。'));
+    // 2. 紫府同宫（紫微天府同宫）
+    if (same('紫微', '天府')) push('吉', '紫府同宫', '紫微天府同宫，财官双美，一生安稳富足，天府守财，主大器。');
+    // 3. 杀破狼（七杀破军贪狼三星会齐命宫三方）
+    var sbp = ['七杀', '破军', '贪狼'].filter(function (s) { return inSf(s); });
+    if (sbp.length >= 3) push('吉', '杀破狼', '七杀、破军、贪狼三星会齐命宫三方，变动开创之命，宜军警、创业、开拓性行业，急成急败，乱世英雄。');
+    // 4. 机月同梁（天机太阴天同天梁集于三方，作吏人）
+    var jy = ['天机', '太阴', '天同', '天梁'].filter(function (s) { return inSf(s); });
+    if (jy.length >= 3) push('吉', '机月同梁', '机月同梁作吏人：天机、太阴、天同、天梁集于命宫三方，性格温和、策划力强，宜公职、文职、大型机构幕僚。');
+    // 5. 府相朝垣（天府天相三方会照）
+    if (inSf('天府') && inSf('天相')) push('吉', '府相朝垣', '天府天相在三方会照，财库稳固、食禄千钟，一生衣食无忧，多得贵人相助。');
+    // 6. 阳梁昌禄（太阳天梁文昌禄存会齐三方）
+    if (inSf('太阳') && inSf('天梁') && (inSf('文昌') || (huaStarAt['禄'] !== undefined && sanFang[huaStarAt['禄']]))) push('吉', '阳梁昌禄', '太阳、天梁、文昌（禄存/化禄）三方会照，考试夺魁之格，宜学术、教育、法律、公职。');
+    // 7. 三奇嘉会（化禄权科同聚三方四正）
+    var sanQiCnt = ['禄', '权', '科'].filter(function (h) { return huaStarAt[h] !== undefined && sanFang[huaStarAt[h]]; }).length;
+    if (sanQiCnt >= 3) push('吉', '三奇嘉会', '化禄、化权、化科同聚命宫三方四正，名利双收、富贵最全之格，才华与机遇兼备。');
+    // 8. 火贪格（火星贪狼同宫）
+    if (same('火星', '贪狼')) push('吉', '火贪格', '火星贪狼同宫，暴发横财之象，财运来去急骤，宜军警武职，把握时机可成大业。');
+    // 9. 铃贪格（铃星贪狼同宫）
+    if (same('铃星', '贪狼')) push('吉', '铃贪格', '铃星贪狼同宫，偏财暴发，一生多意外之财，亦多波折，中年后发达。');
+    // 10. 日月同宫
+    if (same('太阳', '太阴')) push('吉', '日月同宫', '太阳太阴同宫，阴阳调和，为人圆融，但日月相会一生多有起伏，宜平衡兼顾。');
+    // 11. 日月并明（日月各在庙旺位）
+    if (isMiao('太阳') && isMiao('太阴')) push('吉', '日月并明', '太阳太阴各在庙旺之位，聪慧明理，事业感情两相宜，格局清贵。');
+    // 12. 禄马交驰（禄存与天马同宫，或化禄与天马同宫）
+    if (same(LU, '天马') || (huaStarAt['禄'] !== undefined && huaStarAt['禄'] === at('天马'))) push('吉', '禄马交驰', '禄马交驰，财源流动、愈动愈旺，宜贸易、物流、海外发展，动中得财。');
+    // 13. 文星拱命（昌曲夹命或会照）
+    if ((jia('文昌') && jia('文曲')) || (inSf('文昌') && inSf('文曲'))) push('吉', '文星拱命', '文昌文曲拱照命宫，聪明好学、才华出众，利考试文书、学术研究。');
+    // 14. 左右夹命
+    if (jia('左辅') && jia('右弼')) push('吉', '左右夹命', '左辅右弼夹命，贵人环绕、人缘极佳，领导有方，宜团队管理与合伙事业。');
+    // 15. 坐贵向贵（天魁天钺分居命宫与迁移宫）
+    if ((at('天魁') === mingIdx && at('天钺') === dui(mingIdx)) || (at('天钺') === mingIdx && at('天魁') === dui(mingIdx))) push('吉', '坐贵向贵', '天魁天钺分居命宫与迁移宫，一生贵人扶持，逢凶化吉，利外出发展。');
+    // 16. 七杀朝斗（七杀在子午得地，对宫紫微相照）
+    if ((at('七杀') === 0 || at('七杀') === 6) && at('紫微') === dui(at('七杀'))) push('吉', '七杀朝斗', '七杀坐子午，对宫紫微相照，将星得地、威震四方，宜军警、竞技、开创先锋。');
+    // 17. 日丽中天（太阳在午入庙）
+    if (at('太阳') === 6) push('吉', '日丽中天', '太阳居午，日丽中天，光明磊落，主贵，利公职与名望，中年后发越。');
+    // 18. 月朗天门（太阴在亥入庙）
+    if (at('太阴') === 11) push('吉', '月朗天门', '太阴居亥，月朗天门，清贵之命，才华内敛，女命尤佳。');
+    // 19. 明珠出海（太阳在辰入庙）
+    if (at('太阳') === 4) push('吉', '明珠出海', '太阳在辰入庙，光耀门楣、名声远播，宜文化、教育、政治。');
+
+    // ===== 凶格 =====
+    // 20. 命无正曜（命宫无十四主星）
+    if (mingStars.length === 0) push('凶', '命无正曜', '命宫无十四主星坐守，个性受环境与对宫影响较大，宜借对宫星曜力量，命格变化多端。');
+    // 21. 羊陀夹命
+    if (jia(YANG) && jia(TUO)) push('凶', '羊陀夹命', '羊陀夹命，行事多阻碍、劳碌受制，宜忍耐守成，不宜冒进。');
+    // 22. 火铃夹命
+    if (jia('火星') && jia('铃星')) push('凶', '火铃夹命', '火星铃星夹命，性格急躁、是非较多，需修心养性，晚运可佳。');
+    // 23. 空劫夹命
+    if (jia('地空') && jia('地劫')) push('凶', '空劫夹命', '地空地劫夹命，钱财不聚、人生波折较多，宜务实守财。');
+    // 24. 刑囚夹印（廉贞天相在子午，逢廉贞化忌加擎羊）
+    if (same('廉贞', '天相') && (at('廉贞') === 0 || at('廉贞') === 6) && at(YANG) === at('廉贞') && huaStarAt['忌'] === at('廉贞')) push('凶', '刑囚夹印', '廉贞天相在子午，廉贞化忌加擎羊，主官非诉讼、名誉受损，行事需谨慎守法。');
+    // 25. 马头带剑（擎羊天马同宫）
+    if (same(YANG, '天马')) push('凶', '马头带剑', '擎羊天马同宫，奔波劳碌、离乡背井之象，宜动中求财，注意意外。');
+    // 26. 日月反背（太阳在亥、太阴在巳，各落陷）
+    if (at('太阳') === 11 && at('太阴') === 4) push('凶', '日月反背', '太阳在亥、太阴在巳，日月各落陷地，事业多阻、六亲缘薄，宜坚韧守成。');
+    // 27. 巨机同临（巨门天机同宫）
+    if (same('巨门', '天机')) push('凶', '巨机同临', '巨门天机同宫，口舌是非、心思过重，口才与智慧并用，宜学术、外交、咨询，谨防多疑。');
+    // 28. 贪狼陷地（贪狼坐命落陷）
+    if (at('贪狼') === mingIdx && bright('贪狼') === '陷') push('凶', '贪狼陷地', '贪狼落陷坐命，欲望较强、易沉迷声色，宜自律修身。');
+    // 29. 廉贞破军（廉贞破军同宫）
+    if (same('廉贞', '破军')) push('凶', '廉贞破军', '廉贞破军同宫，人生大起大落，宜在变动中求发展，注意是非。');
+    // 30. 羊陀夹忌（羊陀夹化忌之星）
+    (function () {
+      if (huaStarAt['忌'] !== undefined) {
+        var jiIdx = huaStarAt['忌'];
+        if (at(YANG) === (jiIdx + 11) % 12 && at(TUO) === (jiIdx + 1) % 12) push('凶', '羊陀夹忌', '羊陀夹化忌之星，进退两难、煎熬痛苦，凡事多留余地。');
+      }
+    })();
     return out;
   }
 
@@ -329,12 +389,7 @@
       huaLabel = dxGan + '大限（' + (dxPalace ? dxPalace.name + '宫' : '') + '）';
     }
 
-    h += '<div class="info-box" id="birth-info">';
-    h += '<p><strong>公历</strong> ' + info.solar.getYear() + '-' + U.pad(info.solar.getMonth()) + '-' + U.pad(info.solar.getDay()) + ' ' + U.pad(info.solar.getHour()) + ':' + U.pad(info.solar.getMinute()) + '　<strong>农历</strong> ' + info.lunar.getYearInChinese() + '年' + info.lunar.getMonthInChinese() + '月' + info.lunar.getDayInChinese() + '日 ' + info.hourZhi + '时</p>';
-    h += '<p><strong>八字</strong> ' + info.bazi.getYear() + ' ' + info.bazi.getMonth() + ' ' + info.bazi.getDay() + ' ' + info.bazi.getTime() + '　<strong>性别</strong> ' + (info.gender === 1 ? '男' : '女') + '　<strong>大限</strong> ' + info.ju + '岁起运' + (info.shun ? '顺行' : '逆行') + '</p>';
-    h += '<p><strong>命宫</strong> ' + info.mingGongGZ + '（' + info.naYin + ' ' + info.juName + '）　<strong>身宫</strong> ' + info.shenGong + '　<strong>紫微</strong>' + info.ziwei + ' <strong>天府</strong>' + info.tianfu + '</p>';
-    h += '<p><strong>流年</strong> ' + ln.year + '（' + ln.gan + ln.zhi + '）　<strong>虚岁</strong> ' + ln.age + '　<strong>流年命宫</strong>' + ZHI[ln.gongIdx] + '　<strong>小限宫</strong>' + ZHI[ln.xiaoXianIdx] + '</p>';
-    h += '</div>';
+    // 出生信息已并入十二宫中央（不再单独显示顶部信息块，避免重复）
 
     // 十二宫盘面（4x4 grid）
     h += '<div class="zw-grid">';
@@ -360,7 +415,9 @@
             h += '<div class="zw-cb-row">' + U.wuXingColor(yGZ.substr(1, 1)) + U.wuXingColor(mGZ.substr(1, 1)) + U.wuXingColor(dGZ.substr(1, 1)) + U.wuXingColor(tGZ.substr(1, 1)) + '</div>';
             h += '</div>';
             h += '<div class="zw-center-info">' + info.mingGongGZ + ' · ' + info.juName + '</div>';
-            h += '<div class="zw-center-info2">身宫' + info.shenGong + '　紫微' + info.ziwei + '</div>';
+            h += '<div class="zw-center-info2">身宫' + info.shenGong + '　紫微' + info.ziwei + '　天府' + info.tianfu + '</div>';
+            h += '<div class="zw-center-info3">大限 ' + info.ju + '岁起运' + (info.shun ? '顺行' : '逆行') + ' · ' + info.yearGan + '年命</div>';
+            h += '<div class="zw-center-info3 zw-c-ln">流年 ' + ln.year + ' ' + ln.gan + ln.zhi + ' · 虚岁' + ln.age + ' · 流命' + ZHI[ln.gongIdx] + '宫 小限' + ZHI[ln.xiaoXianIdx] + '宫</div>';
             h += '</div>';
           }
           // 其余中心格 (2,3)(3,2)(3,3) 已被中宫格 span 覆盖，不输出
@@ -401,9 +458,9 @@
     }
     h += '</div>';
 
-    // 大限条（点击切换大限四化）
-    h += '<div class="info-box"><div class="zw-bar-title">大限（' + (info.shun ? '顺行' : '逆行') + '）</div><div class="zw-bar">';
-    for (var dxi2 = 0; dxi2 < 12; dxi2++) {
+    // 大限条（一行 8 个大限，点击切换大限四化）
+    h += '<div class="info-box"><div class="zw-bar-title">大限（' + (info.shun ? '顺行' : '逆行') + '·共8限）</div><div class="zw-bar zw-bar-8">';
+    for (var dxi2 = 0; dxi2 < 8; dxi2++) {
       var dz2 = info.shun ? (mingIdx + dxi2) % 12 : (mingIdx - dxi2 + 12) % 12;
       var dp2 = null;
       for (var dq = 0; dq < pan.palaces.length; dq++) { if (pan.palaces[dq].zhiIdx === dz2) { dp2 = pan.palaces[dq]; break; } }
@@ -413,8 +470,8 @@
     }
     h += '</div></div>';
 
-    // 流年条（范围=当前大限 10 年，点击只移动高亮、范围不变）
-    h += '<div class="info-box"><div class="zw-bar-title">流年（' + liuYearStart + '~' + liuYearEnd + '，点击切换）</div><div class="zw-bar">';
+    // 流年条（一行 10 个，范围=当前大限 10 年，点击只移动高亮、范围不变）
+    h += '<div class="info-box"><div class="zw-bar-title">流年（' + liuYearStart + '~' + liuYearEnd + '，点击切换）</div><div class="zw-bar zw-bar-10">';
     for (var ly2 = liuYearStart; ly2 <= liuYearEnd; ly2++) {
       var lso = Solar.fromYmdHms(ly2, 6, 1, 12, 0, 0);
       var lz = lso.getLunar().getYearInGanZhiExact();
@@ -423,17 +480,39 @@
     }
     h += '</div></div>';
 
-    // 常见格局
-    var geju = detectGeJu(pan);
-    h += '<div class="info-box"><div class="zw-bar-title">常见格局</div><div class="zw-geju">';
-    if (geju.length === 0) {
-      h += '<span class="zw-geju-none">未构成常见格局</span>';
-    } else {
-      for (var gj = 0; gj < geju.length; gj++) {
-        h += '<span class="zw-geju-item zw-geju-click" data-geju="' + geju[gj].name + '" data-desc="' + geju[gj].desc + '">' + geju[gj].name + '</span>';
+    // 常见格局（本命/大限/流年 三类，按《紫微斗数全书》成格规则，不同颜色）
+    // 本命：生年四化 + 本命羊陀禄；大限：当前大限宫干四化；流年：流年四化 + 流羊流陀流禄
+    var dxGan2 = info.yearGan, dxPalace2 = null;
+    for (var dpk = 0; dpk < pan.palaces.length; dpk++) { if (pan.palaces[dpk].zhiIdx === dxZhiIdx) { dxPalace2 = pan.palaces[dpk]; break; } }
+    if (dxPalace2) dxGan2 = dxPalace2.gongGan;
+    var dxHua2 = {};
+    var dh2 = HUA[dxGan2] || [];
+    for (var dhk2 = 0; dhk2 < dh2.length; dhk2++) dxHua2[dh2[dhk2][1]] = { star: dh2[dhk2][0], idx: info.stars[dh2[dhk2][0]] };
+    var gejuBen = detectGeJu(pan, { hua: pan.hua, yang: '擎羊', tuo: '陀罗', lu: '禄存' });
+    var gejuDx = detectGeJu(pan, { hua: dxHua2, yang: '擎羊', tuo: '陀罗', lu: '禄存' });
+    var gejuLn = detectGeJu(pan, {
+      hua: ln.hua, yang: '流羊', tuo: '流陀', lu: '流禄',
+      extra: { '流禄': ln.stars['流禄'], '流羊': ln.stars['流羊'], '流陀': ln.stars['流陀'] }
+    });
+    var gejuSections = [
+      { label: '命盘格局', cls: 'zw-geju-ben', list: gejuBen },
+      { label: '大限格局', cls: 'zw-geju-dx', list: gejuDx },
+      { label: '流年格局', cls: 'zw-geju-ln', list: gejuLn }
+    ];
+    h += '<div class="info-box"><div class="zw-bar-title">常见格局（点击查看解说）</div>';
+    for (var gs = 0; gs < gejuSections.length; gs++) {
+      var sec = gejuSections[gs];
+      h += '<div class="zw-geju-sec"><span class="zw-geju-label ' + sec.cls + '">' + sec.label + '</span><span class="zw-geju">';
+      if (sec.list.length === 0) {
+        h += '<span class="zw-geju-none">无</span>';
+      } else {
+        for (var gj4 = 0; gj4 < sec.list.length; gj4++) {
+          h += '<span class="zw-geju-item ' + sec.cls + (sec.list[gj4].type === '凶' ? ' zw-geju-xiong' : '') + ' zw-geju-click" data-geju="' + sec.list[gj4].name + '" data-desc="' + sec.list[gj4].desc + '">' + sec.list[gj4].name + '</span>';
+        }
       }
+      h += '</span></div>';
     }
-    h += '</div></div>';
+    h += '</div>';
 
     // 四化说明
     var huaShow = huaSrc || pan.hua;
