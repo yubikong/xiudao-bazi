@@ -213,13 +213,15 @@
     return '';
   }
 
+  // 农历月中文 → 数字（备用）
+  const CN_MONTH_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12 };
   // 月支 → 节（流月起算节气）
   const ZHI_JIE = { 寅: '立春', 卯: '惊蛰', 辰: '清明', 巳: '立夏', 午: '芒种', 未: '小暑', 申: '立秋', 酉: '白露', 戌: '寒露', 亥: '立冬', 子: '大雪', 丑: '小寒' };
 
-  // 流月起始日（节）：默认取今天所在的流月（最近的节）
-  function getLiuYueStartSolar(liuYueZhi, liuNian) {
+  // 流日起点（流月换节的第一天）：切换流月时用该流月的节，否则用今天所在流月的节
+  function getLiuDayStartSolar(liuYueZhi, liuNian) {
     try {
-      if (liuNian) {
+      if (liuYueZhi && liuNian) {
         const tbl = liuNian.getLunar().getJieQiTable();
         const jieName = ZHI_JIE[liuYueZhi];
         if (jieName && tbl[jieName] && tbl[jieName].toYmd) {
@@ -228,7 +230,6 @@
         }
       }
     } catch (e) { /* fallthrough */ }
-    // 回退：今天流月起始
     try {
       return Solar.fromDate(new Date()).getLunar().getPrevJie(true).getSolar();
     } catch (e2) {
@@ -236,7 +237,7 @@
     }
   }
 
-  // 流日数组：从流月起始日（节）起 30 天，随所选流月变动；今天在序列内则高亮今天
+  // 流日数组：从流月换节第一天起 30 天，默认选中换节第一天（index 0）
   function genLiuDayArr(w, startSolar) {
     let _ds0 = startSolar || null;
     if (!_ds0) {
@@ -249,14 +250,9 @@
     }
     const bazi = w.info.bazi;
     w.liuD.arr = getLiuInfoArr(bazi, 'day', objs);
-    const _tgz = w.now.bazi.getDayGan() + w.now.bazi.getDayZhi();
-    let _di = 0;
-    for (let k = 0; k < w.liuD.arr.length; k++) {
-      if (w.liuD.arr[k].ganzhi === _tgz) { _di = k; break; }
-    }
-    w.sel.st.day = _di;
-    w.sel.def.day = _di;
-    const _cd = w.liuD.arr[_di];
+    w.sel.st.day = 0;   // 默认选中换节第一天
+    w.sel.def.day = 0;
+    const _cd = w.liuD.arr[0];
     if (_cd) {
       w.zhu[9].gan = _cd.gan;
       w.zhu[9].zhi = _cd.zhi;
@@ -334,9 +330,9 @@
     w.sel.def.month = curMonthIdx;
     const curLiuYue = liuYueArr[curMonthIdx];
     w.zhu[8] = { type: 'liuMonth', title: '流月', gan: curLiuYue.getGanZhi().substr(0, 1), zhi: curLiuYue.getGanZhi().substr(1, 1) };
-    // 流日：从命局流月（节）起 30 天，随流月切换变动；今天在序列内则高亮
+    // 流日：从流月换节第一天起 30 天，默认选中换节第一天；切换流月时随所选流月变动
     w.zhu[9] = { type: 'liuDay', title: '流日', gan: '', zhi: '' };
-    genLiuDayArr(w, getLiuYueStartSolar(bazi.getMonthZhi(), curLiuNian));
+    genLiuDayArr(w, getLiuDayStartSolar(bazi.getMonthZhi(), curLiuNian));
 
     // 胎元命宫身宫
     w.spzhu = calcTaiYuan(bazi, lunar);
@@ -601,8 +597,8 @@
     }
     i += '</div>';
 
-    // 流日（随流月变动，可点击切换）
-    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日</div></div>';
+    // 流日（流月换节第一天起，可点击切换）
+    i += '<div class="dtrGap small bgray dayGap"><div class="tc">流日（换节起）</div></div>';
     i += '<div class="dtr dayRow">';
     for (let ed in Y.liuD.arr) {
       const td = Y.liuD.arr[ed];
@@ -815,8 +811,8 @@
         // 流月：取第一个流年的流月（童限或大运1 都用第一个流年）
         if (n2.length > 0) {
           _w.liuM.arr = getLiuInfoArr(bazi, 'month', n2[0].getLiuYue());
-          // 重置流日（回到命局流月起始）
-          genLiuDayArr(_w, getLiuYueStartSolar(bazi.getMonthZhi(), null));
+          // 重置流日（回到今天农历月初一）
+          genLiuDayArr(_w, getLiuDayStartSolar(null, null));
         }
         // 更新大运干支
         const dYunGanZhi = t2.getGanZhi() || bazi.getMonthGan() + bazi.getMonthZhi();
@@ -856,8 +852,8 @@
         _w.zhu[7].ganzhi = liuNian.getGanZhi();
         const liuYue = liuNian.getLiuYue()[0];
         _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);        _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
-        // 重置流日（回到命局流月起始）
-        genLiuDayArr(_w, getLiuYueStartSolar(bazi.getMonthZhi(), null));
+        // 重置流日（回到今天农历月初一）
+        genLiuDayArr(_w, getLiuDayStartSolar(null, null));
         calcShenSha(_w);
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
@@ -876,8 +872,8 @@
         const liuYue = liuNian.getLiuYue()[ind];
         _w.zhu[8].gan = liuYue.getGanZhi().substr(0, 1);
         _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
-        // 流日随所选流月变动（从该流月的节起始日起 30 天）
-        genLiuDayArr(_w, getLiuYueStartSolar(liuYue.getGanZhi().substr(1, 1), liuNian));
+        // 流日随所选流月变动：该流月对应农历月初一起 30 天，默认选中初一
+        genLiuDayArr(_w, getLiuDayStartSolar(liuYue.getGanZhi().substr(1, 1), liuNian));
         $('#pan').html(renderPan(_w, suse));
         $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
