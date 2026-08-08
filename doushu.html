@@ -8,9 +8,6 @@
 <link rel="stylesheet" href="css/bazi.85d86054.css">
 <style>
   html, body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
-  .page-nav { display: flex; align-items: center; padding: 5px 10px; border-bottom: 1px solid #e1e1e1; max-width: 415px; margin: auto; }
-  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.5rem; margin-right: 10px; }
-  .page-nav a.active { font-weight: bold; }
   .doushu-container { max-width: 415px; margin: 0 auto; padding: 0 8px; }
   .doushu-container h1 { color: #b98c51; padding: 6px 0; font-size: 1.7rem; font-weight: 400; }
   /* 输入控制条 */
@@ -28,11 +25,20 @@
   /* 十二宫固定高度：切换流年/大限时内容增减不跳动（约7行） */
   .zw-cell { min-height: 108px; display: flex; flex-direction: column; }
   .zw-stars { flex: 1 1 auto; }
-  /* 常见格局 */
+  /* 常见格局（本命/大限/流年 三类分色） */
+  .zw-geju-sec { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
+  .zw-geju-label { flex: 0 0 auto; font-size: 0.85em; font-weight: bold; padding: 1px 6px; border-radius: 4px; color: #fff; }
+  .zw-geju-label.zw-geju-ben { background: #b98c51; }
+  .zw-geju-label.zw-geju-dx { background: #6b98c0; }
+  .zw-geju-label.zw-geju-ln { background: #228b22; }
   .zw-geju { display: flex; flex-wrap: wrap; gap: 4px; }
-  .zw-geju-item { border: 1px solid #c9b089; background: #fdf8ef; color: #7a5c2e; border-radius: 10px; padding: 1px 9px; font-size: 1.0rem; cursor: pointer; }
-  .zw-geju-item:hover { background: #f5e9d8; }
-  .zw-geju-none { color: #999; font-size: 1.05rem; }
+  .zw-geju-item { border: 1px solid #c9b089; background: #fdf8ef; color: #7a5c2e; border-radius: 10px; padding: 0 8px; font-size: 0.9rem; cursor: pointer; }
+  .zw-geju-item.zw-geju-ben { border-color: #b98c51; }
+  .zw-geju-item.zw-geju-dx { border-color: #6b98c0; background: #f0f7fd; color: #3a6a92; }
+  .zw-geju-item.zw-geju-ln { border-color: #228b22; background: #f0f8f0; color: #1d6b1d; }
+  .zw-geju-item.zw-geju-xiong { border-style: dashed; border-color: #d4a0a0; background: #fdf3f3; color: #a05a5a; }
+  .zw-geju-item:hover { filter: brightness(.96); }
+  .zw-geju-none { color: #999; font-size: 1.0rem; }
   /* 全站统一切换导航：6 格等宽、字号一致、不左右变动 */
   .page-nav { display: flex; gap: 3px; padding: 8px 8px 2px; }
   .page-nav a { flex: 1 1 0; min-width: 0; text-align: center; padding: 7px 2px; font-size: 1.15rem; color: #7a5c2e; text-decoration: none; background: #faf6ee; border: 1px solid #e0d4bc; border-radius: 6px; white-space: nowrap; }
@@ -86,27 +92,31 @@
   .zw-cb-row { display: flex; gap: 5px; font-size: 1.05em; line-height: 1.25; }
   .zw-cb-row span { width: 1.3em; text-align: center; }
   .zw-cb-head span { color: #b98c51; font-weight: bold; font-size: 0.8em; }
-  .zw-center-info { font-size: 0.95em; color: #b98c51; font-weight: bold; }
-  .zw-center-info2 { font-size: 0.8em; color: #999; }
-  .zw-bar-title { font-size: 1.05rem; color: #b98c51; font-weight: bold; margin-bottom: 3px; }
-  .zw-bar { display: flex; flex-wrap: wrap; gap: 3px; }
-  .zw-bar-item { border: 1px solid #ddd; border-radius: 3px; padding: 2px 5px; font-size: 0.95em; text-align: center; cursor: pointer; line-height: 1.3; }
-  .zw-bar-item span { display: block; font-size: 0.75em; color: #999; }
+  .zw-center-info { font-size: 0.9em; color: #b98c51; font-weight: bold; }
+  .zw-center-info2 { font-size: 0.75em; color: #999; }
+  .zw-center-info3 { font-size: 0.7em; color: #666; line-height: 1.35; }
+  .zw-c-ln { color: #6b98c0; }
+  .zw-bar-title { font-size: 1.0rem; color: #b98c51; font-weight: bold; margin-bottom: 3px; }
+  .zw-bar { display: grid; gap: 3px; }
+  .zw-bar-8 { grid-template-columns: repeat(8, 1fr); }
+  .zw-bar-10 { grid-template-columns: repeat(10, 1fr); }
+  .zw-bar-item { border: 1px solid #ddd; border-radius: 3px; padding: 1px 1px; font-size: 0.78em; text-align: center; cursor: pointer; line-height: 1.3; white-space: nowrap; overflow: hidden; }
+  .zw-bar-item span { display: block; font-size: 0.7em; color: #999; }
   .zw-bar-item.cur { border-color: #b98c51; background: #fdf8ef; font-weight: bold; }
   .zw-bar-item:hover { background: #f5e9d8; }
   @media (max-width: 415px) { html { font-size: 2.5vw; } }
 </style>
 </head>
 <body>
-<div class="page-nav">
-  <a href="index.html">八字排盘</a>
-  <a href="jinkoujue.html">金口诀</a>
-  <a href="rili.html">黄历</a>
-  <a href="baziHelp.html">使用说明</a>
-  <a href="doushu.html" class="active">紫微</a>
-  <a href="compass.html">罗盘</a>
-</div>
 <div class="doushu-container">
+  <nav class="page-nav">
+    <a href="index.html">八字排盘</a>
+    <a href="jinkoujue.html">金口诀</a>
+    <a href="rili.html">黄历</a>
+    <a href="doushu.html" class="active">紫微</a>
+    <a href="compass.html">罗盘</a>
+    <a href="baziHelp.html">使用说明</a>
+  </nav>
   <h1>紫微斗数排盘</h1>
 
   <!-- 输入控制条 -->
@@ -145,16 +155,8 @@
   </div>
 
   <div id="zw-pan">
-    <div class="info-box" id="birth-info"><p>正在排盘...</p></div>
+    <div class="info-box" id="zw-msg"><p>正在排盘...</p></div>
   </div>
-  <nav class="page-nav">
-    <a href="index.html">八字排盘</a>
-    <a href="jinkoujue.html">金口诀</a>
-    <a href="rili.html">黄历</a>
-    <a href="doushu.html" class="active">紫微</a>
-    <a href="compass.html">罗盘</a>
-    <a href="baziHelp.html">使用说明</a>
-  </nav>
   <!-- 星曜释义弹窗 -->
   <div class="zw-modal" id="zw-modal"><div class="zw-modal-box">
     <span class="zw-modal-close" id="zw-modal-close">×</span>
@@ -162,11 +164,11 @@
     <div class="zw-modal-desc" id="zw-modal-desc"></div>
   </div></div>
 </div>
-<script src="js/lunar.js?v=20260808c"></script>
-<script src="js/shensha_data.js?v=20260808c"></script>
-<script src="js/utils.js?v=20260808c"></script>
-<script src="js/jquery.min.js?v=20260808c"></script>
-<script src="js/ziwei.js?v=20260808c"></script>
+<script src="js/lunar.js?v=20260808d"></script>
+<script src="js/shensha_data.js?v=20260808d"></script>
+<script src="js/utils.js?v=20260808d"></script>
+<script src="js/jquery.min.js?v=20260808d"></script>
+<script src="js/ziwei.js?v=20260808d"></script>
 <script>
 $(function () {
   function getV() {
@@ -187,13 +189,13 @@ $(function () {
   function renderPan() {
     const raw = $('#zw-input').val().trim();
     if (!raw) {
-      $('#birth-info').html('<p style="color:#c00">请先输入公历时间（12位数字）。</p>');
+      $('#zw-msg').html('<p style="color:#c00">请先输入公历时间（12位数字）。</p>');
       return;
     }
     // 去掉非数字
     const v = raw.replace(/[^\d]/g, '');
     if (v.length < 8) {
-      $('#birth-info').html('<p style="color:#c00">时间格式错误，至少需要8位（年月日）。</p>');
+      $('#zw-msg').html('<p style="color:#c00">时间格式错误，至少需要8位（年月日）。</p>');
       return;
     }
     const y = parseInt(v.substr(0, 4), 10);
@@ -212,7 +214,7 @@ $(function () {
       url.searchParams.set('gender', gender);
       history.replaceState(null, '', url.toString());
     } catch (e) {
-      $('#birth-info').html('<p style="color:#c00">排盘出错：' + e.message + '</p>');
+      $('#zw-msg').html('<p style="color:#c00">排盘出错：' + e.message + '</p>');
     }
   }
 
