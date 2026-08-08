@@ -631,46 +631,6 @@
     return i;
   }
 
-  // ============ 分析面板（#analyse） ============
-  function renderAnalyse(w) {
-    const solar = w.info.solar;
-    const lunar = w.info.lunar;
-    const bazi = w.info.bazi;
-    const gender = w.info.gender;
-    let html = '';
-    html += '<div class="dtr birthinfo"><div class="col col0">公历</div>';
-    html += '<div class="col left">' + solar.getYear() + '年' + solar.getMonth() + '月' + solar.getDay() + '日 ' + U.pad(solar.getHour()) + ':' + U.pad(solar.getMinute()) + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">农历</div>';
-    html += '<div class="col left">' + lunar.getYearInChinese() + '年' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese() + ' ' + (lunar.getHour() < 12 ? '上午' : '下午') + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">属相</div>';
-    const shengxiao = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
-    html += '<div class="col left">' + shengxiao[lunar.getYearZhiIndex ? (parseInt(lunar.getYearZhi()) + 12) % 12 : 0] + '（' + lunar.getYearShengXiao() + '）</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">八字</div>';
-    html += '<div class="col left">' + bazi.getYear() + ' ' + bazi.getMonth() + ' ' + bazi.getDay() + ' ' + bazi.getTime() + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">纳音</div>';
-    html += '<div class="col left">' + bazi.getYearNaYin() + ' ' + bazi.getMonthNaYin() + ' ' + bazi.getDayNaYin() + ' ' + bazi.getTimeNaYin() + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">五行</div>';
-    html += '<div class="col left">' + bazi.getYearWuXing() + bazi.getMonthWuXing() + bazi.getDayWuXing() + bazi.getTimeWuXing() + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">藏干</div>';
-    const hideGans = [bazi.getYearHideGan(), bazi.getMonthHideGan(), bazi.getDayHideGan(), bazi.getTimeHideGan()];
-    html += '<div class="col left">' + hideGans.map(g => g.join('、')).join(' / ') + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">胎元</div>';
-    html += '<div class="col left">' + w.spzhu[0].ganzhi + '（' + w.spzhu[0].ganzhi.substr(0, 1) + bazi.getMonthZhi() + '）</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">命宫</div>';
-    html += '<div class="col left">' + w.spzhu[1].ganzhi + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">身宫</div>';
-    html += '<div class="col left">' + w.spzhu[2].ganzhi + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">日主</div>';
-    html += '<div class="col left">' + bazi.getDayGan() + '（' + bazi.getDayWuXing() + bazi.getDayGan() + '）</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">性别</div>';
-    html += '<div class="col left">' + (1 === gender ? '乾造（男）' : '坤造（女）') + '</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">日柱</div>';
-    html += '<div class="col left">' + bazi.getDay() + '（' + bazi.getDayNaYin() + '）</div></div>';
-    html += '<div class="dtr birthinfo"><div class="col col0">时柱</div>';
-    html += '<div class="col left">' + bazi.getTime() + '（' + bazi.getTimeNaYin() + '）</div></div>';
-    return html;
-  }
-
   // ============ 输入解析 ============
   function parseInput(v) {
     v = String(v || '').trim();
@@ -792,7 +752,6 @@
     const w = buildData(parsed.solar, parsed.gender, { sect: sect });
     _w = w;
     $('#pan').html(renderPan(w, suse));
-    $('#analyse').html(renderAnalyse(w));
     bindPanClick();
     scrollYunToCurrent();
   }
@@ -843,7 +802,6 @@
         calcShenSha(_w);
         // 重新渲染
         $('#pan').html(renderPan(_w, suse));
-        $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'year') {
@@ -867,7 +825,6 @@
         genLiuDayArr(_w, getLiuDayStartSolar(null, null));
         calcShenSha(_w);
         $('#pan').html(renderPan(_w, suse));
-        $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'month') {
@@ -886,7 +843,6 @@
         // 流日随所选流月变动：该流月对应农历月初一起 30 天，默认选中初一
         genLiuDayArr(_w, getLiuDayStartSolar(liuYue.getGanZhi().substr(1, 1), liuNian));
         $('#pan').html(renderPan(_w, suse));
-        $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'day') {
@@ -900,7 +856,6 @@
         }
         const suse = $('#suse').prop('checked');
         $('#pan').html(renderPan(_w, suse));
-        $('#analyse').html(renderAnalyse(_w));
         bindPanClick();
         scrollYunToCurrent();
       }
@@ -1034,22 +989,16 @@
       }
     });
 
-    // 斗数跳转（紫微，同页跳转）
+    // 斗数跳转（紫微，同页跳转，携带八字当前日期；数字日期与四柱输入均可解析）
     $('.doushuAnchor').on('click', function (e) {
       e.preventDefault();
-      const v2 = String($('#input').text()).replace(/[^\d]/g, '');
+      const parsed = parseInput($('#input').text());
       const gender = $('#gender_man').prop('checked') ? 1 : 0;
-      location.href = 'doushu.html?v=' + v2 + '&gender=' + gender;
-    });
-
-    // 分析面板
-    $('.analyseAnchor').on('click', function (e) {
-      e.preventDefault();
-      const $a = $('#analyse');
-      if ($a.is(':visible')) {
-        $a.hide();
+      if (parsed && parsed.solar) {
+        const v2 = parsed.solar.toYmdHms().replace(/[- :]/gim, '').substr(0, 12);
+        location.href = 'doushu.html?v=' + v2 + '&gender=' + gender;
       } else {
-        $a.show();
+        location.href = 'doushu.html';
       }
     });
 
@@ -1066,11 +1015,6 @@
         const url = href + sep + 'v=' + v2 + '&gender=' + gender;
         window.location.href = url;
       }
-    });
-
-    // 关闭分析
-    $(document).on('click', '#analyse .close-btn', function () {
-      $('#analyse').hide();
     });
   });
 

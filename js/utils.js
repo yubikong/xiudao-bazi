@@ -56,11 +56,25 @@ window.Utils = (function () {
   var ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 
   function ganZhiAdd(gz, n) {
+    n = n || 0;
+    // 单字天干：只推进天干；单字地支：只推进地支（与原站 ganzhiAdd 行为一致）
+    if (gz.length === 1) {
+      if (GAN.indexOf(gz) >= 0) return GAN[(GAN.indexOf(gz) + n + 10) % 10];
+      if (ZHI.indexOf(gz) >= 0) return ZHI[(ZHI.indexOf(gz) + n + 12) % 12];
+      return gz;
+    }
     var g = gz.substr(0, 1), z = gz.substr(1, 1);
     var gi = GAN.indexOf(g), zi = ZHI.indexOf(z);
+    if (gi < 0 || zi < 0) return gz;
     return GAN[(gi + n + 10) % 10] + ZHI[(zi + n + 12) % 12];
   }
   function ganZhiMinus(a, b) {
+    // 单字天干/地支直接相减；双字取地支相减（原站 ganzhiMinus 单字兼容行为）
+    if (a.length === 1) {
+      if (GAN.indexOf(a) >= 0) return GAN.indexOf(b) - GAN.indexOf(a);
+      if (ZHI.indexOf(a) >= 0) return ZHI.indexOf(b) - ZHI.indexOf(a);
+      return 0;
+    }
     return ZHI.indexOf(a.substr(1, 1)) - ZHI.indexOf(b.substr(1, 1));
   }
 
