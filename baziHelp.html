@@ -11,20 +11,22 @@
   p { padding: 5px; line-height: 1.6em; }
   h1 { padding: 15px 0 15px 5px; color: #b98c51; }
   #naYin { margin-top: 30px; }
-  .page-nav { display: flex; align-items: center; padding: 6px 10px; border-bottom: 1px solid #e1e1e1; max-width: 415px; margin: auto; }
-  .page-nav a { color: #b98c51; text-decoration: none; font-size: 1.6rem; margin-right: 12px; }
+  .page-nav { display: flex; gap: 3px; padding: 8px 8px 2px; max-width: 415px; margin: auto; }
+  .page-nav a { flex: 1 1 0; min-width: 0; text-align: center; padding: 7px 2px; font-size: 1.15rem; color: #7a5c2e; text-decoration: none; background: #faf6ee; border: 1px solid #e0d4bc; border-radius: 6px; white-space: nowrap; }
+  .page-nav a.active { background: #b98c51; color: #fff; font-weight: bold; border-color: #b98c51; }
+  @media (max-width: 415px) { .page-nav a { font-size: 1.02rem; } }
   .help { max-width: 415px; margin: auto; }
 </style>
 </head>
 <body>
-<div class="page-nav">
+<nav class="page-nav">
   <a href="index.html">八字排盘</a>
-  <a href="index.html#jinkoujue">金口诀</a>
+  <a href="jinkoujue.html">金口诀</a>
   <a href="rili.html">黄历</a>
   <a href="doushu.html">紫微</a>
-    <a href="compass.html">罗盘</a>
-  <a href="baziHelp.html" style="font-weight:bold;">使用说明</a>
-</div>
+  <a href="compass.html">罗盘</a>
+  <a href="baziHelp.html" class="active">使用说明</a>
+</nav>
 <div class="help">
   <h1>软件帮助</h1>
   <p>01.录入八字：录入一段日期信息到框中，如199908121700+代表1999年8月12日17点生男，199908121700-代表1999年8月12日17点生女。</p>
