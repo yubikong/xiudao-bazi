@@ -180,7 +180,10 @@
         u.ganzhi = o.getGanZhi();
       } else if ('day' === type) {
         u.dayC = o.getDayInChinese();
-        u.ganzhi = o.getDayInGanZhi();
+        // 与黄历（rili.js）口径一致：EightChar.setSect(1) 取日干支
+        const dayEc = o.getEightChar();
+        dayEc.setSect(1);
+        u.ganzhi = dayEc.getDayGan() + dayEc.getDayZhi();
       }
       u.gan = u.ganzhi.substr(0, 1);
       u.zhi = u.ganzhi.substr(1, 1);
@@ -219,14 +222,22 @@
   const ZHI_JIE = { 寅: '立春', 卯: '惊蛰', 辰: '清明', 巳: '立夏', 午: '芒种', 未: '小暑', 申: '立秋', 酉: '白露', 戌: '寒露', 亥: '立冬', 子: '大雪', 丑: '小寒' };
 
   // 流日起点（流月换节的第一天）：切换流月时用该流月的节，否则用今天所在流月的节
+  // 注意 liuNian.getLunar() 是出生年农历，不能用它的节气表；必须按流年（公历）查当年节气。
+  // 寅~子月的节落在流年公历年内，丑月（小寒）落在次年年初；且立春可能落在上一个农历年，故跨农历年查找。
   function getLiuDayStartSolar(liuYueZhi, liuNian) {
     try {
       if (liuYueZhi && liuNian) {
-        const tbl = liuNian.getLunar().getJieQiTable();
         const jieName = ZHI_JIE[liuYueZhi];
-        if (jieName && tbl[jieName] && tbl[jieName].toYmd) {
-          const s = tbl[jieName];
-          return Solar.fromYmd(s.getYear(), s.getMonth(), s.getDay());
+        const y = liuNian.getYear();
+        const targetYear = ('丑' === liuYueZhi) ? y + 1 : y;
+        if (jieName && y >= 1 && y <= 9999) {
+          for (let ly = y - 1; ly <= y + 1; ly++) {
+            const tbl = Lunar.fromYmd(ly, 1, 1).getJieQiTable();
+            const s = tbl[jieName];
+            if (s && s.getYear() === targetYear && s.toYmd) {
+              return Solar.fromYmd(s.getYear(), s.getMonth(), s.getDay());
+            }
+          }
         }
       }
     } catch (e) { /* fallthrough */ }
@@ -330,9 +341,9 @@
     w.sel.def.month = curMonthIdx;
     const curLiuYue = liuYueArr[curMonthIdx];
     w.zhu[8] = { type: 'liuMonth', title: '流月', gan: curLiuYue.getGanZhi().substr(0, 1), zhi: curLiuYue.getGanZhi().substr(1, 1) };
-    // 流日：从流月换节第一天起 30 天，默认选中换节第一天；切换流月时随所选流月变动
+    // 流日：从当前流月换节第一天起 30 天，默认选中换节第一天；切换流月时随所选流月变动
     w.zhu[9] = { type: 'liuDay', title: '流日', gan: '', zhi: '' };
-    genLiuDayArr(w, getLiuDayStartSolar(bazi.getMonthZhi(), curLiuNian));
+    genLiuDayArr(w, getLiuDayStartSolar(curLiuYue.getGanZhi().substr(1, 1), curLiuNian));
 
     // 胎元命宫身宫
     w.spzhu = calcTaiYuan(bazi, lunar);
