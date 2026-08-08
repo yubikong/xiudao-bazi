@@ -12,6 +12,11 @@
   // 贵神地支特殊顺序（贵人腾蛇朱雀六合勾陈青龙天空白虎太常玄武太阴天后）
   var GUI_DIZHI = '丑巳午卯辰寅戌申未子酉亥'.split('');
   var GUI_SHEN = ['贵人', '腾蛇', '朱雀', '六合', '勾陈', '青龙', '天空', '白虎', '太常', '玄武', '太阴', '天后'];
+  // 果老星宗法 昼/夜贵人表（《果老星宗》/《六壬探源2》：天干两两成对）
+  var GUI_REN_GUOLAO = {
+    昼: { 甲: '未', 乙: '申', 丙: '酉', 丁: '亥', 戊: '午', 己: '子', 庚: '丑', 辛: '寅', 壬: '卯', 癸: '巳' },
+    夜: { 甲: '丑', 乙: '子', 丙: '亥', 丁: '酉', 戊: '寅', 己: '申', 庚: '未', 辛: '午', 壬: '巳', 癸: '卯' }
+  };
   // 神将释义（《金口诀入门与进阶》第六章第5节）
   var GUI_DESC = {
     贵人: '官贵之神，遇之易有当官的插手或本身为官。受克主诅咒仇害；受生有官贵之喜；囚主牢狱。',
@@ -309,14 +314,26 @@
 
     // 4. 贵神：贵人位 + 顺逆行神盘
     var isDay = ['卯', '辰', '巳', '午', '未', '申'].indexOf(timeZhi) >= 0;
-    var guiRen;
-    if (['甲', '戊', '庚'].indexOf(dayGan) >= 0) guiRen = isDay ? '丑' : '未';
-    else if (['乙', '己'].indexOf(dayGan) >= 0) guiRen = isDay ? '子' : '申';
-    else if (['丙', '丁'].indexOf(dayGan) >= 0) guiRen = isDay ? '亥' : '酉';
-    else if (['壬', '癸'].indexOf(dayGan) >= 0) guiRen = isDay ? '巳' : '卯';
-    else guiRen = isDay ? '寅' : '午'; // 辛：昼贵寅、夜贵午（金口诀"六辛逢马虎"，辛日旦贵在寅）
-    var isShun = (isDay && ['壬', '癸', '辛'].indexOf(dayGan) < 0) || (!isDay && ['壬', '癸', '辛'].indexOf(dayGan) >= 0);
-    var idx = ZHI.indexOf(guiRen);
+    var guiRen, isShun, guiRenMethod = '昼夜顺逆';
+    var idx;
+    if (_state && _state.guiren === 'guolao') {
+      // 果老星宗法：果老贵人表 + 落宫定顺逆（贵人落地盘亥子丑寅卯辰顺、巳午未申酉戌逆）
+      guiRen = GUI_REN_GUOLAO[isDay ? '昼' : '夜'][dayGan] || '丑';
+      guiRenMethod = '果老·落宫';
+      var luoGong = tianPan.indexOf(guiRen); // 天盘贵人所落地盘位
+      if (luoGong < 0) luoGong = ZHI.indexOf(guiRen);
+      idx = luoGong;
+      isShun = '亥子丑寅卯辰'.indexOf(ZHI[idx]) >= 0;
+    } else {
+      // 默认（俗传）：昼夜顺逆
+      if (['甲', '戊', '庚'].indexOf(dayGan) >= 0) guiRen = isDay ? '丑' : '未';
+      else if (['乙', '己'].indexOf(dayGan) >= 0) guiRen = isDay ? '子' : '申';
+      else if (['丙', '丁'].indexOf(dayGan) >= 0) guiRen = isDay ? '亥' : '酉';
+      else if (['壬', '癸'].indexOf(dayGan) >= 0) guiRen = isDay ? '巳' : '卯';
+      else guiRen = isDay ? '午' : '寅'; // 辛：昼贵午、夜贵寅（金口诀"六辛逢马虎"，虎寅马午）
+      isShun = (isDay && ['壬', '癸', '辛'].indexOf(dayGan) < 0) || (!isDay && ['壬', '癸', '辛'].indexOf(dayGan) >= 0);
+      idx = ZHI.indexOf(guiRen);
+    }
     // 贵神地支映射（天后设置：金口诀默认天后亥/玄武子；大六壬天后子/玄武亥）
     var guiDizhi = ['丑', '巳', '午', '卯', '辰', '寅', '戌', '申', '未', '子', '酉', '亥'];
     if (_state && _state.tianhou === '子') { guiDizhi[9] = '亥'; guiDizhi[11] = '子'; }
@@ -369,7 +386,7 @@
       wangShuai: wangShuai,
       yongShen: yongShen,
       sidakongwang: sidakongwang,
-      isDay: isDay, guiRen: guiRen, isShun: isShun,
+      isDay: isDay, guiRen: guiRen, isShun: isShun, guiRenMethod: guiRenMethod,
       tianPan: tianPan, panJiang: panJiang, shenPan: shenPan,
       bazi: { yearGan: yearGan, yearZhi: yearZhi, monthGan: monthGan, monthZhi: monthZhi, dayGan: dayGan, dayZhi: dayZhi, timeGan: timeGan, timeZhi: timeZhi },
       idx: { mz: mz, dz: dz, tz: tz, df: df }
@@ -893,7 +910,7 @@
     var mingGong = ZHI[(1 + M - H + 12) % 12];
     var shenGong = ZHI[(1 + M + H) % 12];
     h += '<div class="bazi-info"><span class="key">胎元</span>' + taiGan + taiZhi + ' <span class="key">命宫</span>' + mingGong + ' <span class="key">身宫</span>' + shenGong + ' <span class="key">空亡</span>' + kongWang + ' <span class="key">四大空亡</span>' + ke.sidakongwang + '</div>';
-    h += '<div class="bazi-info"><span class="key">占时</span>' + U.wuXingColor(b.timeZhi, 'span') + ' <span class="key">月将</span>' + U.wuXingColor(ke.yuejiang, 'span') + '<span style="color:#999;font-size:1rem;">(' + (ke.yuejiangMethod || '') + ')</span>' + ' <span class="key">' + (ke.isDay ? '昼贵' : '夜贵') + '</span>' + U.wuXingColor(ke.guiRen, 'span') + (ke.isShun ? '顺' : '逆') + '</div>';
+    h += '<div class="bazi-info"><span class="key">占时</span>' + U.wuXingColor(b.timeZhi, 'span') + ' <span class="key">月将</span>' + U.wuXingColor(ke.yuejiang, 'span') + '<span style="color:#999;font-size:1rem;">(' + (ke.yuejiangMethod || '') + ')</span>' + ' <span class="key">' + (ke.isDay ? '昼贵' : '夜贵') + '</span>' + U.wuXingColor(ke.guiRen, 'span') + (ke.isShun ? '顺' : '逆') + '<span style="color:#999;font-size:1rem;">(' + (ke.guiRenMethod || '') + ')</span>' + '</div>';
     h += '</div>';
 
     // 十二宫 + 中间四课（4x4 grid，中间合并区域 4 行竖排）
@@ -1224,7 +1241,14 @@
         if (pt === '子') th = '子';
       } catch (e) {}
       if ($('#tianhou-sel').length && $('#tianhou-sel').val() === '子') th = '子';
-      _state = { solar: solar, difen: df, jiang: jiang, tianhou: th };
+      // 天乙贵人：URL 参数 guiren 或 UI 下拉（default=昼夜顺逆；guolao=果老落宫定顺逆）
+      var gr = null;
+      try {
+        var pg2 = pj.get('guiren');
+        if (pg2 === 'guolao') gr = 'guolao';
+      } catch (e) {}
+      if ($('#guiren-sel').length && $('#guiren-sel').val() === 'guolao') gr = 'guolao';
+      _state = { solar: solar, difen: df, jiang: jiang, tianhou: th, guiren: gr };
     } else {
       _state.solar = solar;
     }
@@ -1234,6 +1258,9 @@
     }
     if ($('#tianhou-sel').length) {
       $('#tianhou-sel').val(_state.tianhou || '亥');
+    }
+    if ($('#guiren-sel').length) {
+      $('#guiren-sel').val(_state.guiren === 'guolao' ? 'guolao' : 'default');
     }
     renderAll();
   }
@@ -1277,6 +1304,12 @@
     $('#tianhou-sel').on('change.jkj', function () {
       var v = $(this).val();
       _state.tianhou = (v === '子') ? '子' : '亥';
+      renderAll();
+    });
+    // 天乙贵人切换（default=昼夜顺逆；guolao=果老落宫定顺逆）
+    $('#guiren-sel').on('change.jkj', function () {
+      var v = $(this).val();
+      _state.guiren = (v === 'guolao') ? 'guolao' : null;
       renderAll();
     });
     $('#now-btn').on('click', function () {
