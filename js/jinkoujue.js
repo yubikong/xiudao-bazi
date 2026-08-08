@@ -211,6 +211,35 @@
 
   // 中气换月将表（太阳过宫：某中气后至下一中气前用该将）
   var JIANG_BY_ZHONGQI = { '雨水': '亥', '春分': '戌', '谷雨': '酉', '小满': '申', '夏至': '未', '大暑': '午', '处暑': '巳', '秋分': '辰', '霜降': '卯', '小雪': '寅', '冬至': '丑', '大寒': '子' };
+
+  // ===== 日缠校正：太阳地心视黄经 → 月将（移植自《月将推算_算法.py》） =====
+  // 回归黄经以春分点为 0°，每 30° 一宫，边界即中气；与"逢中气换将"等价但按精确黄经。
+  var JIANG_LAMBDA = [
+    [330, '亥'], [0, '戌'], [30, '酉'], [60, '申'], [90, '未'], [120, '午'],
+    [150, '巳'], [180, '辰'], [210, '卯'], [240, '寅'], [270, '丑'], [300, '子']
+  ];
+  function solarLambdaDeg(solar) {
+    // lunar.js 的 getJulianDay 把北京时间当作 UTC，需减 8 小时转真 UTC（与算法.py 一致）
+    var jd = solar.getJulianDay() - 8 / 24;
+    var T = (jd - 2451545.0) / 36525.0;
+    var L0 = (280.46646 + 36000.76983 * T) % 360;
+    var M = (357.52911 + 35999.05029 * T) % 360;
+    var Mr = M * Math.PI / 180;
+    var C = (1.914602 - 0.004817 * T) * Math.sin(Mr)
+      + (0.019993 - 0.000101 * T) * Math.sin(2 * Mr)
+      + 0.000289 * Math.sin(3 * Mr);
+    var theta = L0 + C;
+    var Om = (125.04 - 1934.136 * T) * Math.PI / 180;
+    return ((theta - 0.00569 - 0.00478 * Math.sin(Om)) % 360 + 360) % 360;
+  }
+  function getMonthJiangBySolarLambda(solar) {
+    var lam = solarLambdaDeg(solar);
+    for (var i = 0; i < JIANG_LAMBDA.length; i++) {
+      var s = JIANG_LAMBDA[i][0];
+      if (s <= lam && lam < s + 30) return JIANG_LAMBDA[i][1];
+    }
+    return '亥';
+  }
   // 月将按中气精确换将：取当前日期之前（含）最近的中气
   function getMonthJiangByZhongQi(lunar) {
     try {
@@ -245,17 +274,23 @@
     var tz = ZHI.indexOf(timeZhi);
     var df = ZHI.indexOf(difen);
 
-    // 1. 月将：自定义优先（12 将），否则默认按中气换将（太阳过宫）
-    var yuejiang = customJiang && ZHI.indexOf(customJiang) >= 0 ? customJiang : null;
+    // 1. 月将：自定义 12 将优先；'richen'=日缠校正（太阳躔度）；默认中气换将（太阳过宫）
+    var yuejiang = (customJiang && ZHI.indexOf(customJiang) >= 0) ? customJiang : null;
     var yuejiangAuto = true;
-    if (!yuejiang) {
+    var yuejiangMethod = '中气';
+    if (yuejiang) {
+      yuejiangAuto = false;
+      yuejiangMethod = '自定义';
+    } else if (customJiang === 'richen') {
+      yuejiang = getMonthJiangBySolarLambda(solar);
+      yuejiangAuto = false;
+      yuejiangMethod = '日缠校正';
+    } else {
       yuejiang = getMonthJiangByZhongQi(lunar);
       if (!yuejiang) {
         // 兜底：月支公式（13 - 月支序）
         yuejiang = ZHI[(13 - mz) % 12];
       }
-    } else {
-      yuejiangAuto = false;
     }
     var yuejiangIdx = ZHI.indexOf(yuejiang);
 
@@ -282,6 +317,9 @@
     else guiRen = isDay ? '寅' : '午'; // 辛：昼贵寅、夜贵午（金口诀"六辛逢马虎"，辛日旦贵在寅）
     var isShun = (isDay && ['壬', '癸', '辛'].indexOf(dayGan) < 0) || (!isDay && ['壬', '癸', '辛'].indexOf(dayGan) >= 0);
     var idx = ZHI.indexOf(guiRen);
+    // 贵神地支映射（天后设置：金口诀默认天后亥/玄武子；大六壬天后子/玄武亥）
+    var guiDizhi = ['丑', '巳', '午', '卯', '辰', '寅', '戌', '申', '未', '子', '酉', '亥'];
+    if (_state && _state.tianhou === '子') { guiDizhi[9] = '亥'; guiDizhi[11] = '子'; }
     var shenPan = new Array(12);
     for (var s = 1; s <= 12; s++) {
       var key;
@@ -292,10 +330,10 @@
         if (idx - s + 2 <= 0) idx += 12;
         key = idx - s + 2;
       }
-      shenPan[key - 1] = GUI_DIZHI[s - 1];
+      shenPan[key - 1] = guiDizhi[s - 1];
     }
     var guishen = shenPan[df];
-    var guishenName = GUI_SHEN[GUI_DIZHI.indexOf(guishen)];
+    var guishenName = GUI_SHEN[guiDizhi.indexOf(guishen)];
 
     // 5. 五子元遁（日干起）→ 人元（只干）/ 将神干 / 贵神干
     var ss = WUZI[dayGan];
@@ -320,6 +358,7 @@
       zhanshi: timeZhi,
       yuejiang: yuejiang,
       yuejiangAuto: yuejiangAuto,
+      yuejiangMethod: yuejiangMethod,
       renyuan: renyuan,
       renyuanWX: U.wuXingMap(renyuan),
       renyuanYY: '阳阴'.charAt(GAN.indexOf(renyuan) % 2),
@@ -854,7 +893,7 @@
     var mingGong = ZHI[(1 + M - H + 12) % 12];
     var shenGong = ZHI[(1 + M + H) % 12];
     h += '<div class="bazi-info"><span class="key">胎元</span>' + taiGan + taiZhi + ' <span class="key">命宫</span>' + mingGong + ' <span class="key">身宫</span>' + shenGong + ' <span class="key">空亡</span>' + kongWang + ' <span class="key">四大空亡</span>' + ke.sidakongwang + '</div>';
-    h += '<div class="bazi-info"><span class="key">占时</span>' + U.wuXingColor(b.timeZhi, 'span') + ' <span class="key">月将</span>' + U.wuXingColor(ke.yuejiang, 'span') + (ke.yuejiangAuto ? '<span style="color:#999;font-size:1rem;">(中气)</span>' : '<span style="color:#6b98c0;font-size:1rem;">(自定义)</span>') + ' <span class="key">' + (ke.isDay ? '昼贵' : '夜贵') + '</span>' + U.wuXingColor(ke.guiRen, 'span') + (ke.isShun ? '顺' : '逆') + '</div>';
+    h += '<div class="bazi-info"><span class="key">占时</span>' + U.wuXingColor(b.timeZhi, 'span') + ' <span class="key">月将</span>' + U.wuXingColor(ke.yuejiang, 'span') + '<span style="color:#999;font-size:1rem;">(' + (ke.yuejiangMethod || '') + ')</span>' + ' <span class="key">' + (ke.isDay ? '昼贵' : '夜贵') + '</span>' + U.wuXingColor(ke.guiRen, 'span') + (ke.isShun ? '顺' : '逆') + '</div>';
     h += '</div>';
 
     // 十二宫 + 中间四课（4x4 grid，中间合并区域 4 行竖排）
@@ -1164,25 +1203,37 @@
           }
         } catch (e) {}
       }
-      // 自定义月将：URL 参数 jiang 或 UI 下拉（'auto' 为自动按中气）
+      // 自定义月将：URL 参数 jiang 或 UI 下拉（'auto'=按中气；'richen'=日缠校正；或 12 将）
       var jiang = null;
       try {
         var pj = new URLSearchParams(location.search);
         var dj = pj.get('jiang');
         if (dj === 'auto' || !dj) { jiang = null; }
+        else if (dj === 'richen') { jiang = 'richen'; }
         else if ('子丑寅卯辰巳午未申酉戌亥'.indexOf(dj) >= 0) { jiang = dj; }
       } catch (e) {}
       if (!jiang && $('#jiang-sel').length && $('#jiang-sel').val() !== 'auto') {
         var vj = $('#jiang-sel').val();
-        if ('子丑寅卯辰巳午未申酉戌亥'.indexOf(vj) >= 0) jiang = vj;
+        if (vj === 'richen') jiang = 'richen';
+        else if ('子丑寅卯辰巳午未申酉戌亥'.indexOf(vj) >= 0) jiang = vj;
       }
-      _state = { solar: solar, difen: df, jiang: jiang };
+      // 天后地支：URL 参数 tianhou 或 UI 下拉（'亥'=金口诀玄武子，'子'=大六壬玄武亥）
+      var th = '亥';
+      try {
+        var pt = pj.get('tianhou');
+        if (pt === '子') th = '子';
+      } catch (e) {}
+      if ($('#tianhou-sel').length && $('#tianhou-sel').val() === '子') th = '子';
+      _state = { solar: solar, difen: df, jiang: jiang, tianhou: th };
     } else {
       _state.solar = solar;
     }
-    // 同步月将下拉显示
+    // 同步月将/天后下拉显示
     if ($('#jiang-sel').length) {
       $('#jiang-sel').val(_state.jiang ? _state.jiang : 'auto');
+    }
+    if ($('#tianhou-sel').length) {
+      $('#tianhou-sel').val(_state.tianhou || '亥');
     }
     renderAll();
   }
@@ -1214,11 +1265,18 @@
 
     $('#input').on('input.jkj', function () { sync($(this).val()); });
     $('input[name=gender], #sect, #suse').on('change.jkj', function () { sync($('#input').val()); });
-    // 月将切换（auto=按中气自动，或 12 将自定义）
+    // 月将切换（auto=中气自动；richen=日缠校正；或 12 将自定义）
     $('#jiang-sel').on('change.jkj', function () {
       var v = $(this).val();
       if (v === 'auto') { _state.jiang = null; }
+      else if (v === 'richen') { _state.jiang = 'richen'; }
       else if ('子丑寅卯辰巳午未申酉戌亥'.indexOf(v) >= 0) { _state.jiang = v; }
+      renderAll();
+    });
+    // 天后地支切换（亥=金口诀玄武子；子=大六壬玄武亥）
+    $('#tianhou-sel').on('change.jkj', function () {
+      var v = $(this).val();
+      _state.tianhou = (v === '子') ? '子' : '亥';
       renderAll();
     });
     $('#now-btn').on('click', function () {
