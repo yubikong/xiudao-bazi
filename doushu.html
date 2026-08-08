@@ -23,7 +23,7 @@
   /* 时辰增减 */
   .hour-btn { flex: 0 0 auto; font-weight: bold; }
   /* 十二宫固定高度：切换流年/大限时内容增减不跳动（约7行） */
-  .zw-cell { min-height: 108px; display: flex; flex-direction: column; }
+  .zw-cell { min-height: 130px; display: flex; flex-direction: column; }
   .zw-stars { flex: 1 1 auto; }
   /* 常见格局（本命/大限/流年 三类分色） */
   .zw-geju-sec { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
@@ -54,30 +54,41 @@
   .c-water { color: #007bff; }
   .c-fire { color: #d41313; }
   .c-earth { color: #a17323; }
-  /* 紫微盘面 */
-  .zw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 6px 0; }
-  .zw-cell { border: 1px solid #888; border-radius: 2px; padding: 2px; background: #fff; }
+  /* 紫微盘面（react-iztro 紧凑布局，适配 415px） */
+  .zw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 6px 0; position: relative; }
+  .zw-grid-sf { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+  .zw-grid-sf-line { fill: none; stroke: #e57373; stroke-width: 0.2; opacity: 0.75; stroke-dasharray: 1 1; }
+  .zw-cell { border: 1px solid #bbb; border-radius: 2px; padding: 2px; background: #fff; display: flex; flex-direction: column; min-height: 128px; overflow: hidden; }
   .zw-cell.empty { border-color: transparent; min-height: 0; }
-  .zw-cell.ming { background: #fff8e1; border-color: #b98c51; }
+  .zw-cell.ming { background: #fdf8ef; border-color: #b98c51; }
   .zw-cell.shen { box-shadow: inset 0 0 0 2px #f0e6d0; }
-  .zw-cell-head { font-weight: bold; color: #b98c51; text-align: center; padding: 0; border-bottom: 1px solid #eee; font-size: 0.72em; line-height: 1.35; }
-  .zw-daxian { text-align: center; font-size: 0.6em; color: #999; padding: 0; line-height: 1.3; }
-  .zw-stars { padding: 1px 0; }
-  .zw-star { display: flex; justify-content: center; align-items: center; padding: 0; font-size: 0.7em; line-height: 1.25em; }
-  .hua-mark { font-size: 0.6em; margin-left: 1px; font-weight: bold; }
-  .hua-mark.禄 { color: #228b22; }
-  .hua-mark.权 { color: #b98c51; }
-  .hua-mark.科 { color: #007bff; }
-  .hua-mark.忌 { color: #d41313; }
+  .zw-cell.lngong { box-shadow: inset 0 0 0 2px #6b98c0; }
+  .zw-cell.dxgong { box-shadow: inset 0 0 0 2px #d3a94f; }
+  .zw-c-head { display: flex; justify-content: space-between; align-items: baseline; gap: 2px; }
+  .zw-c-name { font-size: 0.72em; font-weight: bold; color: #6b4fa3; white-space: nowrap; }
+  .zw-c-gz { font-size: 0.66em; font-weight: bold; color: #228b22; white-space: nowrap; }
+  .zw-c-sub { font-size: 0.52em; color: #888; white-space: nowrap; overflow: hidden; }
+  .zw-c-stars { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 2px 4px; padding: 1px 0; }
+  .zw-star { display: inline-flex; justify-content: center; align-items: center; padding: 0; font-size: 0.7em; line-height: 1.4; }
+  .zw-star-major { font-weight: bold; font-size: 0.8em; }
+  .zw-star-minor { font-size: 0.66em; }
+  .zw-c-fate { display: flex; justify-content: center; gap: 3px; flex-wrap: wrap; margin: 1px 0; }
+  .zw-fate { font-size: 0.5em; background: #6b4fa3; color: #fff; border-radius: 8px; padding: 1px 4px; white-space: nowrap; }
+  .zw-fate-ln { background: #6b98c0; }
+  .zw-fate-xx { background: #a05a5a; }
+  .zw-c-footer { font-size: 0.5em; color: #888; text-align: center; border-top: 1px solid #eee; padding: 1px 0; }
+  .hua-mark { font-size: 0.58em; margin-left: 1px; font-weight: bold; color: #fff; border-radius: 4px; padding: 0 2px; }
+  .hua-mark.禄 { background: #e57373; }
+  .hua-mark.权 { background: #7a9be0; }
+  .hua-mark.科 { background: #66bb6a; }
+  .hua-mark.忌 { background: #555; }
   .btn-group { display: flex; gap: 8px; margin: 10px 0; }
   .btn { padding: 6px 14px; background: #b98c51; color: #fff; border: 0; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 1.3rem; }
   .btn:hover { background: #a07b46; }
-  /* 紫微增强：星曜亮度/流年星/宫干四化/流年命宫/大限命宫/释义弹窗 */
+  /* 紫微增强：星曜亮度/流年星/宫干四化/运限胶囊/释义弹窗 */
   .zw-bright { font-size: 0.55em; margin-left: 1px; font-weight: bold; }
-  .zw-lnstar { color: #6b98c0; font-size: 0.66em !important; }
+  .zw-lnstar { color: #c9577a; font-size: 0.6em; }
   .zw-gonghua { font-size: 0.58em; color: #888; text-align: center; padding: 0; line-height: 1.2; }
-  .zw-cell.lngong { box-shadow: inset 0 0 0 2px #6b98c0; }
-  .zw-cell.dxgong { box-shadow: inset 0 0 0 2px #b98c51; }
   .zw-dxmark { color: #b98c51; font-weight: bold; }
   .zw-star-click { cursor: pointer; }
   .zw-star-click:hover { background: #f5e9d8; border-radius: 2px; }
@@ -86,8 +97,11 @@
   .zw-modal-title { font-size: 1.4rem; font-weight: bold; color: #b98c51; margin-bottom: 6px; }
   .zw-modal-desc { font-size: 1.15rem; color: #555; line-height: 1.6; }
   .zw-modal-close { position: absolute; top: 6px; right: 12px; cursor: pointer; font-size: 1.6rem; color: #999; }
-  /* 中间横排四柱 + 大运流年条 */
-  .zw-center-cell { grid-column: span 2; grid-row: span 2; border: 1px solid #888; border-radius: 2px; background: #fdf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+  /* 杂耀（小字） */
+  .zw-minor-star { white-space: nowrap; font-size: 0.54em; color: #8a8a8a; }
+  .zw-minor-star.zw-th { color: #c9577a; }
+  /* 中宫（四柱 + 信息） */
+  .zw-center-cell { grid-column: span 2; grid-row: span 2; border: 1px solid #bbb; border-radius: 2px; background: #fdf8ef; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px; }
   .zw-center-bazi { display: flex; flex-direction: column; gap: 1px; align-items: center; }
   .zw-cb-row { display: flex; gap: 5px; font-size: 1.05em; line-height: 1.25; }
   .zw-cb-row span { width: 1.3em; text-align: center; }
