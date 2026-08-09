@@ -132,7 +132,30 @@
     s += '<svg id="compassSvg" viewBox="0 0 400 400" width="100%" height="100%">';
     s += '<circle cx="' + cx + '" cy="' + cy + '" r="198" fill="#fdf8ef" stroke="#a1a1a1" stroke-width="2"/>';
     s += '<circle cx="' + cx + '" cy="' + cy + '" r="190" fill="none" stroke="#d9c9a8" stroke-width="1"/>';
+    // 各内容层间的同心分隔圆（参考实际罗盘多层分界，画在内容层下方）
+    // 环形带：天池34 / 四方58 / 八卦91 / 72龙111 / 12支133 / 28宿153 / 24山169 / 刻度178-190
+    var xkDiv = [80, 102, 120, 146, 160];
+    for (var di = 0; di < xkDiv.length; di++) {
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + xkDiv[di] + '" fill="none" stroke="#d9c9a8" stroke-width="1"/>';
+    }
     s += '<g id="dial">';
+    // 各环径向分隔线：按每环字符数等分（4/8/72/12/28/24），画在字符间隙，颜色同圆环
+    var xkRadial = [
+      { r1: 34, r2: 80, n: 4, base: 0 },
+      { r1: 80, r2: 102, n: 8, base: 180 },
+      { r1: 102, r2: 120, n: 72, base: 180 },
+      { r1: 120, r2: 146, n: 12, base: 180 },
+      { r1: 146, r2: 160, n: 28, base: 180 },
+      { r1: 160, r2: 190, n: 24, base: 180 }
+    ];
+    for (var bd = 0; bd < xkRadial.length; bd++) {
+      var band = xkRadial[bd], bstep = 360 / band.n;
+      for (var bq = 0; bq < band.n; bq++) {
+        var bdeg = band.base + bq * bstep + bstep / 2;
+        var brad = (bdeg % 360) * Math.PI / 180;
+        s += '<line x1="' + (cx + band.r1 * Math.sin(brad)).toFixed(1) + '" y1="' + (cy - band.r1 * Math.cos(brad)).toFixed(1) + '" x2="' + (cx + band.r2 * Math.sin(brad)).toFixed(1) + '" y2="' + (cy - band.r2 * Math.cos(brad)).toFixed(1) + '" stroke="#d9c9a8" stroke-width="0.6"/>';
+      }
+    }
     // 二十八宿外圈层（layer-xxiu）
     var xiuAcc = 0;
     for (var xi = 0; xi < 28; xi++) {
@@ -143,7 +166,7 @@
       var xMidN = norm360((xStart + xEnd) / 2 - 90); // 宿中点角度（0=正北？转正北上南下北）
       // 28宿以正北子位为"虚"宿起？传统：虚宿在子。这里简化按宿序从北方起排
       var xa = (xi * (360 / 28) + 180) % 360, xr = xa * Math.PI / 180;
-      s += '<text class="layer-xxiu" x="' + (cx + 148 * Math.sin(xr)).toFixed(1) + '" y="' + (cy - 148 * Math.cos(xr) + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#8a6d3b">' + XXIU[xi] + '</text>';
+      s += '<text class="layer-xxiu" x="' + (cx + 153 * Math.sin(xr)).toFixed(1) + '" y="' + (cy - 153 * Math.cos(xr) + 4).toFixed(1) + '" text-anchor="middle" font-size="11" fill="#8a6d3b">' + XXIU[xi] + '</text>';
     }
     for (var a = 0; a < 360; a += 15) {
       var major = (a % 30 === 0);
@@ -153,12 +176,12 @@
     }
     for (var i = 0; i < 24; i++) {
       var ang = (i * 15 + 180) % 360, rad = ang * Math.PI / 180;
-      s += '<text x="' + (cx + 162 * Math.sin(rad)).toFixed(1) + '" y="' + (cy - 162 * Math.cos(rad) + 5).toFixed(1) + '" text-anchor="middle" font-size="17" fill="#5a4632" font-weight="600">' + SHAN24[i] + '</text>';
+      s += '<text x="' + (cx + 169 * Math.sin(rad)).toFixed(1) + '" y="' + (cy - 169 * Math.cos(rad) + 5).toFixed(1) + '" text-anchor="middle" font-size="16" fill="#5a4632" font-weight="600">' + SHAN24[i] + '</text>';
     }
     for (var j = 0; j < 12; j++) {
       var ang2 = (j * 30 + 180) % 360, rad2 = ang2 * Math.PI / 180;
       var z = ZHI12[j];
-      s += '<text x="' + (cx + 126 * Math.sin(rad2)).toFixed(1) + '" y="' + (cy - 126 * Math.cos(rad2) + 6).toFixed(1) + '" text-anchor="middle" font-size="20" font-weight="700" fill="' + (WX_COLOR[z] || '#333') + '">' + z + '</text>';
+      s += '<text x="' + (cx + 133 * Math.sin(rad2)).toFixed(1) + '" y="' + (cy - 133 * Math.cos(rad2) + 6).toFixed(1) + '" text-anchor="middle" font-size="20" font-weight="700" fill="' + (WX_COLOR[z] || '#333') + '">' + z + '</text>';
     }
     // 穿山72龙层（layer-72）：每山3格纳音五行字
     var nayin = window.LunarUtil && window.LunarUtil.NAYIN ? window.LunarUtil.NAYIN : null;
@@ -172,24 +195,24 @@
       var wxw = ny ? (ny.substr(-1)) : '';
       var clr = wxClr[wxw] || '#999';
       var a72 = (s72 * 5 + 180) % 360, r72 = a72 * Math.PI / 180;
-      s += '<text class="layer-72" x="' + (cx + 108 * Math.sin(r72)).toFixed(1) + '" y="' + (cy - 108 * Math.cos(r72) + 3).toFixed(1) + '" text-anchor="middle" font-size="8" fill="' + clr + '">' + (wxw || '·') + '</text>';
+      s += '<text class="layer-72" x="' + (cx + 111 * Math.sin(r72)).toFixed(1) + '" y="' + (cy - 111 * Math.cos(r72) + 3).toFixed(1) + '" text-anchor="middle" font-size="8" fill="' + clr + '">' + (wxw || '·') + '</text>';
     }
     // 先天八卦层（layer-bagua）
     for (var bi = 0; bi < 8; bi++) {
       var bg = BAGUA_XT[bi], ba = (bg[0] + 180) % 360, br = ba * Math.PI / 180;
-      s += '<text class="layer-bagua" x="' + (cx + 96 * Math.sin(br)).toFixed(1) + '" y="' + (cy - 96 * Math.cos(br) + 4).toFixed(1) + '" text-anchor="middle" font-size="14" fill="#6b98c0">' + bg[1] + '</text>';
+      s += '<text class="layer-bagua" x="' + (cx + 91 * Math.sin(br)).toFixed(1) + '" y="' + (cy - 91 * Math.cos(br) + 4).toFixed(1) + '" text-anchor="middle" font-size="14" fill="#6b98c0">' + bg[1] + '</text>';
     }
     var four = [[0, '南', '#007bff'], [90, '西', '#ffa436'], [180, '北', '#d41313'], [270, '东', '#228b22']];
     for (var k = 0; k < 4; k++) {
-      var a3 = four[k][0], r3 = 78, rad3 = a3 * Math.PI / 180;
+      var a3 = four[k][0], r3 = 58, rad3 = a3 * Math.PI / 180;
       s += '<text x="' + (cx + r3 * Math.sin(rad3)).toFixed(1) + '" y="' + (cy - r3 * Math.cos(rad3) + 9).toFixed(1) + '" text-anchor="middle" font-size="30" font-weight="800" fill="' + four[k][2] + '">' + four[k][1] + '</text>';
     }
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="62" fill="none" stroke="#d9c9a8" stroke-width="1.5"/>';
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="28" fill="#fff" stroke="#a1a1a1" stroke-width="1.5"/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="34" fill="#fff" stroke="#a1a1a1" stroke-width="1.5"/>';
     s += '</g>';
     s += '<g id="needle">';
-    s += '<polygon points="200,118 192,170 208,170" fill="#d41313"/>';
-    s += '<polygon points="200,282 192,230 208,230" fill="#f5f5f5" stroke="#999" stroke-width="1"/>';
+    // 长细指针：贯穿外圆直径，上半红（北）、下半黑（南），线宽同主刻度线
+    s += '<line x1="200" y1="2" x2="200" y2="198" stroke="#d41313" stroke-width="1"/>';
+    s += '<line x1="200" y1="202" x2="200" y2="398" stroke="#000" stroke-width="1"/>';
     s += '<circle cx="200" cy="200" r="8" fill="#b98c51" stroke="#fff" stroke-width="2"/>';
     s += '</g>';
     s += '<polygon points="200,6 193,20 207,20" fill="#d41313"/>';
