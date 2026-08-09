@@ -239,6 +239,14 @@ $(function () {
   if (!$('#zw-liunian').val()) $('#zw-liunian').val(new Date().getFullYear());
   renderPan();
 
+  // 八字跳转：携带当前紫微日期+性别
+  $('.page-nav a[href="index.html"]').on('click', function (e) {
+    e.preventDefault();
+    const v = $('#zw-input').val().replace(/[^\d]/g, '');
+    const gender = $('#zw-man').prop('checked') ? 1 : 0;
+    location.href = 'index.html?v=' + v + '&gender=' + gender;
+  });
+
   // 排盘按钮
   $('#zw-pp').on('click', renderPan);
   // 此刻
