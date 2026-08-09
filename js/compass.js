@@ -335,18 +335,27 @@
   // ============ 玄空方形罗盘 ============
   var XK_GRID = [['东南', '南', '西南'], ['东', '中', '西'], ['东北', '北', '西北']];
 
+  var _xkKey = '';
   function renderXuankong() {
     var FS = window.FengShui;
     var year = parseInt(document.getElementById('xk-year').value, 10) || new Date().getFullYear();
     var sel = document.getElementById('xk-shan');
-    var shanIdx = sel && sel.value !== '' ? parseInt(sel.value, 10) : FS.shanIndexFromDegree(currentHeading());
-    if (sel) sel.value = shanIdx;
+    // 坐山：'跟随朝向'时按当前朝向（锁定优先），否则用下拉手动所选
+    var autoFollow = !sel || sel.value === '';
+    var shanIdx = autoFollow ? FS.shanIndexFromDegree(currentHeading()) : parseInt(sel.value, 10);
+    if (autoFollow && sel) sel.value = '';
+    // 山向未变则不重排（避免传感器高频刷新闪烁）
+    var key = year + ':' + shanIdx;
+    if (_xkKey === key && document.getElementById('xuankong-pan').innerHTML) return;
+    _xkKey = key;
     var pan = FS.xuankongPan(year, shanIdx);
     var cellMap = {};
     pan.palaces.forEach(function (p) { cellMap[p.direction] = p; });
 
     var h2 = '<div class="xk-pan-title">' + pan.yunName + ' · ' + pan.shan + '山' + pan.xiang + '向（坐' + pan.shanPalace + '朝' + pan.xiangPalace + '）</div>';
     h2 += '<div class="xk-sub">山星' + pan.shanStar + (pan.shanReverse ? '逆' : '顺') + '飞 · 向星' + pan.xiangStar + (pan.xiangReverse ? '逆' : '顺') + '飞</div>';
+    h2 += '<div class="bz-wrap">';
+    h2 += '<div class="bz-pointer"><span class="bz-tri">▲</span><span class="bz-ptr-txt" id="xk-ptr-txt">向：' + pan.xiang + '（' + pan.xiangPalace + '）</span></div>';
     h2 += '<div class="xk-grid">';
     for (var r = 0; r < 3; r++) {
       for (var c = 0; c < 3; c++) {
@@ -369,6 +378,7 @@
       }
     }
     h2 += '</div>';
+    h2 += '</div>'; // 关闭 bz-wrap
     document.getElementById('xuankong-pan').innerHTML = h2;
   }
 
@@ -385,7 +395,7 @@
     var circCtrl = document.getElementById('circular-ctrl');
     if (circCtrl) circCtrl.style.display = (type === 'circular') ? '' : 'none';
     var lockBtn = document.getElementById('lock-btn');
-    if (lockBtn) lockBtn.style.display = (type === 'circular' || type === 'bazhai') ? '' : 'none';
+    if (lockBtn) lockBtn.style.display = (type === 'circular' || type === 'bazhai' || type === 'xuankong') ? '' : 'none';
     if (type === 'bazhai') renderBazhai(true);
     if (type === 'xuankong') renderXuankong();
   }
