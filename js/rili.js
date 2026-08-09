@@ -155,10 +155,10 @@
     e += '</div></div>';
 
     // 4. 值日
-    e += '<div class="div_table table_zhiri"><div class="dtr dayinfo"><div class="col col0">值日：</div><div class="col tl col-right">' + U.wuXingColor(w.zhu[3].naYin, 'span', 0) + '&nbsp;';
+    e += '<div class="div_table table_zhiri"><div class="dtr dayinfo"><div class="col col0">值日：</div><div class="col tl col-right">' + U.wuXingColor(w.zhu[3].naYin, 'span') + '&nbsp;';
     e += getZhiXingHtml(lunar) + '&nbsp;';
     e += getTianShenHtml(lunar) + '&nbsp;';
-    e += '<span class="click-getWordInfo">' + U.wuXingColor(getXingXiu(lunar, true), 'span', 0) + '</span>&nbsp;';
+    e += '<span class="click-getWordInfo">' + U.wuXingColor(getXingXiu(lunar, true), 'span') + '</span>&nbsp;';
     const p = Solar.fromDate(new Date());
     let m = getDistance(solar, p);
     e += '<span>（距离此刻：' + m + '）</span></div></div></div>';

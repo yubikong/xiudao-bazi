@@ -407,10 +407,9 @@
   }
 
   // ============ 渲染 ============
-  function renderPan(w, n2) {
+  function renderPan(w) {
     const Y = w;
     const n = Y.info.gender;
-    const suse = n2; // 素色
     let i = '';
 
     // 出生信息
@@ -757,10 +756,9 @@
       return;
     }
     const sect = $('#sect').prop('checked') ? 2 : 1;
-    const suse = $('#suse').prop('checked');
     const w = buildData(parsed.solar, parsed.gender, { sect: sect });
     _w = w;
-    $('#pan').html(renderPan(w, suse));
+    $('#pan').html(renderPan(w));
     bindPanClick();
     scrollYunToCurrent();
   }
@@ -778,7 +776,6 @@
         _w.sel.def.year = 0;
         _w.sel.st.month = 0;
         _w.sel.def.month = 0;
-        const suse = $('#suse').prop('checked');
         // 重新计算大运流年流月
         const bazi = _w.info.bazi;
         const gender = _w.info.gender;
@@ -810,13 +807,12 @@
         // 重新计算神煞（流年神煞变化）
         calcShenSha(_w);
         // 重新渲染
-        $('#pan').html(renderPan(_w, suse));
+        $('#pan').html(renderPan(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'year') {
         _w.sel.st.year = ind;
         _w.sel.def.year = ind;
-        const suse = $('#suse').prop('checked');
         const bazi = _w.info.bazi;
         const gender = _w.info.gender;
         const f = bazi.getYun(gender).getDaYun(11);
@@ -833,12 +829,11 @@
         // 重置流日（回到今天农历月初一）
         genLiuDayArr(_w, getLiuDayStartSolar(null, null));
         calcShenSha(_w);
-        $('#pan').html(renderPan(_w, suse));
+        $('#pan').html(renderPan(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'month') {
         _w.sel.st.month = ind;
-        const suse = $('#suse').prop('checked');
         const bazi = _w.info.bazi;
         const gender = _w.info.gender;
         const f = bazi.getYun(gender).getDaYun(11);
@@ -851,7 +846,7 @@
         _w.zhu[8].zhi = liuYue.getGanZhi().substr(1, 1);
         // 流日随所选流月变动：该流月对应农历月初一起 30 天，默认选中初一
         genLiuDayArr(_w, getLiuDayStartSolar(liuYue.getGanZhi().substr(1, 1), liuNian));
-        $('#pan').html(renderPan(_w, suse));
+        $('#pan').html(renderPan(_w));
         bindPanClick();
         scrollYunToCurrent();
       } else if (type === 'day') {
@@ -863,8 +858,7 @@
           _w.zhu[9].zhi = _td.zhi;
           _w.zhu[9].ganzhi = _td.ganzhi;
         }
-        const suse = $('#suse').prop('checked');
-        $('#pan').html(renderPan(_w, suse));
+        $('#pan').html(renderPan(_w));
         bindPanClick();
         scrollYunToCurrent();
       }
@@ -990,12 +984,6 @@
 
     // 晚子时
     $('#sect').on('change', function () {
-      render($('#input').text());
-    });
-
-    // 素色
-    $('#suse').on('change', function () {
-      $('body').toggleClass('suse', $(this).prop('checked'));
       render($('#input').text());
     });
 

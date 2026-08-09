@@ -861,7 +861,6 @@
     var sd = calcSanDong();
     var geju = calcGeJu();
     var rushi = calcRuShi();
-    var suse = $('#suse').prop('checked') ? 1 : 0;
     var solar = _state.solar;
     var lunar = solar.getLunar();
     var b = ke.bazi;
@@ -1291,7 +1290,7 @@
     $('#birth-title').text(s.getYear() + '年' + s.getMonth() + '月' + s.getDay() + '日(' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese() + ')' + U.pad(s.getHour()) + ':' + U.pad(s.getMinute()));
 
     $('#input').on('input.jkj', function () { sync($(this).val()); });
-    $('input[name=gender], #sect, #suse').on('change.jkj', function () { sync($('#input').val()); });
+    $('input[name=gender], #sect').on('change.jkj', function () { sync($('#input').val()); });
     // 月将切换（auto=中气自动；richen=日缠校正；或 12 将自定义）
     $('#jiang-sel').on('change.jkj', function () {
       var v = $(this).val();

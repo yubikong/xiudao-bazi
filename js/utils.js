@@ -9,8 +9,8 @@ window.Utils = (function () {
   var wuXingColorMap = { 金: "c-gold", 庚: "c-gold", 辛: "c-gold", 申: "c-gold", 酉: "c-gold", 木: "c-wood", 甲: "c-wood", 乙: "c-wood", 寅: "c-wood", 卯: "c-wood", 水: "c-water", 壬: "c-water", 癸: "c-water", 亥: "c-water", 子: "c-water", 火: "c-fire", 丙: "c-fire", 丁: "c-fire", 巳: "c-fire", 午: "c-fire", 土: "c-earth", 戊: "c-earth", 己: "c-earth", 辰: "c-earth", 戌: "c-earth", 丑: "c-earth", 未: "c-earth", 男: "c-water", 乾造: "c-water", 乾: "c-water", 女: "c-fire", 坤造: "c-fire", 坤: "c-fire",
     角木蛟: "c-wood", 亢金龙: "c-gold", 氐土貉: "c-earth", 尾火虎: "c-fire", 箕水豹: "c-water", 斗木獬: "c-wood", 牛金牛: "c-gold", 女土蝠: "c-earth", 室火猪: "c-fire", 壁水貐: "c-water", 奎木狼: "c-wood", 娄金狗: "c-gold", 胃土彘: "c-earth", 觜火猴: "c-fire", 参水猿: "c-water", 井木犴: "c-wood", 鬼金羊: "c-gold", 柳土獐: "c-earth", 翼火蛇: "c-fire", 轸水蚓: "c-water" };
 
-  function wuXingColor(t, n, e) {
-    n = n || "span"; e = e || 0;
+  function wuXingColor(t, n) {
+    n = n || "span";
     var r = wuXingMap(t) || t;
     var o = wuXingColorMap[r] || "";
     if (!o && 3 === String(t).length) { o = wuXingColorMap[String(t).substr(2, 1)] || ""; }
@@ -18,10 +18,9 @@ window.Utils = (function () {
     if (!o && 2 === String(t).length) {
       var g0 = String(t).charAt(0), z0 = String(t).charAt(1);
       if ('甲乙丙丁戊己庚辛壬癸'.indexOf(g0) >= 0 && '子丑寅卯辰巳午未申酉戌亥'.indexOf(z0) >= 0) {
-        return wuXingColor(g0, n, e) + wuXingColor(z0, n, e);
+        return wuXingColor(g0, n) + wuXingColor(z0, n);
       }
     }
-    if (e) { o = "c-suse"; }
     if ("" === n) { return t; }
     return '<' + n + ' class="' + o + '">' + t + '</' + n + '>';
   }
@@ -40,10 +39,9 @@ window.Utils = (function () {
     甲酉: "胎", 丙子: "胎", 戊子: "胎", 庚卯: "胎", 壬午: "胎", 乙申: "胎", 丁亥: "胎", 己亥: "胎", 辛寅: "胎", 癸巳: "胎",
     甲戌: "养", 丙丑: "养", 戊丑: "养", 庚辰: "养", 壬未: "养", 乙未: "养", 丁戌: "养", 己戌: "养", 辛丑: "养", 癸辰: "养" };
 
-  function changShengColor(t, suse) {
+  function changShengColor(t) {
     var c = changShengMap[t] || "";
     var colorMap = { 长生: "c-water", 沐浴: "c-water", 冠带: "c-water", 临官: "c-water", 帝旺: "c-water", 衰: "c-earth", 病: "c-earth", 死: "c-earth", 墓: "c-earth", 绝: "c-earth", 胎: "c-fire", 养: "c-fire" };
-    if (suse) { return c; }
     return '<span class="' + (colorMap[c] || "") + '">' + c + '</span>';
   }
 
