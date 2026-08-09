@@ -633,7 +633,9 @@
 
   // ============ 输入解析 ============
   function parseInput(v) {
-    v = String(v || '').trim();
+    // 先捕获原始输入（sloppy 模式下 arguments 与 v 别名绑定，v 被替换后 arguments[0] 也变，故须先存 raw）
+    const raw = String(v || '').trim();
+    v = raw;
     // 八字反推：支持多种格式
     // 男：庚辰 丁亥 癸巳 甲寅
     // 女/坤造：壬寅 丁未 丙戌 丙申
@@ -675,8 +677,8 @@
     const minute = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
     if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23) return null;
     let gender = 1;
-    if (/\+/.test(v) || /\+$/.test(String(arguments[0] || ''))) gender = 1;
-    if (/-/.test(v) || /-$/.test(String(arguments[0] || ''))) gender = 0;
+    if (/\+$/.test(raw)) gender = 1;
+    if (/-$/.test(raw)) gender = 0;
     try {
       return { solar: Solar.fromYmdHms(year, month, day, hour, minute, 0), gender: gender, isLunar: false };
     } catch (e) {
@@ -739,6 +741,13 @@
         if (cur) row.scrollLeft = cur.offsetLeft - (row.clientWidth - cur.clientWidth) / 2;
       });
     }, 0);
+  }
+
+  // 按输入框末尾符号同步性别单选框
+  function syncGenderRadio() {
+    const t = $('#input').text();
+    if (/-$/.test(t)) $('#gender_woman').prop('checked', true);
+    else if (/\+\s*$/.test(t)) $('#gender_man').prop('checked', true);
   }
 
   function render(vStr) {
@@ -919,10 +928,13 @@
       const now = Solar.fromDate(new Date());
       v = now.toYmdHms().replace(/[- :]/gim, '').substr(0, 12);
     }
-    // 性别
+    // 性别：URL gender 参数优先，其次识别 v 末尾的 +/- 符号
     const gParam = params.get('gender');
+    const vSign = String(v).match(/[-+]$/);
     if (gParam) {
       $('#gender_' + (gParam === '0' ? 'woman' : 'man')).prop('checked', true);
+    } else if (vSign) {
+      $('#gender_' + (vSign[0] === '-' ? 'woman' : 'man')).prop('checked', true);
     }
     const suffix = $('#gender_man').prop('checked') ? '+' : '-';
     const numericV = String(v).replace(/[^\d]/g, '');
@@ -941,10 +953,11 @@
 
     // 输入框变化
     $('#input').on('input', function () {
+      syncGenderRadio();
       render($(this).text());
     });
     $('#input').on('keypress', function (e) {
-      if (13 === e.which) { e.preventDefault(); render($(this).text()); }
+      if (13 === e.which) { e.preventDefault(); syncGenderRadio(); render($(this).text()); }
     });
 
     // 八字反推
@@ -962,9 +975,17 @@
       render(v2 + g);
     });
 
-    // 性别
+    // 性别（数字日期：更新符号后重排；四柱：解析时按乾坤前缀定性别）
     $('input[name=gender]').on('change', function () {
-      render($('#input').text());
+      const g = $('#gender_man').prop('checked') ? '+' : '-';
+      const cur = $('#input').text();
+      const numeric = cur.replace(/[^\d]/g, '');
+      if (numeric.length >= 4) {
+        $('#input').html(numeric + g);
+        render(numeric + g);
+      } else {
+        render(cur);
+      }
     });
 
     // 晚子时
