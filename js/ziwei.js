@@ -200,10 +200,14 @@
     var tianfu = (12 - _zi + 2) % 12; // 子=0（天府与紫微相对）
 
     var stars = {};
+    // 紫微星系（iztro 标准隔位逆数）：紫微0 天机-1 太阳-3 武曲-4 天同-5 廉贞-8
     var ziweiSeq = ['紫微', '天机', '太阳', '武曲', '天同', '廉贞'];
-    for (var i = 0; i < ziweiSeq.length; i++) stars[ziweiSeq[i]] = (ziwei - i + 12) % 12;
+    var ziweiOff = [0, -1, -3, -4, -5, -8];
+    for (var i = 0; i < ziweiSeq.length; i++) stars[ziweiSeq[i]] = (ziwei + ziweiOff[i] + 12) % 12;
+    // 天府星系（顺行，iztro/安星诀"七杀空三是破军"）：天府0 太阴1 贪狼2 巨门3 天相4 天梁5 七杀6 破军10
     var tianfuSeq = ['天府', '太阴', '贪狼', '巨门', '天相', '天梁', '七杀', '破军'];
-    for (var j = 0; j < tianfuSeq.length; j++) stars[tianfuSeq[j]] = (tianfu + j) % 12;
+    var tianfuOff = [0, 1, 2, 3, 4, 5, 6, 10];
+    for (var j = 0; j < tianfuSeq.length; j++) stars[tianfuSeq[j]] = (tianfu + tianfuOff[j]) % 12;
 
     stars['左辅'] = (4 + M - 1) % 12;
     stars['右弼'] = (10 - (M - 1) + 12) % 12;
@@ -551,24 +555,29 @@
         var isLnGong = (pl.zhiIdx === ln.gongIdx);
         var isXiaoXian = (pl.zhiIdx === ln.xiaoXianIdx);
         var isDxGong = (pl.zhiIdx === dxZhiIdx);
-        // 星曜（主星加粗、辅星小、杂耀更小、流年星粉）
-        var starHtml = '';
+        // 重要星（主星+吉煞）竖排：两字上下、星与星横排；杂耀小星逐行堆叠；流年星粉
+        var majorHtml = '';
         for (var s = 0; s < pl.stars.length; s++) {
           var nm = pl.stars[s];
           var huaMark = '';
-          if (huaSrc) { for (var hk in huaSrc) { if (huaSrc[hk].star === nm) { huaMark = '<span class="hua-mark ' + hk + '">' + hk + '</span>'; break; } } }
+          if (huaSrc) { for (var hk in huaSrc) { if (huaSrc[hk].star === nm) { huaMark = '<span class="zw-vhua ' + hk + '">' + hk + '</span>'; break; } } }
           var br = BRIGHT[nm] ? BRIGHT[nm][pl.zhiIdx] : '';
-          var brHtml = br ? '<span class="zw-bright" style="color:' + (BRIGHT_CLR[br] || '#888') + '">' + br + '</span>' : '';
-          var cls = STAR14.indexOf(nm) >= 0 ? 'zw-star-major' : 'zw-star-minor';
-          starHtml += '<span class="zw-star zw-star-click ' + cls + '" data-star="' + nm + '">' + starColor(nm) + huaMark + brHtml + '</span>';
-        }
-        for (var mi2 = 0; mi2 < pl.minor.length; mi2++) {
-          var mnm = pl.minor[mi2];
-          starHtml += '<span class="zw-minor-star' + (TAOHUA.indexOf(mnm) >= 0 ? ' zw-th' : '') + '">' + mnm + '</span>';
+          var brHtml = br ? '<span class="zw-vbright" style="color:' + (BRIGHT_CLR[br] || '#888') + '">' + br + '</span>' : '';
+          var wc = WX_CLS[STAR_WX[nm]] || '';
+          var cls = STAR14.indexOf(nm) >= 0 ? ' zw-star-major' : '';
+          majorHtml += '<span class="zw-vcell zw-star-click' + cls + '" data-star="' + nm + '">'
+            + '<span class="zw-v1 ' + wc + '">' + nm.charAt(0) + brHtml + '</span>'
+            + '<span class="zw-v2 ' + wc + '">' + nm.charAt(1) + huaMark + '</span>'
+            + '</span>';
         }
         if (lnPalaceStars[pl.zhiIdx]) {
           var lns = lnPalaceStars[pl.zhiIdx];
-          for (var li2 = 0; li2 < lns.length; li2++) starHtml += '<span class="zw-lnstar">' + lns[li2] + '</span>';
+          for (var li2 = 0; li2 < lns.length; li2++) majorHtml += '<span class="zw-lnstar">' + lns[li2] + '</span>';
+        }
+        var minorHtml = '';
+        for (var mi2 = 0; mi2 < pl.minor.length; mi2++) {
+          var mnm = pl.minor[mi2];
+          minorHtml += '<span class="zw-minor-line' + (TAOHUA.indexOf(mnm) >= 0 ? ' zw-th' : '') + '">' + mnm + '</span>';
         }
         // 运限胶囊
         var fateHtml = '';
@@ -577,8 +586,9 @@
         if (isXiaoXian) fateHtml += '<span class="zw-fate zw-fate-xx">小限</span>';
         h += '<div class="zw-cell' + (pl.isMing ? ' ming' : '') + (pl.isShen ? ' shen' : '') + (isLnGong ? ' lngong' : '') + (isDxGong ? ' dxgong' : '') + '">';
         h += '<div class="zw-c-head"><span class="zw-c-name">' + pl.zhi + ' ' + pl.name + (pl.isMing ? ' ☯' : '') + (pl.isShen ? '·身' : '') + '</span><span class="zw-c-gz">' + pl.gongGan + pl.zhi + '</span></div>';
-        h += '<div class="zw-c-sub">' + pl.daXian + ' · 长生' + pl.changSheng + '</div>';
-        h += '<div class="zw-c-stars">' + starHtml + '</div>';
+        h += '<div class="zw-c-sub">' + pl.daXian + ' · 十二长生·' + pl.changSheng + '</div>';
+        h += '<div class="zw-c-stars">' + majorHtml + '</div>';
+        if (minorHtml) h += '<div class="zw-c-minor">' + minorHtml + '</div>';
         if (fateHtml) h += '<div class="zw-c-fate">' + fateHtml + '</div>';
         h += '<div class="zw-c-footer">小限 ' + pl.xiaoXian.join(' ') + ' · ' + pl.suiQian + ' ' + pl.jiangQian + '</div>';
         // 宫干四化（飞星派显示）

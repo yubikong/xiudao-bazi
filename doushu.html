@@ -10,6 +10,9 @@
   html, body { font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; }
   .doushu-container { max-width: 415px; margin: 0 auto; padding: 0 8px; }
   .doushu-container h1 { color: #b98c51; padding: 6px 0; font-size: 1.7rem; font-weight: 400; }
+  .capsule-btn { padding: 2px 12px; border-radius: 999px; border: 1px solid #b98c51; background: #fff; color: #b98c51; font-size: 1.05rem; cursor: pointer; vertical-align: 3px; }
+  .capsule-btn.capsule-primary { background: #b98c51; color: #fff; }
+  .capsule-btn:active { opacity: .8; }
   /* 输入控制条 */
   .ctrl-bar { background: #fbfbfb; border: 1px solid #e1e1e1; border-radius: 4px; padding: 6px 8px; margin-bottom: 6px; }
   .ctrl-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 1.25rem; margin: 2px 0; }
@@ -68,10 +71,23 @@
   .zw-c-name { font-size: 0.72em; font-weight: bold; color: #6b4fa3; white-space: nowrap; }
   .zw-c-gz { font-size: 0.66em; font-weight: bold; color: #228b22; white-space: nowrap; }
   .zw-c-sub { font-size: 0.52em; color: #888; white-space: nowrap; overflow: hidden; }
-  .zw-c-stars { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 2px 4px; padding: 1px 0; }
-  .zw-star { display: inline-flex; justify-content: center; align-items: center; padding: 0; font-size: 0.7em; line-height: 1.4; }
-  .zw-star-major { font-weight: bold; font-size: 0.8em; }
-  .zw-star-minor { font-size: 0.66em; }
+  .zw-c-stars { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-content: flex-start; padding: 1px 0; }
+  /* 重要星竖排：两字上下、星与星横排；庙旺/四化行内小标记跟在字后 */
+  .zw-vcell { display: inline-flex; flex-direction: column; line-height: 1.2; margin: 0 5px 3px 0; }
+  .zw-v1, .zw-v2 { font-size: 0.78em; line-height: 1.2; white-space: nowrap; }
+  .zw-v1 { margin-bottom: 1px; }
+  .zw-v1.zw-star-major, .zw-v2.zw-star-major { font-weight: bold; }
+  .zw-vbright { font-size: 0.55em; margin-left: 1px; line-height: 1; }
+  .zw-vhua { font-size: 0.48em; color: #fff; border-radius: 2px; padding: 0 1px; margin-left: 1px; line-height: 1.2; }
+  .zw-vhua.禄 { background: #e57373; }
+  .zw-vhua.权 { background: #7a9be0; }
+  .zw-vhua.科 { background: #66bb6a; }
+  .zw-vhua.忌 { background: #555; }
+  /* 杂耀小星逐行堆叠 */
+  .zw-c-minor { display: flex; flex-direction: column; margin-top: 1px; }
+  .zw-minor-line { display: block; font-size: 0.54em; color: #8a8a8a; line-height: 1.45; white-space: nowrap; }
+  .zw-minor-line.zw-th { color: #c9577a; }
+  .zw-lnstar { color: #c9577a; font-size: 0.6em; line-height: 1.4; margin: 0 1px; }
   .zw-c-fate { display: flex; justify-content: center; gap: 3px; flex-wrap: wrap; margin: 1px 0; }
   .zw-fate { font-size: 0.5em; background: #6b4fa3; color: #fff; border-radius: 8px; padding: 1px 4px; white-space: nowrap; }
   .zw-fate-ln { background: #6b98c0; }
@@ -131,7 +147,7 @@
     <a href="compass.html">罗盘</a>
     <a href="baziHelp.html">使用说明</a>
   </nav>
-  <h1>紫微斗数排盘</h1>
+  <h1>紫微斗数排盘 <button class="capsule-btn capsule-primary" id="zw-ai-btn">AI分析</button></h1>
 
   <!-- 输入控制条 -->
   <div class="ctrl-bar">
@@ -184,6 +200,59 @@
 <script src="js/jquery.min.js?v=20260808d"></script>
 <script src="js/ziwei.js?v=20260808d"></script>
 <script>
+// ============ 紫微 AI 分析（复制 markdown） ============
+function zwCopyAI() {
+  const pan = window._zwPan;
+  if (!pan) return '';
+  const info = pan.info;
+  const pad = function (n) { return String(n).padStart(2, '0'); };
+  const s0 = info.solar;
+  const g = info.gender === 1 ? '男' : '女';
+  let s = '# 紫微斗数命盘\n';
+  s += '- 出生：北京时间' + info.birthYear + '年' + s0.getMonth() + '月' + s0.getDay() + '日 ' + pad(s0.getHour()) + ':' + pad(s0.getMinute()) + '（' + g + '）\n';
+  s += '- 五行局：' + (info.juName || '') + '　命主：' + info.mingZhu + '　身主：' + info.shenZhu + '\n';
+  s += '- 命宫：' + info.mingGong + '宫　身宫：' + info.shenGong + '宫\n\n';
+  s += '## 十二宫\n';
+  pan.palaces.forEach(function (p) {
+    s += '\n### ' + p.name + '（' + p.zhi + '宫）\n';
+    const stars = p.stars.map(function (st) {
+      const b = pan.BRIGHT[st] ? (pan.BRIGHT[st][p.zhiIdx] || '') : '';
+      return st + (b ? '（' + b + '）' : '');
+    }).join('、');
+    s += '- 本命星：' + (stars || '无');
+    if (p.minor && p.minor.length) s += '\n- 杂耀：' + p.minor.join('、');
+    if (p.hua && p.hua.length) s += '\n- 四化：' + p.hua.map(function (h) { return h.hua + '（' + h.star + '）'; }).join('、');
+    if (p.suiQian || p.jiangQian) s += '\n- 神煞：岁前' + (p.suiQian || '—') + '、将前' + (p.jiangQian || '—');
+    s += '\n- 大限：' + p.daXian;
+    if (p.xiaoXian && p.xiaoXian.length) s += '\n- 小限：' + p.xiaoXian.slice(0, 4).join('、') + '岁…';
+  });
+  // 流年
+  const liuYear = parseInt($('#zw-liunian').val(), 10) || new Date().getFullYear();
+  const ln = ZiWei.calcLiuNian(pan, liuYear);
+  s += '\n\n## 流年运势（' + liuYear + '年 ' + ln.gan + ln.zhi + '）\n';
+  s += '- 流年命宫：' + pan.palaces[ln.gongIdx].name + '宫\n';
+  const lnHua = [];
+  for (const hk in ln.hua) lnHua.push(hk + '（' + ln.hua[hk].star + '）');
+  if (lnHua.length) s += '- 流年四化：' + lnHua.join('、') + '\n';
+  const lnStars = [];
+  for (const lsk in ln.stars) lnStars.push(lsk + '（' + pan.palaces[ln.stars[lsk]].zhi + '宫）');
+  if (lnStars.length) s += '- 流年星：' + lnStars.join('、') + '\n';
+  s += '- 流年小限：' + pan.palaces[ln.xiaoXianIdx].name + '宫\n';
+  s += '\n' + '你是一位精通紫微斗数的命理顾问（结合三合派与飞星派）。请基于以上命盘数据（已由程序排定，勿自行排盘）进行分析，按以下步骤分点输出：\n1. 命宫主星庙旺平陷与性格底色；\n2. 三方四正（命、财帛、官禄、迁移）核心格局；\n3. 生年四化（禄权科忌）落宫与今生课题；\n4. 大限、小限与流年运势走势。星曜特性结合庙旺平陷解读，专业术语加白话括注。';
+  return s;
+}
+function zwClip(text, btn) {
+  function ok() { if (btn) { const o = btn.textContent; btn.textContent = '已复制✓'; setTimeout(function () { btn.textContent = o; }, 1200); } }
+  function fb() {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); ok(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(fb);
+  else fb();
+}
 $(function () {
   function getV() {
     const params = new URLSearchParams(location.search);
@@ -221,6 +290,7 @@ $(function () {
     try {
       const solar = Solar.fromYmdHms(y, m, d, h, mi, 0);
       const pan = ZiWei.paiPan(solar, gender);
+      window._zwPan = pan;
       $('#zw-pan').html(ZiWei.render(pan));
       // 同步 URL
       const url = new URL(location.href);
@@ -312,6 +382,8 @@ $(function () {
     $('#zw-modal-desc').text($(this).data('desc'));
     $('#zw-modal').css('display', 'block');
   });
+  // AI 分析（复制 markdown）
+  $('#zw-ai-btn').on('click', function () { if (window._zwPan) zwClip(zwCopyAI(), this); });
 });
 </script>
 </body>

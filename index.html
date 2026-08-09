@@ -15,6 +15,9 @@
   .firstLine { position: relative; padding: 0 10px; }
   .firstLine h1 { color: #b98c51; padding: .2rem 0; font-size: 1.7rem; font-weight: 400; display: inline-block; margin: 0; }
   .firstLine .nowBazi { color: green; background: none; border: 1px solid green; border-radius: 4px; cursor: pointer; margin-left: 8px; padding: 1px 7px; font-size: 1.2rem; }
+  .firstLine .capsule-btn { padding: 2px 12px; border-radius: 999px; border: 1px solid #b98c51; background: #fff; color: #b98c51; font-size: 1.15rem; cursor: pointer; margin-left: 6px; vertical-align: 2px; }
+  .firstLine .capsule-btn.capsule-primary { background: #b98c51; color: #fff; }
+  .firstLine .capsule-btn:active { opacity: .8; }
   .firstLine a.anchor { color: #b98c51; text-decoration: none; margin-left: 7px; font-size: 1.35rem; }
   /* 全站统一切换导航（6 格等宽、字号一致、不左右变动） */
   .page-nav { display: flex; gap: 3px; padding: 8px 8px 2px; }
@@ -128,6 +131,8 @@
   <div class="firstLine">
     <h1><a href="index.html" class="superLink" style="color:inherit;text-decoration:none;">八字排盘</a> - <span class="fanTui" style="cursor:pointer;">八字反推</span></h1>
     <button class="nowBazi">此刻</button>
+    <button class="capsule-btn" id="bz-copy-btn">复制排盘</button>
+    <button class="capsule-btn capsule-primary" id="bz-ai-btn">AI分析</button>
   </div>
   <div class="top">
     <div class="input-wrap">

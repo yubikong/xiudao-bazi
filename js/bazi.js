@@ -133,10 +133,6 @@
       if (c.jinShen.indexOf(zhu[t].ganzhi) >= 0) zhu[t].shenSha.push('金神');
       if (c.tianKuMap[zhu[1].zhi] === zhu[t].zhi) zhu[t].shenSha.push('天哭');
       if (c.tianYiZhi[zhu[2].zhi] === zhu[t].zhi) zhu[t].shenSha.push('天医');
-      if (zhu[7] && zhu[7].zhi) {
-        const liuShaMap = get12LiuShaMap(zhu[7].zhi);
-        if (t >= 1 && t <= 8 && t !== 5) zhu[t].shenSha.push('流煞-' + liuShaMap[zhu[t].zhi]);
-      }
     }
     const L = '隔角';
     for (let t = 1; t <= 3; t++) {
@@ -150,15 +146,6 @@
         }
       }
     }
-  }
-
-  function get12LiuShaMap(zhi) {
-    const n = '子丑寅卯辰巳午未申酉戌亥';
-    const e = SS.liuYearMap;
-    const r = n.indexOf(zhi);
-    const i = {};
-    for (let t = 0; t < n.length; t++) i[n[t]] = e[(t - r + 12) % 12];
-    return i;
   }
 
   // 流年/流月/大运/童限信息数组
@@ -1025,11 +1012,55 @@
         window.location.href = url;
       }
     });
+
+    // 复制排盘 / AI 分析
+    $('#bz-copy-btn').on('click', function () { if (_w) clipCopy(bzCopy(), this); });
+    $('#bz-ai-btn').on('click', function () { if (_w) clipCopy(bzAI(), this); });
   });
+
+  // ============ 复制排盘 / AI 分析 ============
+  function clipCopy(text, btn) {
+    function ok() { if (btn) { const o = btn.textContent; btn.textContent = '已复制✓'; setTimeout(function () { btn.textContent = o; }, 1200); } }
+    function fb() {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); ok(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(fb);
+    else fb();
+  }
+  function bzBirth() {
+    const s = _w.info.solar, lunar = s.getLunar();
+    return '北京时间' + s.getYear() + '年' + s.getMonth() + '月' + s.getDay() + '日 ' + U.pad(s.getHour()) + ':' + U.pad(s.getMinute()) + '（农历' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese() + '）（' + (_w.info.gender === 1 ? '男' : '女') + '）';
+  }
+  function bzYun() {
+    var list = _w.yun.arr.filter(function (y) { return !y.isTong; }).slice(0, 6);
+    return list.map(function (y) { return y.ganzhi + '（' + y.year + '）'; }).join(' ');
+  }
+  function bzShenSha() {
+    return '年柱神煞：' + ((_w.zhu[1].shenSha || []).join('、') || '无') + '\n' +
+      '月柱神煞：' + ((_w.zhu[2].shenSha || []).join('、') || '无') + '\n' +
+      '日柱神煞：' + ((_w.zhu[3].shenSha || []).join('、') || '无') + '\n' +
+      '时柱神煞：' + ((_w.zhu[4].shenSha || []).join('、') || '无');
+  }
+  function bzPillars() {
+    return _w.zhu[1].ganzhi + ' ' + _w.zhu[2].ganzhi + ' ' + _w.zhu[3].ganzhi + ' ' + _w.zhu[4].ganzhi;
+  }
+  var BZ_AI_PROMPT = '你是一位深谙子平命理的资深命理师，精通《滴天髓》《子平真诠》《穷通宝鉴》。请基于以上八字数据（已由程序排定，勿自行排盘）进行分析，按以下步骤分点输出：\n1. 日主强弱（得令/得地/得势）与五行喜忌；\n2. 格局与用神、忌神；\n3. 十神配置解读性格、事业财运、婚姻、健康；\n4. 大运与流年吉凶趋势。专业术语请加白话括注。';
+  function bzCopy() {
+    return '【八字排盘】' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【神煞】\n' + bzShenSha();
+  }
+  function bzAI() {
+    return '【八字排盘数据】\n出生：' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【神煞】\n' + bzShenSha() + '\n\n' + BZ_AI_PROMPT;
+  }
 
   window.Bazi = {
     render: render,
     parseInput: parseInput,
-    buildData: buildData
+    buildData: buildData,
+    copyPan: bzCopy,
+    copyAI: bzAI
   };
 })();
