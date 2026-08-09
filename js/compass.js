@@ -340,9 +340,10 @@
     var FS = window.FengShui;
     var year = parseInt(document.getElementById('xk-year').value, 10) || new Date().getFullYear();
     var sel = document.getElementById('xk-shan');
-    // 坐山：'跟随朝向'时按当前朝向（锁定优先），否则用下拉手动所选
+    // 朝向 = 手机朝向（与八宅一致）；坐山 = 朝向对宫（+12 山）
+    // 下拉手动选的是坐山，'跟随朝向'时按当前朝向取对宫
     var autoFollow = !sel || sel.value === '';
-    var shanIdx = autoFollow ? FS.shanIndexFromDegree(currentHeading()) : parseInt(sel.value, 10);
+    var shanIdx = autoFollow ? (FS.shanIndexFromDegree(currentHeading()) + 12) % 24 : parseInt(sel.value, 10);
     if (autoFollow && sel) sel.value = '';
     // 山向未变则不重排（避免传感器高频刷新闪烁）
     var key = year + ':' + shanIdx;
