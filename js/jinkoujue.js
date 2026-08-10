@@ -319,7 +319,8 @@
     var day = v.length >= 8 ? parseInt(v.substr(6, 2), 10) : 1;
     var hour = v.length >= 10 ? parseInt(v.substr(8, 2), 10) : 12;
     var minute = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
-    try { return Solar.fromYmdHms(year, month, day, hour, minute, 0); } catch (e) { return null; }
+    var isLunar = !!($('#lunar') && $('#lunar').is(':checked'));
+    try { return isLunar ? Lunar.fromYmdHms(year, month, day, hour, minute, 0).getSolar() : Solar.fromYmdHms(year, month, day, hour, minute, 0); } catch (e) { return null; }
   }
 
   // 中气换月将表（太阳过宫：某中气后至下一中气前用该将）
@@ -1825,7 +1826,7 @@
     $('#birth-title').text(s.getYear() + '年' + s.getMonth() + '月' + s.getDay() + '日(' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese() + ')' + U.pad(s.getHour()) + ':' + U.pad(s.getMinute()));
 
     $('#input').on('input.jkj', function () { sync($(this).val()); });
-    $('input[name=gender], #sect').on('change.jkj', function () { sync($('#input').val()); });
+    $('input[name=gender], #sect, #lunar').on('change.jkj', function () { sync($('#input').val()); });
     // 月将切换（auto=中气自动；richen=日缠校正；或 12 将自定义）
     $('#jiang-sel').on('change.jkj', function () {
       var v = $(this).val();

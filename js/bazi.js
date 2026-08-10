@@ -622,37 +622,24 @@
     // 先捕获原始输入（sloppy 模式下 arguments 与 v 别名绑定，v 被替换后 arguments[0] 也变，故须先存 raw）
     const raw = String(v || '').trim();
     v = raw;
-    // 八字反推：支持多种格式
-    // 男：庚辰 丁亥 癸巳 甲寅
-    // 女/坤造：壬寅 丁未 丙戌 丙申
-    // 乾：壬寅，丁未，丙戌，丙申
-    // 坤造 壬寅 丁未 丙戌 丙申
-    // 直接四柱（默认男）：壬寅 丁未 丙戌 丙申
-    const baZiMatch = v.match(/^(男|女|乾|坤|乾造|坤造)[:：\s]*(.*?)$/);
-    if (baZiMatch) {
-      const g = (baZiMatch[1] === '男' || baZiMatch[1] === '乾' || baZiMatch[1] === '乾造') ? 1 : 0;
-      const rest = baZiMatch[2].replace(/[，,、\s]+/g, ' ').trim();
-      const m = rest.match(/([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g);
-      if (m && m.length >= 4) {
-        try {
-          // sect: 1=晚子时算明天，2=不算（默认1）
-          const list = Solar.fromBaZi(m[0], m[1], m[2], m[3], 1, 1820);
-          if (list && list.length > 0) {
-            return { solar: list[0], gender: g, isLunar: false, baZiSource: m.slice(0, 4), baZiCount: list.length };
-          }
-        } catch (e) {}
-      }
-      return null; // 有性别标记但四柱解析失败
-    }
-    // 也支持无性别前缀的四柱输入（默认男）
-    const noPrefixMatch = v.match(/([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g);
-    if (noPrefixMatch && noPrefixMatch.length >= 4 && /[甲乙丙丁戊己庚辛壬癸]/.test(v)) {
+    // 性别检测：任意位置含"女/坤"→女，含"男/乾"→男（前缀、后缀皆可；数字分支可由 +/- 后缀覆盖）
+    let g = null;
+    if (/女|坤/.test(v)) g = 0;
+    else if (/男|乾/.test(v)) g = 1;
+    // 八字反推：按顺序识别四个干支（中间有无空格/逗号/顿号均可），性别词在前在后皆可
+    const m = v.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g);
+    if (m && m.length >= 4) {
       try {
-        const list = Solar.fromBaZi(noPrefixMatch[0], noPrefixMatch[1], noPrefixMatch[2], noPrefixMatch[3], 1, 1820);
+        // sect: 1=晚子时算明天，2=不算（默认1）
+        const list = Solar.fromBaZi(m[0], m[1], m[2], m[3], 1, 1820);
         if (list && list.length > 0) {
-          return { solar: list[0], gender: 1, isLunar: false, baZiSource: noPrefixMatch.slice(0, 4), baZiCount: list.length };
+          return {
+            solar: list[0], gender: g === null ? 1 : g, isLunar: false,
+            baZiSource: m.slice(0, 4), baZiCount: list.length, baZiList: list
+          };
         }
       } catch (e) {}
+      return null; // 有八字但反推失败
     }
     v = v.replace(/[^\d]/g, '');
     if (v.length < 4) return null;
@@ -662,14 +649,58 @@
     const hour = v.length >= 10 ? parseInt(v.substr(8, 2), 10) : 12;
     const minute = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
     if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23) return null;
-    let gender = 1;
+    let gender = g === null ? 1 : g;
     if (/\+$/.test(raw)) gender = 1;
     if (/-$/.test(raw)) gender = 0;
+    // 农历：勾选"阴历"时按农历年月日排盘
+    const isLunar = !!($('#lunar') && $('#lunar').is(':checked'));
     try {
-      return { solar: Solar.fromYmdHms(year, month, day, hour, minute, 0), gender: gender, isLunar: false };
+      const solar = isLunar
+        ? Lunar.fromYmdHms(year, month, day, hour, minute, 0).getSolar()
+        : Solar.fromYmdHms(year, month, day, hour, minute, 0);
+      return { solar: solar, gender: gender, isLunar: isLunar };
     } catch (e) {
       return null;
     }
+  }
+
+  // 八字反推多结果：弹出候选日期选择框（同一八字在 60 甲子中循环出现）
+  function showBaZiChoices(parsed) {
+    const list = parsed.baZiList;
+    const items = list.map(function (s, i) {
+      const lunar = s.getLunar();
+      const ec = s.getLunar().getEightChar();
+      ec.setSect(1);
+      return '<div class="ft-choice" data-idx="' + i + '">' +
+        '<b>' + s.getYear() + '年' + U.pad(s.getMonth()) + '月' + U.pad(s.getDay()) + '日 ' + U.pad(s.getHour()) + ':' + U.pad(s.getMinute()) + '</b>' +
+        '　农历' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese() + '　' +
+        ec.getYear() + ' ' + ec.getMonth() + ' ' + ec.getDay() + ' ' + ec.getTime() +
+        '</div>';
+    }).join('');
+    const html = `
+      <div class="ft-dialog" id="ft-dialog">
+        <div class="ft-mask"></div>
+        <div class="ft-box">
+          <div class="ft-title">八字反推·匹配到${list.length}个日期<span class="ft-close">×</span></div>
+          <div class="ft-body">
+            <p class="ft-tip">同一八字每 60 年循环出现，请按实际出生时间选择（四柱：${parsed.baZiSource.join(' ')}）：</p>
+            <div class="ft-choices">${items}</div>
+          </div>
+          <div class="ft-foot"><button class="ft-cancel">取消</button></div>
+        </div>
+      </div>
+    `;
+    $('#ft-dialog').remove();
+    $('body').append(html);
+    $('#ft-dialog').on('click', '.ft-mask, .ft-close, .ft-cancel', function () { $('#ft-dialog').remove(); });
+    $('#ft-dialog').on('click', '.ft-choice', function () {
+      const s = list[$(this).data('idx')];
+      $('#ft-dialog').remove();
+      // 把输入框更新为选中的公历日期，避免后续操作重复弹出选择框
+      const num = String(s.getYear()) + U.pad(s.getMonth()) + U.pad(s.getDay()) + U.pad(s.getHour()) + U.pad(s.getMinute()) + (parsed.gender === 0 ? '-' : '+');
+      $('#input').text(num);
+      renderSolar(s, parsed.gender);
+    });
   }
 
   // 八字反推：弹出对话框让用户输入四柱
@@ -682,8 +713,8 @@
             <span class="ft-close">×</span>
           </div>
           <div class="ft-body">
-            <p class="ft-tip">输入四柱（空格或逗号分隔），可选男/女/乾/坤前缀（默认男）</p>
-            <textarea id="ft-text" placeholder="例：男：庚辰 丁亥 癸巳 甲寅&#10;或：乾 壬寅 丁未 丙戌 丙申&#10;或：庚辰丁亥癸巳甲寅" class="ft-textarea"></textarea>
+            <p class="ft-tip">输入四柱（空格/逗号/无分隔均可），性别词可加在前或后（男/女/乾/坤/乾造/坤造，默认男）；命中多个日期会弹出选择框</p>
+            <textarea id="ft-text" placeholder="例：庚辰 丁亥 癸巳 甲寅 男&#10;或：坤造 壬寅 丁未 丙戌 丙申&#10;或：庚辰丁亥癸巳甲寅" class="ft-textarea"></textarea>
             <div class="ft-presets">
               <span class="ft-preset" data-v="壬寅 丁未 丙戌 丙申">试例 1</span>
               <span class="ft-preset" data-v="庚辰 丁亥 癸巳 甲寅">试例 2</span>
@@ -742,8 +773,18 @@
       $('#pan').html('<div class="tip"><p>录入一段日期信息到框中，如200012010322+代表2000年12月1日3点22分生男。<a target="_blank" href="./baziHelp.html">使用说明</a></p></div>');
       return;
     }
+    // 八字反推命中多个候选日期时，弹出选择框由用户确认
+    if (parsed.baZiList && parsed.baZiList.length > 1) {
+      showBaZiChoices(parsed);
+      return;
+    }
+    renderSolar(parsed.solar, parsed.gender);
+  }
+
+  // 按公历日期+性别直接排盘渲染
+  function renderSolar(solar, gender) {
     const sect = $('#sect').prop('checked') ? 2 : 1;
-    const w = buildData(parsed.solar, parsed.gender, { sect: sect });
+    const w = buildData(solar, gender, { sect: sect });
     _w = w;
     $('#pan').html(renderPan(w));
     bindPanClick();
@@ -956,21 +997,33 @@
       render(v2 + g);
     });
 
-    // 性别（数字日期：更新符号后重排；四柱：解析时按乾坤前缀定性别）
+    // 性别（数字日期：更新符号后重排；四柱：重建带性别词的串后重排，确保切换生效）
     $('input[name=gender]').on('change', function () {
-      const g = $('#gender_man').prop('checked') ? '+' : '-';
+      const g = $('#gender_man').prop('checked') ? 1 : 0;
       const cur = $('#input').text();
       const numeric = cur.replace(/[^\d]/g, '');
       if (numeric.length >= 4) {
-        $('#input').html(numeric + g);
-        render(numeric + g);
+        $('#input').html(numeric + (g ? '+' : '-'));
+        render(numeric + (g ? '+' : '-'));
       } else {
-        render(cur);
+        // 四柱输入：保留四柱、重挂性别词
+        const m = cur.match(/[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g);
+        if (m && m.length >= 4) {
+          const s = m.slice(0, 4).join(' ') + (g ? ' 男' : ' 女');
+          $('#input').html(s);
+          render(s);
+        } else {
+          render(cur);
+        }
       }
     });
 
     // 晚子时
     $('#sect').on('change', function () {
+      render($('#input').text());
+    });
+    // 农历/公历切换立即重新排盘
+    $('#lunar').on('change', function () {
       render($('#input').text());
     });
 

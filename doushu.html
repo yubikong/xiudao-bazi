@@ -160,10 +160,11 @@
     <div class="ctrl-row">
       <label><input type="radio" name="zw-gender" id="zw-man" value="1" checked> 男</label>
       <label><input type="radio" name="zw-gender" id="zw-woman" value="0"> 女</label>
+      <label><input type="checkbox" id="zw-lunar">阴历</label>
       <button class="ctrl-btn primary" id="zw-pp">排盘</button>
       <button class="ctrl-btn" id="zw-now">此刻</button>
     </div>
-    <p class="ctrl-tip">输入公历时间（年月日时分，12位），可选男/女。如：200012010322。</p>
+    <p class="ctrl-tip">输入公历时间（年月日时分，12位），勾选"阴历"则按农历排盘。可选男/女。如：200012010322。</p>
     <div class="ctrl-row">
       <label>流年 <input type="number" id="zw-liunian" placeholder="2026" min="1900" max="2100" style="width:4.5em;"></label>
       <label>显示 <select id="zw-mode">
@@ -293,7 +294,8 @@ $(function () {
     const mi = v.length >= 12 ? parseInt(v.substr(10, 2), 10) : 0;
     const gender = getGender();
     try {
-      const solar = Solar.fromYmdHms(y, m, d, h, mi, 0);
+      const isLunar = $('#zw-lunar').is(':checked');
+      const solar = isLunar ? Lunar.fromYmdHms(y, m, d, h, mi, 0).getSolar() : Solar.fromYmdHms(y, m, d, h, mi, 0);
       const pan = ZiWei.paiPan(solar, gender);
       window._zwPan = pan;
       $('#zw-pan').html(ZiWei.render(pan));
@@ -337,7 +339,7 @@ $(function () {
   // 性别切换
   $('input[name=zw-gender]').on('change', renderPan);
   // 流年/模式/四化/流派联动
-  $('#zw-liunian,#zw-mode,#zw-huatype,#zw-school').on('input change', renderPan);
+  $('#zw-liunian,#zw-mode,#zw-huatype,#zw-school,#zw-lunar').on('input change', renderPan);
   // 星曜释义弹窗（事件委托，盘面重绘后仍生效）
   $('#zw-pan').on('click', '.zw-star-click', function () {
     var nm = $(this).data('star');
