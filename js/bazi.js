@@ -1516,19 +1516,24 @@ E. 单一主事件（杜绝多分支打包，必须强制）
   function bzCopy() {
     return '【八字排盘】' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】（至80岁）\n' + bzYun() + '\n\n【流年】（出生至80岁）\n' + bzLiuNianAll() + '\n\n【神煞】\n' + bzShenSha();
   }
+  // 盘面数据段（供 AI 各按钮与完整版复用）
+  function bzPanData() {
+    return '【八字排盘数据】\n出生：' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【当前】\n' + bzCurrentInfo() + '\n\n【流年干支】\n' + bzLiuNianAll();
+  }
   function bzAI() {
-    return BZ_AI_PROMPT + '\n\n【八字排盘数据】\n出生：' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【当前】\n' + bzCurrentInfo() + '\n\n【流年干支】\n' + bzLiuNianAll();
+    return BZ_AI_PROMPT + '\n\n' + bzPanData();
   }
   function bzAIMain() {
-    return BZ_AI_PROMPT_MAIN + '\n\n【八字排盘数据】\n出生：' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【当前】\n' + bzCurrentInfo() + '\n\n【流年干支】\n' + bzLiuNianAll();
+    return BZ_AI_PROMPT_MAIN + '\n\n' + bzPanData();
   }
   function bzAIExtra() {
     return BZ_AI_PROMPT_EXTRA;
   }
-  function bzAIGang() { return BZ_PROMPT_GANG; }
-  function bzAITotal() { return BZ_PROMPT_ZONG; }
-  function bzAILiu() { return BZ_PROMPT_LIU; }
-  function bzAIXijie() { return BZ_PROMPT_XIJIE; }
+  // AI 复制按钮：总纲/断法均附盘面数据，单独复制即可论命
+  function bzAIGang() { return BZ_PROMPT_GANG + '\n\n' + bzPanData(); }
+  function bzAITotal() { return BZ_PROMPT_ZONG + '\n\n' + bzPanData(); }
+  function bzAILiu() { return BZ_PROMPT_LIU + '\n\n' + bzPanData(); }
+  function bzAIXijie() { return BZ_PROMPT_XIJIE + '\n\n' + bzPanData(); }
 
 
   // ============ 自动分析（梁湘润《子平母法总则》可程序化规则） ============
