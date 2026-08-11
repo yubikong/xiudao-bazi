@@ -1529,11 +1529,11 @@ E. 单一主事件（杜绝多分支打包，必须强制）
   function bzAIExtra() {
     return BZ_AI_PROMPT_EXTRA;
   }
-  // AI 复制按钮：总纲/断法均附盘面数据，单独复制即可论命
+  // AI 复制按钮：AI总纲附盘面（可单独完整论命）；三个断法为纯规则补充（配合AI总纲追加，避免重复盘面）
   function bzAIGang() { return BZ_PROMPT_GANG + '\n\n' + bzPanData(); }
-  function bzAITotal() { return BZ_PROMPT_ZONG + '\n\n' + bzPanData(); }
-  function bzAILiu() { return BZ_PROMPT_LIU + '\n\n' + bzPanData(); }
-  function bzAIXijie() { return BZ_PROMPT_XIJIE + '\n\n' + bzPanData(); }
+  function bzAITotal() { return BZ_PROMPT_ZONG; }
+  function bzAILiu() { return BZ_PROMPT_LIU; }
+  function bzAIXijie() { return BZ_PROMPT_XIJIE; }
 
 
   // ============ 自动分析（梁湘润《子平母法总则》可程序化规则） ============
