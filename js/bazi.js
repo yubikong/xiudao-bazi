@@ -1126,8 +1126,9 @@
   }
   function bzYun() {
     const curYun = _w.yun.arr[_w.sel.st.yun];
-    const list = _w.yun.arr.filter(function (y) { return !y.isTong; }).slice(0, 6);
-    return list.map(function (y) { return y.ganzhi + '（' + y.year + '）' + (y === curYun ? '※当前' : ''); }).join(' ');
+    const limitYear = _w.info.solar.getYear() + 79; // 至80岁
+    const list = _w.yun.arr.filter(function (y) { return !y.isTong && y.year <= limitYear; });
+    return list.map(function (y) { return y.ganzhi + '（' + y.year + '年，' + y.age + '岁起）' + (y === curYun ? '※当前' : ''); }).join('；');
   }
   function bzShenSha() {
     return '年柱神煞：' + ((_w.zhu[1].shenSha || []).join('、') || '无') + '\n' +
@@ -1513,7 +1514,7 @@ E. 单一主事件（杜绝多分支打包，必须强制）
 
 
   function bzCopy() {
-    return '【八字排盘】' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【神煞】\n' + bzShenSha();
+    return '【八字排盘】' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】（至80岁）\n' + bzYun() + '\n\n【流年】（出生至80岁）\n' + bzLiuNianAll() + '\n\n【神煞】\n' + bzShenSha();
   }
   function bzAI() {
     return BZ_AI_PROMPT + '\n\n【八字排盘数据】\n出生：' + bzBirth() + '\n\n【四柱】\n' + bzPillars() + '\n\n【大运】\n' + bzYun() + '\n\n【当前】\n' + bzCurrentInfo() + '\n\n【流年干支】\n' + bzLiuNianAll();
